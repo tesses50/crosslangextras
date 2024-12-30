@@ -1,0 +1,39 @@
+func Tesses.CrossLang.Args(args)
+{
+    var filename = args[0];
+
+    if(args.Count < 1) return null;
+    var flags = [];
+    var options = [];
+    var pos = [];
+    
+    var onlyPos=false;
+
+    for(var i = 1; i < args.Count; i++)
+    {
+        if(args[i] == "--") {
+            onlyPos=true;
+            continue;
+        }
+        if(!onlyPos && args[i].Count > 2 && args[i][0] == '-' && args[i][1] == '-')
+        {
+            var p = args[i].Substring(2).Split("=",true,2);
+            if(p.Count == 1)
+                flags.Add(p[0]);
+            else if(p.Count == 2)
+                options.Add({Key = p[0],Value=p[1]});
+        }
+        else {
+            pos.Add(args[i]);
+        }
+    }
+
+
+    return {
+        Options = options,
+        FileName = filename,
+        Flags = flags,
+        Arguments = pos
+    };
+
+}

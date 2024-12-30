@@ -51,7 +51,6 @@ func Tesses.CrossLang.BuildTool(pm)
             };
         },
         BuildProject = (this,projectDirectory)=>{
-            
             var dir = FS.MakeFull(projectDirectory);
             var dirStr = dir.ToString();
             
@@ -99,10 +98,12 @@ func Tesses.CrossLang.BuildTool(pm)
                 {
                     each(var dep : configData.project_dependencies)    
                     {
-                        if(dep.IsRelative())
-                        dependencies.Add(this.BuildProject(dir / dep));
+                        if(Path.FromString(dep).IsRelative())
+                        {
+                            dependencies.Add(this.BuildProject((dir / dep)));
+                            
+                        }
                         else
-
                         dependencies.Add(this.BuildProject(dep));
                     }
                 }

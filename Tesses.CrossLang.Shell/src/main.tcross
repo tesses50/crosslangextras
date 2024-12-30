@@ -1,4 +1,64 @@
 func main(args)
 {
-    Console.WriteLine("Hello, world");
+    var dd = Tesses.CrossLang.Args(args);
+    if(dd.Arguments.Count > 0)
+    {
+        var commandName = dd.Arguments[0];
+        if(commandName == "args")
+        {
+            each(var arg : dd.Arguments)
+            {
+                Console.WriteLine(arg);
+            }
+        }
+        if(commandName == "build")
+        {
+            var offline=false;
+            var buildPath = ".";
+            if(dd.Arguments.Count > 1)
+            {
+                buildPath = dd.Arguments[1];
+            }
+            each(var flag : dd.Flags)
+            {
+                if(flag == "offline")
+                {
+                    offline = true;
+                }
+            }
+            var pm = Tesses.CrossLang.PackageManager();
+            pm.Offline = offline;
+            var bt = Tesses.CrossLang.BuildTool(pm);
+            bt.BuildProject(buildPath);
+        }
+        else if(commandName == "run")
+        {
+            var offline=false;
+            var buildPath = ".";
+            
+            each(var flag : dd.Flags)
+            {
+                if(flag == "offline")
+                {
+                    offline = true;
+                }
+            }
+            var pm = Tesses.CrossLang.PackageManager();
+            pm.Offline = offline;
+            var bt = Tesses.CrossLang.BuildTool(pm);
+            var output =  bt.BuildProject(buildPath).Output;
+
+            var env = VM.CreateEnvironment({});
+            env.RegisterEverything();
+            env.LockRegister();
+
+            env.LoadFileWithDependencies(FS.Local,output);
+            var myArgs = [];
+            for(var i = 1; i < dd.Arguments.Count; i++)
+            {
+                myArgs.Add(dd.Arguments[i]);
+            }
+            return env.GetDictionary().main(myArgs);
+        }
+    }
 }
