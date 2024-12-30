@@ -1,0 +1,11 @@
+func downloadPackage(name,version,path)
+{
+    
+}
+
+var shellDir = Path.FromString(Env.Config) / "Tesses" / "CrossLang" / "Shell";
+FS.Local.CreateDirectory(shellDir);
+
+downloadPackage("Tesses.CrossLang.Shell", "1.0.0.0-prod", shellDir / "Shell.crvm");
+downloadPackage("Tesses.CrossLang.Args", "1.0.0.0-prod", shellDir / "Tesses.CrossLang.Args-1.0.0.0-prod.crvm");
+downloadPackage("Tesses.CrossLang.Args", "1.0.0.0-prod", shellDir / "Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm");
