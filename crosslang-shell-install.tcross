@@ -1,5 +1,24 @@
 func downloadPackage(name,version,path)
 {
+    var uri = $"https://cpkg.tesseslanguage.com/api/v1/download?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(version)}";
+                var req = Net.Http.MakeRequest(uri);
+                if(req.StatusCode == 200)
+                {
+                    var strm = FS.MemoryStream(true);
+                    req.CopyToStream(strm);
+                    
+                        var f = FS.Local.OpenFile(path,"wb");
+                        strm.Seek(0,0);
+                        strm.CopyTo(f);
+                        f.Close();
+                    
+                    strm.Close();
+                    req.Close();
+            }
+            else
+            {
+                throw $"Error when downloading package {name} with version {version}";
+            }
     
 }
 
