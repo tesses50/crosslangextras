@@ -99,13 +99,17 @@ func Tesses.CrossLang.BuildTool(pm)
                 {
                     each(var dep : configData.project_dependencies)    
                     {
+                        if(dep.IsRelative())
+                        dependencies.Add(this.BuildProject(dir / dep));
+                        else
+
                         dependencies.Add(this.BuildProject(dep));
                     }
                 }
                 var sources = [];
                 if(TypeOf(configData.dependencies) == "List")
                 {
-                    each(var dep : configData.project_dependencies)    
+                    each(var dep : configData.dependencies)    
                     {
                         dependencies.Add(this.GetPackageDependencies(dep.Name,dep.Version,dir / objDir / "packages"));
                     }
