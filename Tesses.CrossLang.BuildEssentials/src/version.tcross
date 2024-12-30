@@ -1,0 +1,103 @@
+func Tesses.CrossLang.Version.Create(major,minor,patch,build,stage)
+{
+    return {
+        Major = major,
+        Minor = minor,
+        Patch = patch,
+        Build = build,
+        Stage = stage,
+        getBuildAsInt = (this)=>{
+            return ((this.Build & 0x3FFF) << 2) | ((this.Stage & 0x03));
+        },
+        getVersionInt = (this)=>{
+            return ((this.Major & 0xFF) << 32) | ((this.Minor & 0xFF) << 24) 
+            | ((this.Patch & 0xFF) << 16) | (this.BuildAsInt & 0xFFFF);
+        },
+        operator< = (this,right)=>{
+            return this.VersionInt < right.VersionInt;
+        },
+        operator> = (this,right)=>{
+            return this.VersionInt > right.VersionInt;
+        },
+        operator== = (this,right)=>{
+            return this.VersionInt == right.VersionInt;
+        },
+        operator<= = (this,right)=>{
+            return this.VersionInt <= right.VersionInt;
+        },
+        operator>= = (this,right)=>{
+            return this.VersionInt >= right.VersionInt;
+        },
+        operator!= = (this,right)=>{
+            return this.VersionInt != right.VersionInt;
+        },
+        ToString = (this) => {
+            var stage = this.Stage == 0 ? "dev" : this.Stage == 1 ? "alpha" : this.Stage == 2 ? "beta" : "prod";
+            return $"{this.Major & 0xFF}.{this.Minor & 0xFF}.{this.Patch & 0xFF}.{this.Build & 0x3FFF}-{stage}";
+        },
+        ToBytes = (this, buff, off) => {
+            if((buff.Count - offset) < 5) throw "Not long enough";
+            buff[off] = this.Major;
+            buff[off+1] = this.Minor;
+            buff[off+2] = this.Patch;
+            var b = this.BuildAsInt;
+            buff[off+3] = (b >> 8) & 0xFF;
+            buff[off+4] = b & 0xFF;
+        }
+    };
+}
+func Tesses.CrossLang.Version.FromBytes(buffer, offset)
+{
+    
+    if((buffer.Count - offset) < 5) throw "Not long enough";
+    
+    var major = buffer[offset];
+    var minor = buffer[offset+1];
+    var patch = buffer[offset+2];
+    
+    var buildI = (buffer[offset+3] << 8) | (buffer[offset+4]);
+    
+    var build = (buildI >> 2);
+
+    
+    var stage = buildI & 0x03;
+    
+    var b = Tesses.CrossLang.Version.Create(major,minor,patch,build,stage);
+    return b;
+}
+func Tesses.CrossLang.Version.CreateEmpty()
+{
+    return Tesses.CrossLang.Version.Create(1,0,0,0,Tesses.CrossLang.Version.Prod);
+}
+func Tesses.CrossLang.Version.Parse(ver)
+{
+    var mySplit = ver.Split("-",false,2);
+    var version = 3;
+    if(mySplit.Count >= 1)
+    {
+        if(mySplit.Count == 2)
+        {
+            if(mySplit[1] == "dev") version = 0;
+            else if(mySplit[1] == "alpha") version = 1;
+            else if(mySplit[2] == "beta") version = 2;
+        }
+        var vpart = mySplit[0].Split(".",false,4);
+        var major = 1;
+        var minor = 0;
+        var patch = 0;
+        var build = 0;
+
+        if(vpart.Count >= 1) major = ParseLong(vpart[0]); if(TypeOf(major) != "Long") major = 1;
+        if(vpart.Count >= 2) minor = ParseLong(vpart[1]); if(TypeOf(minor) != "Long") minor = 0;
+        if(vpart.Count >= 3) patch = ParseLong(vpart[2]); if(TypeOf(patch) != "Long") patch = 0;
+        if(vpart.Count >= 4) build = ParseLong(vpart[3]); if(TypeOf(build) != "Long") build = 0;
+
+        return Tesses.CrossLang.Version.Create(major,minor,patch,build,version);
+    }
+}
+Tesses.CrossLang.Version.Dev = 0;
+Tesses.CrossLang.Version.Alpha = 1;
+Tesses.CrossLang.Version.Beta = 2;
+Tesses.CrossLang.Version.Prod = 3;
+
+Tesses.CrossLang.Version.Current = Tesses.CrossLang.Version.Create(1,0,0,0,Tesses.CrossLang.Version.Prod);

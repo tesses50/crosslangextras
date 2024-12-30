@@ -1,0 +1,10 @@
+{
+    "name": "Tesses.CrossLang.PackageServer",
+    "version": "1.0.0.0-prod",
+    "project_dependencies": [
+        "./Tesses.CrossLang.Markup"
+    ],
+    "info": {
+        "type": "console"
+    }
+}

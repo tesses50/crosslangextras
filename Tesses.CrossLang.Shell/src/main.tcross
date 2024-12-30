@@ -1,0 +1,4 @@
+func main(args)
+{
+    Console.WriteLine("Hello, world");
+}

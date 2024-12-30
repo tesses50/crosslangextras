@@ -1,0 +1,149 @@
+func Tesses.CrossLang.CrossVMFile()
+{
+    return {
+        Info = "",
+        Name = "",
+        Version = "",
+        Dependencies = [],
+        Chunks = [],
+        Strings = [],
+        Functions = [],
+        Resources = [],
+        Sections = [],
+        Ensure = (this,strm,buff,len) =>{
+            if(strm.ReadBlock(buff,0,len) != len)
+                throw $"Could not read {len} byte(s)";
+        },
+        EnsureInt = (this,strm)=>{
+            var buff = ByteArray(4);
+            this.Ensure(strm,buff,4);
+            var number = 0;
+            number |= buff[0] << 24;
+            number |= buff[1] << 16;
+            number |= buff[2] << 8;
+            number |= buff[3];
+            return number;
+        },
+        EnsureString = (this,strm)=>{
+            var len = this.EnsureInt(strm);
+            var buff = ByteArray(len);
+            this.Ensure(strm, buff,len);
+            return buff.ToString();
+        },
+        GetString = (this,strm)=>{
+            var index = this.EnsureInt(strm);
+            if(index < this.Strings.Count) return this.Strings[index];
+            throw $"{index} is not less than {this.Strings.Count}";
+        },
+        Read = (this,stream)=>{
+            var header = ByteArray(8);
+            this.Ensure(stream, header, header.Count);
+            
+            var hdrStr = header.ToString();
+            if(hdrStr != "TCROSSVM") throw "Invalid TCrossVM image.";
+            
+            this.Ensure(stream, header, 5);
+            
+            var version = Tesses.CrossLang.Version.FromBytes(header, 0);
+            
+            if(version > Tesses.CrossLang.Version.Current) throw "Runtime is too old.";
+            this.Ensure(stream, header, 5);
+            
+
+            this.Version = Tesses.CrossLang.Version.FromBytes(header,0);
+
+            var sec = ByteArray(4);
+            var sectionCount = this.EnsureInt(stream);
+
+            
+            for(var i = 0; i < sectionCount; i++)
+            {
+
+                this.Ensure(stream, sec, sec.Count);
+                hdrStr = sec.ToString();
+                var tableLength = this.EnsureInt(stream);
+                if(hdrStr == "NAME")
+                {
+                    this.Name = this.GetString(stream);
+                }
+                else if(hdrStr == "INFO")
+                {
+                    this.Info = this.GetString(stream);
+                }
+                else if(hdrStr == "DEPS")
+                {
+                    var _name = this.GetString(stream);
+                    this.Ensure(stream, header, 5);
+                    var _version = Tesses.CrossLang.Version.FromBytes(header,0);
+                    this.Dependencies.Add({
+                        Name = _name,
+                        Version = _version
+                    });
+                }
+                else if(hdrStr == "RESO")
+                {
+                    var resource = ByteArray(tableLength);
+                    this.Ensure(stream,resource,resource.Count);
+                    this.Resources.Add(resource);
+                }
+                else if(hdrStr == "CHKS")
+                {
+                    var chunkCount = this.EnsureInt(stream);
+                    for(var j = 0; j < chunkCount; j++)
+                    {
+                        var _args = [];
+                        var _argCount = this.EnsureInt(stream);
+                        for(var k = 0; k < _argCount; k++)
+                        {
+                            _args.Add(this.GetString(stream));
+                        }
+                        var _code = ByteArray(this.EnsureInt(stream));
+                        this.Ensure(stream,_code,_code.Count);
+                        var chunk = {
+                            Arguments = _args,
+                            Code = _code
+                        };
+                        this.Chunks.Add(chunk);
+                    }
+                }
+                else if(hdrStr == "FUNS")
+                {
+                    var funLen = this.EnsureInt(stream);
+                    for(var j = 0; j < funLen; j++)
+                    {
+                        var fnPartsCount = this.EnsureInt(stream);
+                        var documentation = "";
+                        var fnParts = [];
+                        for(var k = 0; k < fnPartsCount; k++)
+                        {
+                            if(k == 0) documentation = this.GetString(stream);
+                            else fnParts.Add(this.GetString(stream));
+                        }
+                        var fnId = this.EnsureInt(stream);
+                        this.Functions.Add({
+                            Documentation=documentation,
+                            FunctionNameParts = fnParts,
+                            Closure = fnId
+                        });
+                    }
+                }
+                else if(hdrStr == "STRS")
+                {
+                    var strcnt = this.EnsureInt(stream);
+                    for(var j = 0; j < strcnt; j++)
+                    {
+                        this.Strings.Add(this.EnsureString(stream));
+                    }
+                }
+                else {
+                    var data = ByteArray(tableLength);
+                    this.Ensure(stream,data,data.Count);
+                    this.Sections.Add({
+                        Name=hdrStr,
+                        Data = data
+                    });
+                }
+            }
+        }
+    };
+}

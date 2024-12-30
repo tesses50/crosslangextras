@@ -1,0 +1,136 @@
+func Tesses.CrossLang.PackageManager()
+{
+    func ParseFileName(name)
+    {
+        
+        var index = name.LastIndexOf('.');
+        if(index == -1) throw "We expect an extension";
+        if(name.Substring(index) != ".crvm") throw "We expect the extension .crvm";
+        name = name.Substring(0,index);
+        //Name-VERSION-[dev|alpha|beta|prod]
+
+        var lastIndex = name.LastIndexOf('-');
+        var verStage = name.Substring(lastIndex+1);
+        var versionStr = verStage;
+        if(verStage == "dev" || verStage == "alpha" || verStage == "beta" || verStage == "prod")
+        {
+            var lastIndex2 = name.LastIndexOf('-', lastIndex-1);
+            return {
+                Name = name.Substring(0,lastIndex2),
+                Version = name.Substring(lastIndex2+1)
+            };
+        }
+        else
+        {
+            return {
+                Name = name.Substring(0,lastIndex),
+                Version = name.Substring(lastIndex+1)
+            };
+        }
+    }
+    var configRoot = Path.FromString(Env.Config) / "Tesses" / "CrossLang";
+    var packageCache = configRoot / "PackageCache";
+    FS.Local.CreateDirectory(packageCache);
+    func FileReadByteArray(fs,path)
+    {
+        var f = fs.OpenFile(path,"rb");
+            var ms = FS.MemoryStream(true);
+            f.CopyTo(ms);
+            var buff = ms.GetBytes();
+            f.Close();
+        return buff;
+    }
+   func FileReadString  (fs,path) {
+            var buff = FileReadByteArray(fs,path).ToString();
+            ms.Close();
+            return text;
+        }
+    return {
+        Offline = false,
+        ParseFileName,
+        GetPackageServers = ()=>{
+            var packageConfigFile = configRoot / "package_servers.json";
+            if(FS.Local.RegularFileExists(packageConfigFile))
+            {
+                return Json.Decode(FileReadString(FS.Local, packageConfigFile));
+            }
+            return ["https://cpkg.tesseslanguage.com/"];
+        },
+        GetPackage = (this,name, version) =>
+        {
+            var v = Tesses.CrossLang.Version.Parse(version);
+            var useCache = v.Stage != Tesses.CrossLang.Version.Dev;
+            var pkgFile = packageCache / name / v.ToString();
+            if(useCache && FS.Local.RegularFileExists(pkgFile))   
+            {
+                return FileReadByteArray(FS.Local,pkgFile);
+            }
+            if(this.Offline) return null;
+
+            each(var item : this.GetPackageServers())
+            {
+                //https://cpkg.tesseslanguage.com/api/v1/download?name=MyPackage&version=1.0.0.0-prod
+                var uri = $"{item.TrimEnd('/')}/api/v1/download?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(version)}";
+                var req = Net.Http.MakeRequest(uri);
+                if(req.StatusCode == 200)
+                {
+                    var strm = FS.MemoryStream(true);
+                    req.CopyToStream(strm);
+                    
+                    if(useCache) {
+                        FS.Local.CreateDirectory(packageCache / name);
+                        var f = FS.Local.OpenFile(pkgFile,"wb");
+                        strm.Seek(0,0);
+                        strm.CopyTo(f);
+                        f.Close();
+                    }
+                    var data = strm.GetBytes();
+                    strm.Close();
+                    req.Close();
+                    return data;
+                }
+            }
+            return null;
+        },
+        GetLatest = (this,name) => {
+            var pkgServers = this.GetPackageServers();
+            if(this.Offline || pkgServers.Count == 0)
+            {
+                //user has declared they are offline or don't have packageServers look through packages locally
+                var version = Tesses.CrossLang.Version.Create(0,0,0,0,0);
+                var configRoot = Path.FromString(Env.Config) / "Tesses" / "CrossLang";
+                var dir = configRoot / "PackageCache" / name;
+                if(FS.Local.DirectoryExists(dir))
+                each(var f : FS.Local.EnumeratePaths(dir))
+                {
+                    var v = Tesses.CrossLang.Version.Parse(f.GetFileName());
+                    if(v >= version)
+                    {
+                        version = v;
+                    }
+                }
+
+                if(version.VersionInt == 0) return null;
+                return version.ToString();
+            }
+            else
+            {
+                each(var item : pkgServers)
+                {
+                    var uri = $"{item.TrimEnd('/')}/api/v1/latest?name={Net.Http.UrlEncode(name)}";
+                    var req = Net.Http.MakeRequest(uri);
+                    if(req.StatusCode == 200)
+                    {
+                        var res0 = req.ReadAsString();
+                      
+                        var res = Json.Decode(res0);
+                        req.Close();
+                        return res.version;
+                    }
+                }
+
+            }
+            return null;
+        }
+    };
+}

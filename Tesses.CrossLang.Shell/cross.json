@@ -1,0 +1,14 @@
+{
+    "name": "Tesses.CrossLang.Shell",
+    "version": "1.0.0.0-prod",
+    "info": {
+        "maintainer": "Mike Nolan",
+        "type": "console",
+        "repo": "https://gitea.site.tesses.net/tesses50/crosslang/crosslang-libs",
+        "homepage": "https://crosslang.tesseslanguage.com/",
+        "license": "LGPLv3"
+    },
+    "project_dependencies": [
+        "./Tesses.CrossLang.BuildEssentials"
+    ]
+}

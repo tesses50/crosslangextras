@@ -1,0 +1,227 @@
+func Tesses.CrossLang.BuildTool(pm)
+{
+    func copyFile(src,dest)
+    {
+        var src = FS.Local.OpenFile(src,"rb");
+        var dest = FS.Local.OpenFile(dest, "wb");
+        src.CopyTo(dest);
+        src.Close();
+        dest.Close();
+    }
+    
+    return {
+        DirectoriesCompiled = [],
+        FileReadString = (fs,path) =>{
+            var f = fs.OpenFile(path,"rb");
+            var ms = FS.MemoryStream(true);
+            f.CopyTo(ms);
+            var text = ms.GetBytes().ToString();
+            f.Close();
+            ms.Close();
+            return text;
+        },
+        GetPackageDependencies = (this,name,version,dir)=>{
+            var dep = pm.GetPackage(name,version);
+            if(TypeOf(dep) == "Null") throw $"Package {name} with version {version} does not exist";
+            var pkgPath = dir / $"{name}-{version}.crvm";
+            var strm = FS.Local.OpenFile(pkgPath,"wb");
+            strm.WriteBlock(dep,0,dep.Count);
+            strm.Close();
+            var ms = MemoryStream(true);
+            ms.WriteBlock(dep,0,dep.Count);
+            ms.Seek(0,0);
+            var package = Tesses.CrossLang.CrossVMFile();
+            package.Load(ms);
+            ms.Close();
+
+            var deps = [];
+
+            each(var dep : package.Dependencies)
+            {
+                deps.Add(this.GetPackageDependencies(dep.Name, dep.Version, dir));
+            }
+
+
+            return {
+                Name = name,
+                Version = version,
+                Info = package.Info,
+                Dependencies = deps,
+                Output = pkgPath
+            };
+        },
+        BuildProject = (this,projectDirectory)=>{
+            
+            var dir = FS.MakeFull(projectDirectory);
+            var dirStr = dir.ToString();
+            
+            each(var item : this.DirectoriesCompiled)
+            {
+                if(item.Path == dirStr) return item.Data;
+            }
+
+            var crossConf = dir / "cross.json";
+            if(FS.Local.FileExists(crossConf))
+            {
+                var configData = Json.Decode(this.FileReadString(FS.Local,crossConf));
+                var info = {type = "console"};
+                var name = "out";
+                var version = "1.0.0.0-prod";
+                var outputDir = "bin";
+                var objDir = "obj";
+                var srcDir = "src";
+                var resDir = "res";
+                if(TypeOf(configData.name) != "Undefined")
+                    name = configData.name;
+                
+                if(TypeOf(configData.version) != "Undefined")
+                    version = configData.version;
+                if(TypeOf(configData.bin_directory) != "Undefined")
+                    outputDir = configData.bin_directory;
+                
+                if(TypeOf(configData.obj_directory) != "Undefined")
+                    outputDir = configData.obj_directory;
+                if(TypeOf(configData.source_directory) != "Undefined")
+                    srcDir = configData.source_directory;
+                if(TypeOf(configData.resource_directory) != "Undefined")
+                    resDir = configData.resource_directory;
+                if(TypeOf(configData.info) != "Undefined")
+                    info = configData.info;
+
+                FS.Local.CreateDirectory(dir / outputDir);
+
+                FS.Local.CreateDirectory(dir / objDir / "packages");
+
+                FS.Local.CreateDirectory(dir/resDir);
+                
+                var dependencies = [];
+                if(TypeOf(configData.project_dependencies) == "List")
+                {
+                    each(var dep : configData.project_dependencies)    
+                    {
+                        dependencies.Add(this.BuildProject(dep));
+                    }
+                }
+                var sources = [];
+                if(TypeOf(configData.dependencies) == "List")
+                {
+                    each(var dep : configData.project_dependencies)    
+                    {
+                        dependencies.Add(this.GetPackageDependencies(dep.Name,dep.Version,dir / objDir / "packages"));
+                    }
+                }
+
+                each(var item : this.DirectoriesCompiled)
+                {
+                    if(item.Path == dirStr) return item.Data;
+                }
+
+
+                func walk_for_compiling(item,dir2)
+                {
+                    if(item.Info.type == "compile_tool")
+                    {
+                        var newDir = dir / objDir / $"{item.Name}-{item.Version}";
+                        FS.Local.CreateDirectory(newDir);
+                        var newFile = newDir / $"{item.Name}-{item.Version}.crvm";
+
+                        copyFile(item.Output, newFile);
+                        each(var item2 : item.Dependencies)
+                        {
+                            walk_for_compiling(item2, newDir);
+                        }
+                        //we need to load this
+                        var env = VM.CreateEnvironment({});
+                        env.RegisterEverything();
+                        env.LockRegister();
+
+                        env.LoadFileWithDependencies(FS.Local,newFile);
+                        env.GetDictionary().RunTool({
+                                Project = FS.SubdirFilesystem(FS.Local, dir),
+                                ProjectInfo = info,
+                                GeneratedSource = sources
+                            });
+                    }
+                    else 
+                    {
+                        copyFile(item.Output, dir2 / $"{item.Name}-{item.Version}.crvm");
+                        each(var item2 : item.Dependencies)
+                        {
+                            walk_for_compiling(item2, dir2);   
+                        }
+                    }
+                }
+
+                var file_deps = [];
+
+                each(var dep : dependencies)
+                {
+                    if(dep.Info.type == "lib") 
+                    {
+                        file_deps.Add({
+                            Name = dep.Name,
+                            Version = dep.Version
+                        });
+                    }
+                    walk_for_compiling(dep,dir / outputDir);
+                }
+
+                func walk_for_source(sourceDir)
+                {
+                    each(var file : FS.Local.EnumeratePaths(sourceDir))
+                    {
+                        if(FS.Local.RegularFileExists(file))
+                        {
+                            var src = {
+                                FileName = file.ToString(),
+                                Source = this.FileReadString(FS.Local, file)
+                            };
+                            sources.Add(src);
+                        }
+                        else if(FS.Local.DirectoryExists(file))
+                        {
+                            walk_for_source(file);
+                        }
+                    }
+                }
+
+                walk_for_source(dir / srcDir);
+
+
+                var output = $"{name}-{version}.crvm";
+                var outFile = FS.Local.OpenFile(dir / outputDir / output,"wb");
+                
+                var result = VM.Compile({
+                    Name = name,
+                    Version = version,
+                    Sources = sources,
+                    Info = Json.Encode(info),
+                    ResourceFileSystem = FS.SubdirFilesystem(FS.Local, dir / resDir),
+                    Dependencies = file_deps,
+                    Output = outFile
+                });
+
+                outFile.Close();
+                if(!result.Success)
+                {
+                    throw result.Reason;
+                }
+
+                var myData = {
+                    Name = name,
+                    Version = version,
+                    Info = info,
+                    Output = dir / outputDir / output,
+                    Dependencies = dependencies
+                };
+                this.DirectoriesCompiled.Add({
+                    Path = dirStr,
+                    Data = myData
+                });
+
+                return myData;
+            }
+            return null;
+        }
+    };
+}

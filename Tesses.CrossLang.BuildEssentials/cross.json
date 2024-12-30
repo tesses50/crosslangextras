@@ -1,0 +1,11 @@
+{
+    "name": "Tesses.CrossLang.BuildEssentials",
+    "version": "1.0.0.0-prod",
+    "info": {
+        "maintainer": "Mike Nolan",
+        "type": "lib",
+        "repo": "https://gitea.site.tesses.net/tesses50/crosslang/crosslang-libs",
+        "homepage": "https://crosslang.tesseslanguage.com/",
+        "license": "LGPLv3"
+    }
+}

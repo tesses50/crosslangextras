@@ -1,0 +1,11 @@
+func main(args)
+{
+   var pm = Tesses.CrossLang.PackageManager();
+   //pm.Offline=true;
+   //Console.WriteLine(pm.GetLatest("MyPackage"));
+   //Console.WriteLine(Json.Encode(pm.ParseFileName("BeautifulApp-John-1.0.0.0-prod.crvm")));
+
+    var tool = Tesses.CrossLang.BuildTool(pm);
+    tool.BuildProject(args[1]);
+
+}
