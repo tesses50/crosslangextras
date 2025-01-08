@@ -1,3 +1,3 @@
 FROM onedev.site.tesses.net/crosslang/crosslang:latest
 
-RUN mkdir /src && cd /src && git clone https://onedev.site.tesses.net/crosslang/crosslangextras . && bash ./install.sh && cp Tesses.CrossLang.ShellPackage-1.0.0.0-prod.crvm Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm Tesses.CrossLang.WebSite/bin/Tesses.CrossLang.WebSite-1.0.0.0-prod.crvm  /root  && cd / && rm -r /src
+RUN mkdir /src && cd /src && git clone https://onedev.site.tesses.net/crosslang/crosslangextras . && bash ./install.sh && cp Tesses.CrossLang.ShellPackage-1.0.0.0-prod.crvm /root && cp Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm /root && cp Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm /root && cd / && rm -r /src
