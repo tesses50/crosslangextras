@@ -33,7 +33,7 @@ func Tesses.CrossLang.Args(args)
         Options = options,
         FileName = filename,
         Flags = flags,
-        Arguments = pos
+        Arguments = pos,
     };
 
 }

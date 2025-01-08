@@ -4,7 +4,7 @@
     "info": {
         "maintainer": "Mike Nolan",
         "type": "compile_tool",
-        "repo": "https://gitea.site.tesses.net/tesses50/crosslang/crosslang-libs",
+        "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "LGPLv3"
     }

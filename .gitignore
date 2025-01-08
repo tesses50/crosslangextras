@@ -1,4 +1,5 @@
 bin
 bin-tmp
 obj
-Tesses.CrossLang.CrossShellInstaller/res
+shell_archive
+*.crvm

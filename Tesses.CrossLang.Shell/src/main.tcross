@@ -1,9 +1,11 @@
 func main(args)
 {
     var dd = Tesses.CrossLang.Args(args);
-    if(dd.Arguments.Count > 0)
+
+     if(dd.Arguments.Count > 0)
     {
         var commandName = dd.Arguments[0];
+
         if(commandName == "args")
         {
             each(var arg : dd.Arguments)
@@ -11,7 +13,7 @@ func main(args)
                 Console.WriteLine(arg);
             }
         }
-        if(commandName == "build")
+        else if(commandName == "build")
         {
             var offline=false;
             var buildPath = ".";
@@ -53,12 +55,148 @@ func main(args)
             env.LockRegister();
 
             env.LoadFileWithDependencies(FS.Local,output);
-            var myArgs = [];
+            var myArgs = [output];
             for(var i = 1; i < dd.Arguments.Count; i++)
             {
                 myArgs.Add(dd.Arguments[i]);
             }
             return env.GetDictionary().main(myArgs);
+        }
+        else if(commandName  == "new")
+        {
+            func newHelp()
+            {
+                Console.WriteLine($"{dd.FileName} new [FLAGS] <template_name> [directory_for_project]");
+                Console.WriteLine("FLAGS");
+                Console.WriteLine("--help: Shows this help");
+                Console.WriteLine("--list: Lists all templates");
+                Console.WriteLine("ARGUMENTS:");
+                Console.WriteLine("template_name: The name of the template");
+                Console.WriteLine("directory_for_project: The directory for the project, defaults to current directory");
+            }
+            var dir = FS.MakeFull(Env.Config) / "Tesses" / "CrossLang" / "Templates";
+
+            each(var flag : dd.Flags)
+            {
+                if(flag == "list")
+                {
+                    Console.WriteLine("List of templates:");
+                    each(var item : FS.Local.EnumeratePaths(dir))
+                    {
+                        Console.WriteLine(item.ChangeExtension().GetFileName());
+                    }
+                    return 0;
+                }
+                else if(flag == "help")
+                {
+                    newHelp();
+                    return 1;
+                }
+            }
+
+            if(dd.Arguments.Count < 2)
+            {
+                newHelp();
+                return 1;
+            }
+            else
+            {
+                var templateFile = dir / $"{dd.Arguments[1]}.crvm";
+                if(FS.Local.RegularFileExists(templateFile))
+                {
+                    var projectPath = ".";
+                    if(dd.Arguments.Count > 2) projectPath = dd.Arguments[2];
+
+                    projectPath = FS.MakeFull(projectPath);
+
+                    FS.Local.CreateDirectory(projectPath);
+
+                    var projectDir = FS.SubdirFilesystem(FS.Local, projectPath);
+
+
+                    var strm = FS.Local.OpenFile(templateFile,"rb");
+
+
+
+                    var res = FS.ExtractArchive(strm,projectDir);
+
+
+                    strm.Close();
+
+                    if(!projectDir.RegularFileExists("/cross.json"))
+                    {
+                        Console.WriteLine("Could not find /cross.json in template");
+                        return 1;
+                    }
+
+                    var jsonText = FS.ReadAllText(projectDir, "/cross.json");
+                    var proj = Json.Decode(jsonText);
+
+                    proj.name = projectPath.GetFileName();
+                    proj.version = "1.0.0.0-prod";
+                    var old_info = proj.info;
+                    proj.info = old_info.template_info;
+                    proj.dependencies = old_info.template_project_dependencies;
+                    var srcDir = proj.source_directory;
+                    if(TypeOf(srcDir) == "Undefined") srcDir = "/src";
+
+                    var filesToMutate = old_info.template_extra_text_ftles;
+
+                    if(TypeOf(filesToMutate) == "Undefined") filesToMutate = [];
+
+                    each(var f : projectDir.EnumeratePaths(srcDir))
+                    {
+                        if(projectDir.RegularFileExists(f) && f.GetExtension() == ".tcross")
+                        {
+                            filesToMutate.Add(f);
+                        }
+                    }
+
+                    each(var ent : filesToMutate)
+                    {
+                        if(projectDir.RegularFileExists(ent))
+                        {
+                            var src = FS.ReadAllText(projectDir, ent);
+
+                            var src = src.Replace("%PROJECT_NAME%",projectPath.GetFileName());
+
+                            var src = src.Replace("%TEMPLATE_PROJECT_NAME%","%PROJECT_NAME");
+
+                            FS.WriteAllText(projectDir, ent, src);
+                        }
+                    }
+
+                    FS.WriteAllText(projectDir, "/cross.json", Json.Encode(proj,true));
+
+                    projectDir.Close();
+                    return 0;
+                }
+                else
+                {
+                    Console.WriteLine($"Error could not find template {templateFile}");
+                    return 1;
+                }
+            }
+        }
+        else if(commandName == "install-template")
+        {
+            //crosslang install-template Tesses.CrossLang.Template.Console --version=1.0.0.0-prod
+        }
+        else if(commandName == "install-tool")
+        {
+            //crosslang install-tool Tesses.CrossLang.Tool.SomeTool --version=1.0.0.0-prod
+        }
+        else if(commandName == "add-project")
+        {
+            //crosslang add-project /path/to/project
+        }
+        else if(commandName == "add-dependency")
+        {
+            //crosslang add-dependency Tesses.CrossLang.Markup --version=1.0.0.0-prod
+        }
+        else if(commandName == "upload-package")
+        {
+            //crosslang upload-package [PACKAGE_NAME]
         }
     }
 }

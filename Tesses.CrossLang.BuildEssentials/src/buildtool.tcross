@@ -23,16 +23,18 @@ func Tesses.CrossLang.BuildTool(pm)
         GetPackageDependencies = (this,name,version,dir)=>{
             var dep = pm.GetPackage(name,version);
             if(TypeOf(dep) == "Null") throw $"Package {name} with version {version} does not exist";
+
             var pkgPath = dir / $"{name}-{version}.crvm";
+
             var strm = FS.Local.OpenFile(pkgPath,"wb");
+
             strm.WriteBlock(dep,0,dep.Count);
             strm.Close();
-            var ms = MemoryStream(true);
-            ms.WriteBlock(dep,0,dep.Count);
-            ms.Seek(0,0);
+            var strm = FS.Local.OpenFile(pkgPath,"rb");
+
             var package = Tesses.CrossLang.CrossVMFile();
-            package.Load(ms);
-            ms.Close();
+            package.Read(strm);
+            strm.Close();
 
             var deps = [];
 
@@ -41,11 +43,10 @@ func Tesses.CrossLang.BuildTool(pm)
                 deps.Add(this.GetPackageDependencies(dep.Name, dep.Version, dir));
             }
 
-
             return {
                 Name = name,
                 Version = version,
-                Info = package.Info,
+                Info = Json.Decode(package.Info),
                 Dependencies = deps,
                 Output = pkgPath
             };
@@ -87,7 +88,31 @@ func Tesses.CrossLang.BuildTool(pm)
                 if(TypeOf(configData.info) != "Undefined")
                     info = configData.info;
 
+
+
                 FS.Local.CreateDirectory(dir / outputDir);
+
+                if(TypeOf(info.type) == "String" && info.type == "template")
+                {
+                    //vfs, strm, name, version, info
+                    var subdir = FS.SubdirFilesystem(FS.Local,dir);
+                    var output = $"{name}-{version}.crvm";
+                    var outFile = FS.Local.OpenFile(dir / outputDir / output,"wb");
+
+                    if(TypeOf(info.template_ignored_files) != "Undefined")
+                    {
+                        var ignored = "";
+                        each(var item : info.template_ignored_files)
+                        {
+                            ignored += $"{item}\n";
+                        }
+                        FS.WriteAllText(FS.Local, dir / ".crossarchiveignore", ignored);
+                    }
+                    FS.CreateArchive(subdir, outFile, name, version, Json.Encode(info));
+                    outFile.Close();
+                    subdir.Close();
+                    return null;
+                }
 
                 FS.Local.CreateDirectory(dir / objDir / "packages");
 
@@ -101,7 +126,6 @@ func Tesses.CrossLang.BuildTool(pm)
                         if(Path.FromString(dep).IsRelative())
                         {
                             dependencies.Add(this.BuildProject((dir / dep)));
-                            
                         }
                         else
                         dependencies.Add(this.BuildProject(dep));
@@ -112,7 +136,7 @@ func Tesses.CrossLang.BuildTool(pm)
                 {
                     each(var dep : configData.dependencies)    
                     {
-                        dependencies.Add(this.GetPackageDependencies(dep.Name,dep.Version,dir / objDir / "packages"));
+                        dependencies.Add(this.GetPackageDependencies(dep.name,dep.version,dir / objDir / "packages"));
                     }
                 }
 

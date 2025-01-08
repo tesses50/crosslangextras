@@ -292,6 +292,8 @@ func crossmarkupparser(tokens)
                             }
 
                             EnsureTokenType("ExitSpecial");
+
+                            Console.WriteLine($"Creating page: {route}");
                             while(NotEnd())
                             {
                                 nodes.Add(parse_node());
@@ -352,6 +354,7 @@ func crossmarkupparser(tokens)
                                     throw "Not an identifier";
                                 }
                             }
+                            Console.WriteLine($"Creating component: {name}");
 
                             EnsureTokenType("ExitSpecial");
                             while(NotEnd())
@@ -590,9 +593,31 @@ func crossmarkupgen(ast)
         }
         page_functions.Add({
             Key = name,
-            Value = code
+            Value = code,
+            Embeds = ""
         });
     }
+     func add_to_embeds(name, embeddata)
+    {
+        each(var item : page_functions)
+        {
+            if(item.Key == name)
+            {
+                if(item.Embeds.Count > 0)
+                {
+                    item.Embeds += "else ";
+                }
+                item.Embeds += embeddata;
+                return null;
+            }
+        }
+        page_functions.Add({
+            Key = name,
+            Value = "",
+            Embeds = embeddata
+        });
+    }
+
 
     func generate_node(node)
     {
@@ -626,28 +651,29 @@ func crossmarkupgen(ast)
         }
         if(node.Type == "PageNode")
         {
-            var code =  $"if(ctx.Path == \"{node.Route}\")";
-            code += "{__writer = ctx.OpenResponseStream(); ";
+            var codea =  $"if(ctx.Path == \"{node.Route}\")";
+            codea += "{__writer = ctx.OpenResponseStream(); ";
             each(var a : node.Arguments)
             {
-                code += $"var {a} = ctx.QueryParams.TryGetFirst(\"{a}\");";
+                codea += $"var {a} = ctx.QueryParams.TryGetFirst(\"{a}\");";
             }
             each(var item : node.Nodes)
             {
-                code += generate_node(item);
+                codea += generate_node(item);
             }
-            code += " __writer.Close(); return true;}";
+            codea += " __writer.Close(); return true;}";
             
-            add_to_page(node.RouterFunction,code);
+            add_to_page(node.RouterFunction,codea);
             return "";
         }
         else if(node.Type == "EmbedNode")
         {
-            var code =  $"if(ctx.Path == \"{node.Route}\")";
-            code += "{";
-            code += $"ctx.WithMimeType(Net.Http.MimeType(\"{node.Name}\")).SendBytes(embed(\"{node.Name}\"));";
-            code += "return true;";
-            code += "}";
+            var codea =  $"if(ctx.Path == \"{node.Route}\")";
+            codea += "{";
+            codea += $"ctx.WithMimeType(Net.Http.MimeType(\"{node.Name}\")).SendBytes(embed(\"{node.Name}\"));";
+            codea += "return true;";
+            codea += "}";
+            add_to_embeds(node.RouterFunction, codea);
         }
         else if(node.Type == "TextNode")
         {
@@ -655,12 +681,12 @@ func crossmarkupgen(ast)
         }
         else if(node.Type == "ExprNode")
         {
-            var code = "write(";
+            var code = "write((";
             each(var item : node.Nodes)
             {
                 code += generate_node(item);
             }
-            code += ");";
+            code += ").ToString());";
             return code;
         }
         else if(node.Type == "CodeNode")
@@ -761,14 +787,24 @@ func crossmarkupgen(ast)
             each(var pg : page_functions)
             {
                 code += $"func {pg.Key}(ctx)";
-                code += "{ ctx.WithMimeType(\"text/html\");";
+                code += "{";
+                if(pg.Embeds.Count > 0)
+                {
+                    code += pg.Embeds + "else{";
+                }
+                code += "ctx.WithMimeType(\"text/html\");";
                 code += "var __writer = null;";
 
                 code += "func write(__text){ __writer.WriteText(__text); }";
 
                 code += pg.Value;
 
-                code += "__writer.Close(); return false;}";
+                code += "__writer.Close(); ";
+                if(pg.Embeds.Count > 0)
+                {
+                    code += "}";
+                }
+                code += " return false;}";
             }
 
             return code;
@@ -788,6 +824,7 @@ func EnumerateFiles(cfg,path)
     {
         if(cfg.Project.RegularFileExists(file))
         {
+            Console.WriteLine($"Creating markup for: {file}");
             var f = cfg.Project.OpenFile(file, "rb");
             var ms = FS.MemoryStream(true);
             f.CopyTo(ms);
@@ -806,13 +843,16 @@ func EnumerateFiles(cfg,path)
 func RunTool(cfg)
 {
     var text = "";
+
     text += EnumerateFiles(cfg, "/components");
     text += EnumerateFiles(cfg, "/pages");
     var c = crossmarkuplexer(text);
+    Console.WriteLine("Lexed");
 
     var r = crossmarkupparser(c);
+    Console.WriteLine("Parsed");
     
     var src = crossmarkupgen(r);
-
+    Console.WriteLine("Gened");
     cfg.GeneratedSource.Add({Source = src, FileName="markup.tcross"});
 }
