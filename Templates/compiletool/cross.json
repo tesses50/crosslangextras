@@ -1,0 +1,16 @@
+{
+    "name": "Tesses.CrossLang.Template.CompileTool",
+    "version": "1.0.0.0-prod",
+    "info": {
+        "maintainer": "Mike Nolan",
+        "type": "template",
+        "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
+        "homepage": "https://crosslang.tesseslanguage.com/",
+        "license": "MIT",
+        "template_name": "compiletool",
+        "template_info": {
+            "type": "compile_tool"
+        },
+        "template_ignored_files": ["bin","obj"]
+    }
+}

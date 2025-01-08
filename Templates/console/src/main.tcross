@@ -1,0 +1,4 @@
+func main(args)
+{
+    Console.WriteLine("Hello, world my name is: %PROJECT_NAME%");
+}

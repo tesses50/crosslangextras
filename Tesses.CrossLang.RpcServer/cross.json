@@ -1,0 +1,7 @@
+{
+    "info": {
+        "type": "console"
+    },
+    "version": "1.0.0.0-prod",
+    "name": "Tesses.CrossLang.RpcServer"
+}

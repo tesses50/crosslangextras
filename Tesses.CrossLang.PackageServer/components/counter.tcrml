@@ -1,0 +1,3 @@
+<?component() name="Counter" ?>
+    <p>Count is <?expr  count++ ?></p>
+<?end?>

@@ -1,0 +1,34 @@
+version: 38
+jobs:
+- name: Build for x86_64
+  steps:
+  - !CheckoutStep
+    name: Checkout
+    cloneCredential: !DefaultCredential {}
+    withLfs: true
+    withSubmodules: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !BuildImageStep
+    name: Build docker image
+    output: !RegistryOutput
+      tags: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
+    registryLogins:
+    - registryUrl: '@server_url@'
+      userName: '@job_token@'
+      passwordSecret: dockersecret
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  triggers:
+  - !DependencyFinishedTrigger
+    projects: crosslang
+  - !BranchUpdateTrigger
+    branches: master
+    projects: crosslang/crosslangextras
+  projectDependencies:
+  - projectPath: crosslang
+    buildProvider: !LastFinishedBuild
+      jobName: Build for x86_64
+    artifacts: -**
+  retryCondition: never
+  maxRetries: 3
+  retryDelay: 30
+  timeout: 14400

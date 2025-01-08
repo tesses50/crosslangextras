@@ -1,0 +1,29 @@
+<?page() route="/counter" ?>
+    <?code 
+        var pages = [
+            {
+                active = false,
+                route = "/",
+                text = "Home"
+            },
+            {
+                active = true,
+                route = "/counter",
+                text = "Counter"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About"
+            }
+        ];
+    ?>
+    <?Shell?>
+        <?arg "Counter" ?>
+        <?arg pages ?>
+        <?arg_component() ?>
+            <?Counter ?>
+            <?end?>
+        <?end?>
+    <?end?>
+<?end?>

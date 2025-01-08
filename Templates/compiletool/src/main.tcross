@@ -1,0 +1,11 @@
+func RunTool(cfg)
+{
+    //cfg.Project is the project Subdirfilesystem
+    //cfg.ProjectInfo is the info property parsed from the cross.json file in project root
+    cfg.GeneratedSource.Add({
+        Source = "func times(a,b){return a * b;}",
+        FileName = "times.tcross"
+    });
+
+    //this runs with full access to vm so be careful when allowing these
+}

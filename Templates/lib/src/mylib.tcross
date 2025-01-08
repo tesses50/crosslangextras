@@ -1,0 +1,5 @@
+/^ Multiply two numbers ^/
+func MyLib.Times(a,b)
+{
+    return a * b;
+}

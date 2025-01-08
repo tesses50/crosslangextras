@@ -1,0 +1,4 @@
+func main(args)
+{
+	//USE the string %TEMPLATE_PROJECT_NAME% anywhere you want to replace with the project name
+}

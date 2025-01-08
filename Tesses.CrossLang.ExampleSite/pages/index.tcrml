@@ -1,0 +1,28 @@
+<?page() route="/" ?>
+    <?code 
+        var pages = [
+            {
+                active = true,
+                route = "/",
+                text = "Home"
+            },
+            {
+                active = false,
+                route = "/counter",
+                text = "Counter"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About"
+            }
+        ];
+    ?>
+    <?Shell?>
+        <?arg "Main Page" ?>
+        <?arg pages ?>
+        <?arg_component() ?>
+            <p>1 John 4:4: You, dear children, are from God and have overcome them, because the one who is in you is greater than the one who is in the world.</p>
+        <?end?>
+    <?end?>
+<?end?>
