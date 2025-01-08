@@ -17,6 +17,16 @@ jobs:
       userName: '@job_token@'
       passwordSecret: dockersecret
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !RunContainerStep
+    name: Copy the artifacts
+    image: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
+    args: /bin/bash -c "cp /root/*.crvm $ONEDEV_WORKSPACE"
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PublishArtifactStep
+    name: Publish artifacts
+    artifacts: '*.crvm'
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !DependencyFinishedTrigger
     projects: crosslang
