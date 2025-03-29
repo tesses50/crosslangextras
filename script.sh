@@ -8,5 +8,6 @@ crossvm ./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm bu
 crossvm ./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm build Templates/template
 crossvm ./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm build Templates/lib
 crossvm ./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm build Templates/compiletool
+crossvm ./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm build Templates/tool
 crossvm ./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm build crosslang_shell_archive_maker
 

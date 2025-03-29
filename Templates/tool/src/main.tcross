@@ -1,0 +1,30 @@
+/*
+	you must change the toolname in cross.json -> info -> toolname
+	to run the tool from the project folder use crosslang tool-test [flags-options-and-arguments]
+	to install the tool use crosslang install-tool from working directory
+	to run the tool after being installed use crosslang tool <toolname> [flags-and-options-and-arguments]
+	you can push the tool to cpkg
+*/
+func RunTool(arg)
+{
+	//Flags are strings without the -- just like from Tesses.CrossLang.Args, so --Johnny would yield a string with the value Johnny
+	//Options are a dictionary with a field named Key which is the name without the -- just like from Tesses.CrossLang.Args where the Value is from after the = sign just like Tesses.CrossLang.Args, so --John=Joel would yield a dictionary like this {Key="John", Value="Joel"}
+	//Arguments is a list of strings when an argument does not start with -- or is after the -- (it starts after the tool name)
+	//ToolName is the tool name
+	Console.WriteLine($"TOOLNAME: {arg.ToolName}");
+	Console.WriteLine("FLAGS:");
+	each(var flag : arg.Flags)
+	{
+		Console.WriteLine(flag);
+	}
+	Console.WriteLine("OPTIONS:");
+	each(var option : arg.Options)
+	{
+		Console.WriteLine($"{option.Key}: {option.Value}");
+	}
+	Console.WriteLine("ARGUMENTS:");
+	each(var argument : arg.Arguments)
+	{
+		Console.WriteLine(argument);
+	}
+}

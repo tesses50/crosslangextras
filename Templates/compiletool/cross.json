@@ -11,6 +11,7 @@
         "template_info": {
             "type": "compile_tool"
         },
-        "template_ignored_files": ["bin","obj"]
+        "template_ignored_files": ["bin","obj"],
+        "description": "A tool that can be a dependency to a project (including libraries) that runs at compile time"
     }
 }

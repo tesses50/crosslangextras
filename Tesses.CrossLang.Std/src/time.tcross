@@ -1,0 +1,21 @@
+func Time.Date.Create(year,month,day,hour,minute,second,timezone,hasDST)
+{
+
+}
+
+func Time.Date.FromUnix(timeStamp)
+{
+    var seconds = (timeStamp % 60).Abs();
+    var min = ((timeStamp / 60) % 60).Abs();
+    var hour = ((timeStamp / 3600) % 24).Abs();
+    var year = ((timeStamp / 31557600));
+    var daysSince1970 = (timeStamp / 86400);
+    
+    
+
+    return Time.Date.Create(,second);
+}
+func Time.Date.getNow()
+{
+    return Time.Date.FromUnix(Time.Now);
+}

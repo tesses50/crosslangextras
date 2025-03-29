@@ -11,6 +11,7 @@
         "template_info": {
             "type": "lib"
         },
-        "template_ignored_files": ["bin","obj"]
+        "template_ignored_files": ["bin","obj"],
+        "description": "A crosslang library"
     }
 }

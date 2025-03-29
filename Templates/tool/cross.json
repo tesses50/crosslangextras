@@ -1,0 +1,25 @@
+{
+    "dependencies": [],
+    "info": {
+        "template_ignored_files": [
+            "bin",
+            "obj"
+        ],
+        "template_info": {
+            "type": "tool",
+            "description": "This is my tool",
+            "toolname": "changeme"
+        },
+        "template_extra_text_ftles": [],
+        "template_project_dependencies": [],
+        "template_name": "tool",
+        "description": "A crosslang tool that you can run via crosslang tool",
+        "type": "template",
+        "maintainer": "Mike Nolan",
+        "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
+        "homepage": "https://crosslang.tesseslanguage.com/",
+        "license": "MIT"
+    },
+    "version": "1.0.0.0-prod",
+    "name": "Tesses.CrossLang.Template.Tool"
+}

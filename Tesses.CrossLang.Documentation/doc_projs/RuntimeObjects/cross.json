@@ -1,0 +1,7 @@
+{
+    "info": {
+        "type": "lib"
+    },
+    "version": "1.0.0.0-prod",
+    "name": "CrossLang Runtime Objects (this and the root dictionaries are implcit)"
+}

@@ -1,7 +1,6 @@
 func main(args)
 {
     var dd = Tesses.CrossLang.Args(args);
-
      if(dd.Arguments.Count > 0)
     {
         var commandName = dd.Arguments[0];
@@ -27,29 +26,98 @@ func main(args)
                 {
                     offline = true;
                 }
+                if(flag == "help")
+                {
+                    Console.WriteLine("USAGE: crosslang build [build-flags-and-options]");
+                    Console.WriteLine("FLAGS:");
+                    Console.WriteLine("offline:  build with no internet (don't fetch files)");
+                    Console.WriteLine("help:     this help");
+                    Console.WriteLine();
+                    Console.WriteLine("OPTIONS:");
+                    Console.WriteLine("conf=CONFIGSTRING:  specify a conf string for compile_tool(s), is the property Config");
+                    return 0;
+                }
+            }
+            var conf = "";
+            each(var option : dd.Options)
+            {
+                if(option.Key == "conf")
+                {
+                    conf = option.Value;
+                }
             }
             var pm = Tesses.CrossLang.PackageManager();
             pm.Offline = offline;
             var bt = Tesses.CrossLang.BuildTool(pm);
+            bt.Config = conf;
             bt.BuildProject(buildPath);
         }
         else if(commandName == "run")
         {
             var offline=false;
             var buildPath = ".";
-            
+            var nobuild=false;
+            var output="";   
             each(var flag : dd.Flags)
             {
                 if(flag == "offline")
                 {
                     offline = true;
                 }
+                else if(flag == "help")
+                {
+                    Console.WriteLine("USAGE: crosslang run [run-flags-and-options] program-arguments...");
+                    Console.WriteLine("USAGE: crosslang run [run-flags-and-options] -- program-arguments-and-options...");
+                    Console.WriteLine("FLAGS:");
+                    Console.WriteLine("offline:  build with no internet (don't fetch files)");
+                    Console.WriteLine("help:     this help");
+                    Console.WriteLine("nobuild:  don't build, just run");
+                    Console.WriteLine();
+                    Console.WriteLine("OPTIONS:");
+                    Console.WriteLine("conf=CONFIGSTRING:  specify a conf string for compile_tool(s), is the property Config");
+                    return 0;
+                }
+                else if(flag == "nobuild")
+                {
+                    nobuild=true;
+                }
             }
-            var pm = Tesses.CrossLang.PackageManager();
-            pm.Offline = offline;
-            var bt = Tesses.CrossLang.BuildTool(pm);
-            var output =  bt.BuildProject(buildPath).Output;
-
+            var conf = "";
+            each(var option : dd.Options)
+            {
+                if(option.Key == "conf")
+                {
+                    conf = option.Value;
+                }
+            }
+            if(nobuild)
+            {
+                if(FS.Local.FileExists("config.json"))
+                {
+                    var proj = Json.Decode(FS.ReadAllText(FS.Local, "config.json"));
+                    var nameVer = $"{proj.name}-{proj.version}.crvm";
+                    var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
+                    
+                    output = ./buildDir/nameVer;
+                    if(!FS.Local.FileExists(output))
+                    {
+                        Console.WriteLine($"ERROR: file {output} does not exist.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: could not find project.");
+                    return 1;
+                }
+            }
+            else
+            {
+                var pm = Tesses.CrossLang.PackageManager();
+                pm.Offline = offline;
+                var bt = Tesses.CrossLang.BuildTool(pm);
+                bt.Config = conf;
+                output =  bt.BuildProject(buildPath).Output;
+            }
             var env = VM.CreateEnvironment({});
             env.RegisterEverything();
             env.LockRegister();
@@ -83,7 +151,7 @@ func main(args)
                     Console.WriteLine("List of templates:");
                     each(var item : FS.Local.EnumeratePaths(dir))
                     {
-                        Console.WriteLine(item.ChangeExtension().GetFileName());
+                        Console.WriteLine(Tesses.CrossLang.GetNameAndDescription(item));
                     }
                     return 0;
                 }
@@ -178,6 +246,14 @@ func main(args)
                 }
             }
         }
+        else if(commandName == "install-console")
+        {
+            //crosslang install-console
+        }
+        else if(commandName == "install-app")
+        {
+            //crosslang install-app
+        }
         else if(commandName == "install-template")
         {
             //crosslang install-template Tesses.CrossLang.Template.Console --version=1.0.0.0-prod
@@ -185,10 +261,235 @@ func main(args)
         else if(commandName == "install-tool")
         {
             //crosslang install-tool Tesses.CrossLang.Tool.SomeTool --version=1.0.0.0-prod
+            var toolsDir = Path.FromString(Env.Config) / "Tesses" / "CrossLang" / "Tools";
+            
+            var offline=false;
+            var buildPath = ".";
+            var nobuild=false;
+            var output=.;   
+            each(var flag : dd.Flags)
+            {
+                if(flag == "offline")
+                {
+                    offline = true;
+                }
+                else if(flag == "help")
+                {
+                    Console.WriteLine("USAGE: crosslang install-tool [flags-and-options]");
+                    Console.WriteLine("USAGE: crosslang install-tool [PackageName] [flags-and-options]");
+                    Console.WriteLine("FLAGS:");
+                    Console.WriteLine("offline:  build with no internet (don't fetch files)");
+                    Console.WriteLine("help:     this help");
+                    Console.WriteLine("nobuild:  don't build, just install (irrelevant if you specify a PackageName)");
+                    Console.WriteLine();
+                    Console.WriteLine("OPTIONS:");
+                    Console.WriteLine("conf=CONFIGSTRING:     specify a conf string for compile_tool(s), is the property Config (irrelevant if you specify a PackageName)");
+                    Console.WriteLine("version=1.0.0.0-prod:  specify the package version (irrelevant if you don't specify a PackageName)");
+                    Console.WriteLine();
+                    Console.WriteLine("ARGUMENTS:");
+                    Console.WriteLine("PackageName: the package name of a tool you want to download and install, if not specified we install the tool from the current directory");
+                    return 0;
+                }
+                else if(flag == "nobuild")
+                {
+                    nobuild=true;
+                }
+            }
+            
+            if(dd.Arguments.Length == 1)
+            {
+                
+                var conf = "";
+                each(var option : dd.Options)
+                {
+                    if(option.Key == "conf")
+                    {
+                        conf = option.Value;
+                    }
+                }
+
+                if(FS.Local.FileExists("cross.json"))
+                {
+                    var proj = Json.Decode(FS.ReadAllText(FS.Local,"cross.json"));
+                    var name = TypeOf(proj.info.toolname) == "String" ? proj.info.toolname : proj.name;
+                    
+                    if(proj.info.type != "tool")
+                    {
+                        Console.WriteLine("The project is not a tool");
+                        return 1;
+                    }
+                    if(TypeOf(name) != "String")
+                    {
+                        Console.WriteLine("The tool does not have a name");
+                        return 1;
+                    }
+                    var toolDir = toolsDir / name;
+                    FS.Local.CreateDirectory(toolDir);
+                    var toolFile = toolDir / name + ".crvm";
+
+                    if(nobuild)
+                    {
+                        var nameVer = $"{proj.name}-{proj.version}.crvm";
+                        var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
+                    
+                        output = ./buildDir/nameVer;
+                        if(!FS.Local.FileExists(output))
+                        {
+                            Console.WriteLine($"ERROR: file {output} does not exist.");
+                            return 1;
+                        }
+
+                    } 
+                    else
+                    {
+                        var pm = Tesses.CrossLang.PackageManager();
+                        pm.Offline = offline;
+                        var bt = Tesses.CrossLang.BuildTool(pm);
+                        bt.Config = conf;
+                        output =  bt.BuildProject(buildPath).Output;
+                    }
+                    
+                    func CopyCRVM(src,dest)
+                    {
+                        func copyFile(src,dest)
+                        {
+                            var _src = FS.Local.OpenFile(src,"rb");
+                            var _dest = FS.Local.OpenFile(dest, "wb");
+                            _src.CopyTo(_dest);
+                            _src.Close();
+                            _dest.Close();
+                            Console.WriteLine($"{src} -> {dest}");
+                        }    
+                        if(FS.Local.FileExists(dest)) return;
+                        copyFile(src,dest);
+
+                        
+                        var srcStrm = FS.Local.OpenFile(src,"rb");
+                        var crvm = VM.LoadExecutable(srcStrm);
+                        
+                        srcStrm.Close();
+                        each(var dep : crvm.Dependencies)
+                        {
+                            var name = $"{dep.Name}-{dep.Version.ToString()}.crvm";
+                            CopyCRVM(src.GetParent()/name, dest.GetParent()/name);
+                        }
+                    }
+                    CopyCRVM(output,toolFile);
+                    return 0;
+                }
+                else
+                {
+                    
+                    Console.WriteLine("The current directory does not have a project");
+                    return 1;
+                }
+            }
+        }
+        else if(commandName == "console")
+        {
+            //crosslang console myfavoriteapp
+        }
+        else if(commandName == "tool")
+        {
+
+            var dir = FS.MakeFull(Env.Config) / "Tesses" / "CrossLang" / "Tools";
+            if(dd.Arguments.Length == 1)
+            {
+                Console.WriteLine("List of tools:");
+                each(var item : FS.Local.EnumeratePaths(dir))
+                {
+                    Console.WriteLine(Tesses.CrossLang.GetNameAndDescription(item / item.GetFileName() + ".crvm"));
+                }
+                return 0;
+            }
+        }
+        else if(commandName == "tool-test")
+        {
+            var pm = Tesses.CrossLang.PackageManager();
+            pm.Offline = false;
+            var bt = Tesses.CrossLang.BuildTool(pm);
+           
+            var proj=bt.BuildProject(".");
+
+            var output = proj.Output;
+
+            var env = VM.CreateEnvironment({});
+            env.RegisterEverything();
+            env.LockRegister();
+
+            env.LoadFileWithDependencies(FS.Local,output);
+            var myArgs = [];
+            for(var i = 1; i < dd.Arguments.Count; i++)
+            {
+                myArgs.Add(dd.Arguments[i]);
+            }
+            return env.GetDictionary().RunTool({
+                Arguments=myArgs,
+                Options = dd.Options,
+                Flags = dd.Flags,
+                ToolName = proj.Info.toolname
+            });
         }
         else if(commandName == "add-project")
         {
             //crosslang add-project /path/to/project
+
+            if(dd.Arguments.Count > 1)
+            {
+                var dep = dd.Arguments[1];
+                if(FS.Local.DirectoryExists(dep))
+                {
+                    var path = Path.FromString(dep) / "cross.json";
+                    var pathStr = FS.MakeFull(dep).CollapseRelativeParents().ToString();
+                    if(FS.Local.FileExists(path))
+                    {
+                        if(FS.Local.FileExists("cross.json"))
+                        {
+                            var f = FS.ReadAllText(FS.Local,"cross.json");
+                            var json = Json.Decode(f);
+                            if(TypeOf(json.project_dependencies) == "List")
+                            {
+                                each(var item : json.project_dependencies)
+                                {
+                                    var _path = FS.MakeFull(item).CollapseRelativeParents().ToString();
+                                    
+                                    if(_path == pathStr) 
+                                    {
+                                        Console.WriteLine($"The project {dep} already exists in cross.json.");
+
+                                        return 0;
+                                    }
+                                }
+                                json.project_dependencies.Add(dep);
+                            }
+                            else
+                            {
+                                json.project_dependencies = [dep];
+                                
+                            }
+                            Console.WriteLine($"Added project {dep} to cross.json.");
+                            FS.WriteAllText(FS.Local, "cross.json", Json.Encode(json,true));
+                            return 0;
+                        }
+                        else
+                        {
+                            Console.WriteLine("The current directory does not have a project");
+                            return 1;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"The project file {path} does not exist");
+                        return 1;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("The project directory does not exist");
+                    return 1;
+                }
+            }
+            return 1;
         }
         else if(commandName == "add-dependency")
         {
@@ -198,5 +499,32 @@ func main(args)
         {
             //crosslang upload-package [PACKAGE_NAME]
         }
+        else if(commandName == "configdir")
+        {
+            Console.WriteLine(Tesses.CrossLang.ConfigDir);
+        }
+       
     }
+    else
+    {
+        each(var flag : dd.Flags)
+        {
+            if(flag == "version")
+            {
+                Console.WriteLine($"VM version: {VM.RuntimeVersion}");
+                Console.WriteLine($"Shell version: {main.File.Version}");
+                Console.WriteLine($"Args version: {Tesses.CrossLang.Args.File.Version}");
+                Console.WriteLine($"BuildTool version: {Tesses.CrossLang.BuildTool.File.Version}");
+                return 0;
+            }
+        }
+        Console.WriteLine($"USAGE: crosslang COMMAND [command-arguments]");
+        Console.WriteLine("COMMANDS:");
+        Console.WriteLine("new: create new project");
+        Console.WriteLine("build: build a project");
+        Console.WriteLine("run: run a project");
+        Console.WriteLine("configdir: print the config directory");
+        return 0;
+    }
+    return 0;
 }

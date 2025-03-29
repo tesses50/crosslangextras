@@ -8,6 +8,7 @@
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "MIT",
         "template_name": "template",
+        "description": "A template for a project",
         "template_info": {
             "type": "template",
             "template_name": "mytemplate",

@@ -32,8 +32,8 @@ func Tesses.CrossLang.BuildTool(pm)
             strm.Close();
             var strm = FS.Local.OpenFile(pkgPath,"rb");
 
-            var package = Tesses.CrossLang.CrossVMFile();
-            package.Read(strm);
+            
+            var package = VM.LoadExecutable(strm);
             strm.Close();
 
             var deps = [];
@@ -41,6 +41,10 @@ func Tesses.CrossLang.BuildTool(pm)
             each(var dep : package.Dependencies)
             {
                 deps.Add(this.GetPackageDependencies(dep.Name, dep.Version, dir));
+            }
+            each(var pkg : package.Tools)
+            {
+                dep.Add(this.GetPackageDependencies(dep.Name, dep.Version, dir));
             }
 
             return {
@@ -54,6 +58,7 @@ func Tesses.CrossLang.BuildTool(pm)
         BuildProject = (this,projectDirectory)=>{
             var dir = FS.MakeFull(projectDirectory);
             var dirStr = dir.ToString();
+        
             
             each(var item : this.DirectoriesCompiled)
             {
@@ -71,6 +76,7 @@ func Tesses.CrossLang.BuildTool(pm)
                 var objDir = "obj";
                 var srcDir = "src";
                 var resDir = "res";
+                var icon = "";
                 if(TypeOf(configData.name) != "Undefined")
                     name = configData.name;
                 
@@ -87,6 +93,8 @@ func Tesses.CrossLang.BuildTool(pm)
                     resDir = configData.resource_directory;
                 if(TypeOf(configData.info) != "Undefined")
                     info = configData.info;
+                if(TypeOf(configData.icon) != "Undefined")
+                    icon = configData.icon;
 
 
 
@@ -108,7 +116,7 @@ func Tesses.CrossLang.BuildTool(pm)
                         }
                         FS.WriteAllText(FS.Local, dir / ".crossarchiveignore", ignored);
                     }
-                    FS.CreateArchive(subdir, outFile, name, version, Json.Encode(info));
+                    FS.CreateArchive(subdir, outFile, name, version, Json.Encode(info),icon);
                     outFile.Close();
                     subdir.Close();
                     return null;
@@ -139,6 +147,7 @@ func Tesses.CrossLang.BuildTool(pm)
                         dependencies.Add(this.GetPackageDependencies(dep.name,dep.version,dir / objDir / "packages"));
                     }
                 }
+                
 
                 each(var item : this.DirectoriesCompiled)
                 {
@@ -168,7 +177,8 @@ func Tesses.CrossLang.BuildTool(pm)
                         env.GetDictionary().RunTool({
                                 Project = FS.SubdirFilesystem(FS.Local, dir),
                                 ProjectInfo = info,
-                                GeneratedSource = sources
+                                GeneratedSource = sources,
+                                Config = this.Config
                             });
                     }
                     else 
@@ -182,12 +192,20 @@ func Tesses.CrossLang.BuildTool(pm)
                 }
 
                 var file_deps = [];
+                var file_tools = [];
 
                 each(var dep : dependencies)
                 {
                     if(dep.Info.type == "lib") 
                     {
                         file_deps.Add({
+                            Name = dep.Name,
+                            Version = dep.Version
+                        });
+                    }
+                    else if(dep.Info.type == "compile_tool")
+                    {
+                        file_tools.Add({
                             Name = dep.Name,
                             Version = dep.Version
                         });
@@ -225,6 +243,8 @@ func Tesses.CrossLang.BuildTool(pm)
                     Version = version,
                     Sources = sources,
                     Info = Json.Encode(info),
+                    Icon = icon,
+                    Tools = file_tools,
                     ResourceFileSystem = FS.SubdirFilesystem(FS.Local, dir / resDir),
                     Dependencies = file_deps,
                     Output = outFile

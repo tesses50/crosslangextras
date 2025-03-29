@@ -58,8 +58,8 @@ func Tesses.CrossLang.PackageManager()
         },
         GetPackage = (this,name, version) =>
         {
-            var v = Tesses.CrossLang.Version.Parse(version);
-            var useCache = v.Stage != Tesses.CrossLang.Version.Dev;
+            var v = Version.Parse(version);
+            var useCache = v.Stage != "dev";
             var pkgFile = packageCache / name / v.ToString();
             if(useCache && FS.Local.RegularFileExists(pkgFile))   
             {
@@ -97,13 +97,13 @@ func Tesses.CrossLang.PackageManager()
             if(this.Offline || pkgServers.Count == 0)
             {
                 //user has declared they are offline or don't have packageServers look through packages locally
-                var version = Tesses.CrossLang.Version.Create(0,0,0,0,0);
+                var version = new Version(0,0,0,0,"dev");
                 var configRoot = Path.FromString(Env.Config) / "Tesses" / "CrossLang";
                 var dir = configRoot / "PackageCache" / name;
                 if(FS.Local.DirectoryExists(dir))
                 each(var f : FS.Local.EnumeratePaths(dir))
                 {
-                    var v = Tesses.CrossLang.Version.Parse(f.GetFileName());
+                    var v = Version.Parse(f.GetFileName());
                     if(v >= version)
                     {
                         version = v;
