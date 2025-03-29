@@ -8,24 +8,38 @@ jobs:
     withLfs: true
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: Build everything
+    runInContainer: true
+    image: onedev.site.tesses.net/crosslang/crosslang:latest
+    interpreter: !DefaultInterpreter
+      commands: |
+        bash ./pack.sh
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PublishArtifactStep
+    name: Publish shell package
+    artifacts: Tesses.CrossLang.ShellPackage-*.crvm
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PublishArtifactStep
+    name: Publish Package Server
+    sourcePath: Tesses.CrossLang.PackageServer/bin/
+    artifacts: Tesses.CrossLang.PackageServer-*.crvm
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !PublishArtifactStep
+    name: Publish Website Package
+    sourcePath: Tesses.CrossLang.WebSite/bin
+    artifacts: /Tesses.CrossLang.WebSite-*.crvm
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
-    name: Build docker image
+    name: Build container
+    dockerfile: Dockerfile
     output: !RegistryOutput
       tags: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
     registryLogins:
     - registryUrl: '@server_url@'
       userName: '@job_token@'
       passwordSecret: dockersecret
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !RunContainerStep
-    name: Copy the artifacts
-    image: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
-    args: /bin/bash -c "cp /root/*.crvm $ONEDEV_WORKSPACE"
-    useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !PublishArtifactStep
-    name: Publish artifacts
-    artifacts: '*.crvm'
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !DependencyFinishedTrigger

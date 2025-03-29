@@ -1,3 +1,5 @@
 FROM onedev.site.tesses.net/crosslang/crosslang:latest
 
-RUN mkdir /src && cd /src && git clone https://onedev.site.tesses.net/crosslang/crosslangextras . && bash ./install-docker.sh && cd / && rm -r /src
+COPY ./Tesses.CrossLang.ShellPackage-1.0.0.0-prod.crvm /root/Tesses.CrossLang.ShellPackage-1.0.0.0-prod.crvm
+
+RUN crossarchiveextract /root/Tesses.CrossLang.ShellPackage-1.0.0.0-prod.crvm /root/.config/Tesses/CrossLang
