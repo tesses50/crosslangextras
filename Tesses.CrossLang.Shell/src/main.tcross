@@ -134,7 +134,7 @@ func main(args)
         {
             func newHelp()
             {
-                Console.WriteLine($"{dd.FileName} new [FLAGS] <template_name> [directory_for_project]");
+                Console.WriteLine($"crosslang new [FLAGS] <template_name> [directory_for_project]");
                 Console.WriteLine("FLAGS");
                 Console.WriteLine("--help: Shows this help");
                 Console.WriteLine("--list: Lists all templates");
