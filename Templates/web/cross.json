@@ -8,7 +8,7 @@
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "MIT",
         "template_name": "web",
-        "documentation": "A Simple.CSS Website with my template engine",
+        "description": "A Simple.CSS Website with my template engine",
         "template_info": {
             "type": "console"
         },
