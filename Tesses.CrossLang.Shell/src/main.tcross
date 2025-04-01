@@ -501,7 +501,7 @@ func main(args)
         }
         else if(commandName == "configdir")
         {
-            Console.WriteLine(Tesses.CrossLang.ConfigDir);
+            Console.WriteLine(FS.MakeFull(Env.Config) / "Tesses" / "CrossLang");
         }
        
     }
