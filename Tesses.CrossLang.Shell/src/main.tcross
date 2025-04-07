@@ -503,7 +503,7 @@ func main(args)
         {
             Console.WriteLine(FS.MakeFull(Env.Config) / "Tesses" / "CrossLang");
         }
-       
+
     }
     else
     {
@@ -524,6 +524,7 @@ func main(args)
         Console.WriteLine("build: build a project");
         Console.WriteLine("run: run a project");
         Console.WriteLine("configdir: print the config directory");
+        Console.WriteLine("update-shell: update the shell"); //this command is handled by runtime so we don't have to implement it here
         return 0;
     }
     return 0;
