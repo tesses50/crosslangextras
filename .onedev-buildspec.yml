@@ -41,6 +41,12 @@ jobs:
       userName: '@job_token@'
       passwordSecret: dockersecret
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !SCPCommandStep
+    name: Copy Shell Package
+    privateKeySecret: tesses_www_private_key
+    source: Tesses.CrossLang.ShellPackage-*.crvm
+    target: mike@@10.137.42.28:/var/www/downloads/ShellPackage.crvm
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !DependencyFinishedTrigger
     projects: crosslang
