@@ -11,7 +11,7 @@ func main(args)
 
 func install()
 {
-    var d = FS.MakeFull(Env.Config) / "Tesses" / "CrossLang";
+    var d = Env.CrossLangConfig;
     FS.Local.CreateDirectory(d);
     var sdfs = FS.SubdirFilesystem(FS.Local, d);
     var strm = FS.Local.OpenFile(name,"rb");

@@ -142,7 +142,7 @@ func main(args)
                 Console.WriteLine("template_name: The name of the template");
                 Console.WriteLine("directory_for_project: The directory for the project, defaults to current directory");
             }
-            var dir = FS.MakeFull(Env.Config) / "Tesses" / "CrossLang" / "Templates";
+            var dir = Env.CrossLangConfig / "Templates";
 
             each(var flag : dd.Flags)
             {
@@ -261,7 +261,7 @@ func main(args)
         else if(commandName == "install-tool")
         {
             //crosslang install-tool Tesses.CrossLang.Tool.SomeTool --version=1.0.0.0-prod
-            var toolsDir = Path.FromString(Env.Config) / "Tesses" / "CrossLang" / "Tools";
+            var toolsDir = Env.CrossLangConfig / "Tools";
             
             var offline=false;
             var buildPath = ".";
@@ -392,7 +392,7 @@ func main(args)
         else if(commandName == "tool")
         {
 
-            var dir = FS.MakeFull(Env.Config) / "Tesses" / "CrossLang" / "Tools";
+            var dir = Env.CrossLangConfig / "Tools";
             if(dd.Arguments.Length == 1)
             {
                 Console.WriteLine("List of tools:");
@@ -501,7 +501,7 @@ func main(args)
         }
         else if(commandName == "configdir")
         {
-            Console.WriteLine(FS.MakeFull(Env.Config) / "Tesses" / "CrossLang");
+            Console.WriteLine(Env.CrossLangConfig);
         }
 
     }

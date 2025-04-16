@@ -28,7 +28,7 @@ func Tesses.CrossLang.PackageManager()
             };
         }
     }
-    var configRoot = Path.FromString(Env.Config) / "Tesses" / "CrossLang";
+    var configRoot = Env.CrossLangConfig;
     var packageCache = configRoot / "PackageCache";
     FS.Local.CreateDirectory(packageCache);
     func FileReadByteArray(fs,path)
@@ -98,7 +98,7 @@ func Tesses.CrossLang.PackageManager()
             {
                 //user has declared they are offline or don't have packageServers look through packages locally
                 var version = new Version(0,0,0,0,"dev");
-                var configRoot = Path.FromString(Env.Config) / "Tesses" / "CrossLang";
+                var configRoot = Env.CrossLangConfig;
                 var dir = configRoot / "PackageCache" / name;
                 if(FS.Local.DirectoryExists(dir))
                 each(var f : FS.Local.EnumeratePaths(dir))
