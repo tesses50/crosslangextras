@@ -26,11 +26,6 @@ jobs:
     sourcePath: Tesses.CrossLang.PackageServer/bin/
     artifacts: Tesses.CrossLang.PackageServer-*.crvm
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !PublishArtifactStep
-    name: Publish Website Package
-    sourcePath: Tesses.CrossLang.WebSite/bin
-    artifacts: Tesses.CrossLang.WebSite-*.crvm
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !BuildImageStep
     name: Build container
     dockerfile: Dockerfile
