@@ -1,0 +1,29 @@
+func Pages.Upload(ctx)
+{
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  true,
+                route = "/upload",
+                text = "Upload"
+            },
+            {
+                active = false,
+                route = "/login",
+                text = "Login"
+            }
+        ];
+    var html = <div class={"container min-vh-100 d-flex justify-content-center align-items-center"}>
+                <form action={"./upload"} method={"post"} enctype={"multipart/form-data"}>
+                      <h1>Upload Package</h1>
+                      <input type={"file"} class={"form-control"} name={"package"} accept={".crvm"}>
+                      <button type={"submit"} class={"btn btn-primary"}>Upload</button>
+                      <input type={"hidden"} name={"csrf"} value={DB.CreateCSRF(ctx)}>
+                </form>
+            </div>;
+    return Shell("Upload Package",pages,html);
+}

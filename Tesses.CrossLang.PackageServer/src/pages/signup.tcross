@@ -1,0 +1,44 @@
+func Pages.Signup()
+{
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            {
+                active = false,
+                route = "/login",
+                text = "Login"
+            }
+        ];
+    var html = <div class={"container min-vh-100 d-flex justify-content-center align-items-center"}>
+                <form action={"./signup"} method={"post"} enctype={"application/x-www-form-urlencoded"}>
+                    <div class={"mb-3"}>
+                        <label for={"email"} class={"form-label"}>Email address</label>
+                        <input type={"email"} class={"form-control"} id={"email"} aria-describedby={"emailHelp"} name={"email"}>
+                        <div id={"emailHelp"} class={"form-text"}>{"We'll"} never share your email with anyone else.</div>
+                      </div>
+                      <div class={"mb-3"}>
+                        <label for={"displayName"} class={"form-label"}>Display Name</label>
+                        <input type={"text"} class={"form-control"} id={"displayName"} name={"displayName"}>
+                      </div>
+                      <div class={"mb-3"}>
+                        <label for={"password"} class={"form-label"}>Password</label>
+                        <input type={"password"} class={"form-control"} id={"password"} name={"password"}>
+                      </div>
+                      <div class={"mb-3"}>
+                        <label for={"passwordconfirm"} class={"form-label"}>Confirm Password</label>
+                        <input type={"password"} class={"form-control"} id={"passwordconfirm"} name={"passwordconfirm"}>
+                      </div>
+                      <a href={"./login"}>Login</a>
+                      <button type={"submit"} class={"btn btn-primary"}>Sign Up</button>
+                </form>
+            </div>;
+    return Shell("Signup", pages, html);
+}

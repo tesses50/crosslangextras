@@ -1,0 +1,157 @@
+func Pages.Package(name)
+{
+    var package = DB.GetPackageVersions(name);
+
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            {
+                active = false,
+                route = "/login",
+                text = "Login"
+            }
+        ];
+    
+    
+   
+    var html = <if(package.Length > 0)><section class={"container"}>
+        <br>
+        <img width={"64"} height={"64"} src={$"./api/v1/package_icon.png?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(package[0].version)}"} alt={"icon"}>
+        <h1>{name}</h1>
+    </section>
+    <section class={"container"}>
+        <h2>To install</h2>
+        <ul class={"nav nav-tabs"} id={"myTab"} role={"tablist"}>
+            <li class={"nav-item"} role={"presentation"}>
+              <button class={"nav-link active"} id={"home-tab"} data-bs-toggle={"tab"} data-bs-target={"#home-tab-pane"} type={"button"} role={"tab"} aria-controls={"home-tab-pane"} aria-selected={"true"}>CLI</button>
+            </li>
+            <li class={"nav-item"} role={"presentation"}>
+              <button class={"nav-link"} id={"profile-tab"} data-bs-toggle={"tab"} data-bs-target={"#profile-tab-pane"} type={"button"} role={"tab"} aria-controls={"profile-tab-pane"} aria-selected={"false"}>cross.json</button>
+            </li>
+          </ul>
+          <div class={"tab-content"} id={"myTabContent"}>
+            <div class={"tab-pane fade show active"} id={"home-tab-pane"} role={"tabpanel"} aria-labelledby={"home-tab"} tabindex={"0"}><div class={"card"}>
+            
+                <div class={"card-body"}>
+                    <if(package[0].type == "lib" || package[0].type == "compile_tool")>
+                    crosslang add-dependency {name}
+                    </if>
+                </div>
+                </div>
+            </div>
+            <div class={"tab-pane fade"} id={"profile-tab-pane"} role={"tabpanel"} aria-labelledby={"profile-tab"} tabindex={"0"}><div class={"card"}>
+            
+                    <div class={"card-body"}>
+                        {Json.Encode({name=name,version = package[0].version })}
+                    </div>
+                </div>
+            </div>
+          </div>
+          <br>
+          <h3>More options and info</h3>
+          <ul>
+            <li>Account: <a href={$"./account?name={Net.Http.UrlEncode(package[0].accountName)}"}>{package[0].accountName}</a></li>
+            <if(package[0].maintainer.Length > 0)>
+            <li>Maintainer: {package[0].maintainer}</li>
+            </if>
+            <if(package[0].license.Length > 0)>
+            <li>License: {package[0].license}</li>
+            </if>
+            <if(package[0].homepage.Length > 0)>
+            <li>Homepage: <a href={package[0].homepage}>{package[0].homepage}</a></li>
+            </if>
+            <if(package[0].repo.Length > 0)>
+            <li>Repo: <a href={package[0].repo}>{package[0].repo}</a></li>
+            </if>
+            <li>Last updated: {package[0].uploadDate}</li>
+            <li>Latest version: {package[0].version}</li>
+            <li>Type: {package[0].type}</li>
+            <li><a href={package[0].download}>Download</a></li>
+          </ul>
+          <if(package.Length > 1)>
+          <br>
+
+          <h3>Older versions</h3>
+          <div class={"accordion accordion-flush"} id={"accordionFlushExample"}>
+          <for(var i=1; i<package.Length; i++)>
+        <div class={"accordion-item"}>
+          <h2 class={"accordion-header"}>
+            <button class={"accordion-button collapsed"} type={"button"} data-bs-toggle={"collapse"} data-bs-target={$"#collapse-{Net.Http.HtmlEncode(package[i].version)}"} aria-expanded={"false"} aria-controls={"flush-collapseOne"}>
+              {package[i].version}
+            </button>
+          </h2>
+          <div id={$"collapse-{Net.Http.HtmlEncode(package[i].version)}"} class={"accordion-collapse collapse"} data-bs-parent={"#accordionFlushExample"}>
+            <div class={"accordion-body"}>
+                  <ul>
+                      <if(package[i].maintainer.Length > 0)>
+                      <li>Maintainer: {package[i].maintainer}</li>
+                      </if>
+                      <if(package[i].license.Length > 0)>
+                        <li>License: {package[i].license}</li>
+                     </if>
+                     <if(package[i].homepage.Length > 0)>
+                    <li>Homepage: <a href={package[i].homepage}>{package[i].homepage}</a></li>
+                    </if>
+                      <if(package[i].repo.Length > 0)>
+                        <li>Repo: <a href={package[i].repo}>{package[i].repo}</a></li>
+                      </if>
+                      <li>Uploaded: {package[i].uploadDate}</li>
+                      <li>Type: {package[i].type}</li>
+                      <li><a href={package[i].download}>Download</a></li>
+                  </ul>
+            </div>
+          </div>
+        </div>
+          
+          </for>
+          </div>
+          </if>
+    </section>
+    </if>;
+    return Shell($"Package {name}", pages,html);
+}
+
+
+/*
+<section class="container">
+        <br>
+        <img width="64" height="64" src="https://api.nuget.org/v3-flatcontainer/newtonsoft.json/13.0.3/icon" alt="icon">
+        <h1>Package</h1>
+    </section>
+    <section class="container">
+        <h2>To install:</h2>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">CLI</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">cross.json</button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0"><div class="card">
+            
+                <div class="card-body">
+                    crosslang add Package
+                </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0"><div class="card">
+            
+                    <div class="card-body">
+                        {"name": "Package","Version": "1.0.0.0-prod"}
+                    </div>
+                </div>
+            </div>
+          </div>
+        
+    </section>
+*/

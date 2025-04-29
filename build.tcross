@@ -1,0 +1,54 @@
+func cmd(name, args)
+{
+    var filename = Env.GetRealExecutablePath(name).ToString();
+    Console.Write($"Running command, {filename}");
+    each(var arg : args)
+        Console.Write($" {arg}");
+    Console.WriteLine();
+    var p= Process.Start({
+        FileName = filename,
+        Arguments = args
+    });
+    p.Join();
+}
+func main(args)
+{
+    
+    var args2=["-o","./Tesses.CrossLang.BuildEssentials/bin-tmp","-n","Tesses.CrossLang.BuildEssentials","-v","1.0.0.0-prod","Tesses.CrossLang.BuildEssentials/main.tcross"];
+    each(var f : FS.Local.EnumeratePaths("./Tesses.CrossLang.BuildEssentials/src"))
+    {
+        if(f.GetExtension() == ".tcross")
+        {
+            args2.Add(f.ToString());
+        }
+    }
+    cmd("crossc", args2);
+    cmd("crossvm",["./Tesses.CrossLang.BuildEssentials/bin-tmp/Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm","Tesses.CrossLang.Shell"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    //cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.WebSite"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/console"]);
+   // cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/emptyweb"]);
+   // cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/web"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/template"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/lib"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/compiletool"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/tool"]);
+    /*cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);*/
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","crosslang_shell_archive_maker"]);
+    
+    if(args.Length > 1)
+    {
+        if(args[1] == "install")
+        {
+            cmd("crossvm",["crosslang_shell_archive_maker/bin/crosslang_shell_archive_maker-1.0.0.0-prod.crvm", "install"]);
+        }
+        else if(args[1] == "pack")
+        {
+            cmd("crossvm",["crosslang_shell_archive_maker/bin/crosslang_shell_archive_maker-1.0.0.0-prod.crvm"]);
+        }
+    }
+}

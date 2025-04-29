@@ -1,0 +1,13 @@
+func Components.Package(name,version,owner,upload,desc)
+{
+
+    var image = $"./api/v1/package_icon.png?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(version)}";
+    var pkgUrl = $"./package?name={Net.Http.UrlEncode(name)}";
+    return <li>
+    <img width={"64"} height={"64"} src={image} alt={"icon"}>
+    <a href={pkgUrl}>{name}</a> | <span>By: {owner}</span>
+    <br>
+    <span>Updated: {upload} | Latest version: {version}</span>
+    <p>{desc}</p>
+    </li>;
+}

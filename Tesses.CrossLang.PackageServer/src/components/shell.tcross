@@ -1,0 +1,43 @@
+func Shell(title,pages,body)
+{
+    var shell= 
+    <html lang={"en"}>
+    <head>
+        <meta charset={"UTF-8"}>
+        <meta name={"viewport"} content={"width=device-width, initial-scale=1.0"}>
+        <link rel={"stylesheet"} href={"./css/bootstrap.min.css"}>
+        <title>CPKG - {title}</title>
+    </head>
+    <body>
+        <header>
+    <nav class={"navbar navbar-expand-lg"} style={"background-color: #ffff00;"}>
+        <div class={"container-fluid"}>
+            <a class={"navbar-brand"} href={"./"}>CPKG</a>
+            <button class={"navbar-toggler"} type={"button"} data-bs-toggle={"collapse"} data-bs-target={"#navbarNav"} aria-controls={"navbarNav"} aria-expanded={"false"} aria-label={"Toggle navigation"}>
+              <span class={"navbar-toggler-icon"}></span>
+            </button>
+            <div class={"collapse navbar-collapse"} id={"navbarNav"}>
+                <ul class={"navbar-nav"}>
+                    <each(var item : pages)>
+                        <li class={"nav-item"}>
+                            <if(item.active)>
+                            <a class={"nav-link active"} aria-current={"page"} href={item.route}>{item.text}</a>
+                            <else>
+                            <a class={"nav-link"} href={item.route}>{item.text}</a>
+                            </if>
+                        </li>
+                    </each>
+                </ul>
+            </div>
+          </div>
+    </nav>
+    </header>
+    <br>
+
+    <raw(body)>
+    <script src={"./js/bootstrap.min.js"}></script>
+    </body>
+    </html>;
+
+    return shell;
+}

@@ -1,0 +1,24 @@
+{
+    "name": "Tesses.CrossLang.Template.EmptyWebsite",
+    "version": "1.0.0.0-prod",
+    "info": {
+        "maintainer": "Mike Nolan",
+        "type": "template",
+        "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
+        "homepage": "https://crosslang.tesseslanguage.com/",
+        "license": "MIT",
+        "template_name": "emptyweb",
+        "description": "An empty website with my template engine",
+        "template_info": {
+            "type": "console"
+        },
+        "template_project_dependencies": [
+            {
+                "name": "Tesses.CrossLang.Markup",
+                "version": "1.0.0.0-prod"
+            }
+        ],
+        "template_extra_text_ftles": [],
+        "template_ignored_files": ["bin","obj"]
+    }
+}

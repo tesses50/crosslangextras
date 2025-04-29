@@ -1,0 +1,27 @@
+func Pages.CheckEmail()
+{
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            {
+                active = false,
+                route = "/login",
+                text = "Login"
+            }
+        ];
+    var html = <div class={"container"}>
+                <h1>Please check your email.</h1>
+                <p>
+                    The email may or may not be in your spam.
+                </p>
+            </div>;
+    return Shell("Check your email",pages,html);
+}
