@@ -1,5 +1,312 @@
 var count = 0;
 func main(args)
 {
-    Net.Http.ListenSimpleWithLoop(Router,4206);
+    Console.WriteLine("In main");
+    var dir = ".";
+    if(args.Length > 1)
+    {
+        
+        dir = args[1];
+    }
+    DB.Init(dir);
+
+
+    //should be a route but its crosslang so we can use mountable
+    
+    
+    mountable.Mount("/package_icon.png", (ctx)=>{
+        ctx.ResponseHeaders.SetValue("Content-Type", "image/png");
+        ctx.SendBytes(embed("crosslang.png"));
+        return true;
+    });
+    
+    /*
+        PUT /api/v1/upload Authorization Bearer
+        POST /api/v1/login Json object with username and password returns json object with either 200 for success {"token": "TOKEN_VAL"} or non 2XX if fails {"reason": "SOME ERROR"}
+        POST /api/v1/logout use Authorization Bearer
+        GET /api/v1/latest?name=PackageName returns 200 OK with json  {"version": "1.0.0.0-prod"} if it succeeds if it fails returns a failing status code with {"reason": "SOME ERROR"}
+        GET /api/v1/download?name=PackageName&version=1.0.0.0-prod returns 200 OK with package bytes or 404 if doesn't exist
+        GET /api/v1/search?q=SomeQuery&offset=&limit= returns 200 OK with json of packages {"packages": [{"name": "pkgName","version": "latestVersion", ...}]} or non success status code
+        
+    */
+
+   
+    Net.Http.ListenSimpleWithLoop((ctx)=>{
+        if(ctx.Path == "/package")
+        {
+            var name = ctx.QueryParams.TryGetFirst("name");
+            if(TypeOf(name) != "String") name = "";
+            ctx.WithMimeType("text/html").SendText(Pages.Package(name));
+            return true;
+        }
+        if(ctx.Path == "/packages")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Packages(ctx));
+            return true;
+        }
+        if(ctx.Path == "/api/v1/latest")
+        {
+            var name = ctx.QueryParams.TryGetFirst("name");
+            if(TypeOf(name) != "String") name = "";
+            var version = DB.GetLatestVersion(name);
+            if(version != null)
+            {
+                ctx.WithMimeType("application/json").SendText(Json.Encode({version}));
+                return true;
+            }
+        }
+        if(ctx.Path == "/api/v1/search")
+        {
+            var q = ctx.QueryParams.TryGetFirst("q");
+            if(TypeOf(q) != "String") q = "";
+            var offset = ParseLong(ctx.QueryParams.TryGetFirst("offset"));
+            if(TypeOf(offset) != "Long") offset=0;
+            var limit = ParseLong(ctx.QueryParams.TryGetFirst("limit"));
+            if(TypeOf(limit) != "Long") limit = 20;
+            if(limit <= 0) limit = 20;
+
+            var res = DB.QueryPackages(q, offset*limit, limit);
+            if(TypeOf(res) != "List")
+            {
+                ctx.StatusCode=500;
+                ctx.SendText("Packages not a list");
+                return true;
+            }
+            else
+            {
+                ctx.WithMimeType("application/json").SendText(Json.Encode({packages=res}));
+                return true;
+            }
+        }
+        if(ctx.Path == "/upload")
+        {
+            if(ctx.Method == "GET")
+            {
+                ctx.WithMimeType("text/html").SendText(Pages.Upload(ctx));
+                return true;
+            }
+            else if(ctx.Method == "POST")
+            {
+                if(ctx.NeedToParseFormData)
+                {
+                    var filePath = DB.working / "Temp" / $"{DB.GetUniqueNumber()}.crvm";
+                    var hasFile=false;
+                    var strm = FS.Local.OpenFile(filePath,"wb");
+                    ctx.ParseFormData((mime,filename,name)=>{
+                
+                        if(name == "package")
+                        {
+                            if(hasFile) return FS.MemoryStream(true);
+                            hasFile=true;
+                    
+                            return strm;
+                        }
+                        else
+                            return FS.MemoryStream(true);
+                    });
+                    
+                    strm.Close();
+            
+                    var session = DB.GetSession(ctx);
+                    if(session == null)
+                    {
+                        ctx.StatusCode = 401;
+                        ctx.SendText("<h1>You are not logged in</h1>");
+                        return true;
+                    }
+
+                    var csrf = ctx.QueryParams.TryGetFirst("csrf");
+                    var result = { Success=false, Reason = "Invalid CSRF"};
+
+                    if(DB.VerifyCSRF(session,csrf))
+                    {
+                        var userId = DB.GetUserIdFromSession(session);
+                        result = DB.UploadPackage(userId, filePath);
+                    }
+
+                    if(FS.Local.FileExists(filePath))
+                        FS.Local.DeleteFile(filePath);
+
+                    if(result.Success)
+                    {
+                        ctx.StatusCode = 302;
+                        ctx.ResponseHeaders.SetValue("Location", "/");
+                        ctx.WriteHeaders();
+                    }
+                    else
+                    {
+                        ctx.StatusCode = 400;
+                        ctx.SendText(result.Reason);
+                    }
+            
+                return true;        
+                }
+            }
+
+        }
+        if(ctx.Path == "/api/v1/package_icon.png")
+        {
+            var name = ctx.QueryParams.TryGetFirst("name");
+            var version = ctx.QueryParams.TryGetFirst("version");
+            ctx.ResponseHeaders.SetValue("Content-Type", "image/png");
+            ctx.SendBytes(DB.GetPackageIcon(name,version));
+            return true;
+        }
+        if(ctx.Path == "/api/v1/download")
+        {
+            var name = ctx.QueryParams.TryGetFirst("name");
+            var version = ctx.QueryParams.TryGetFirst("version");
+            if(TypeOf(name) != "String") name = "";
+            if(TypeOf(version) != "String") version = "";
+    
+            var file =  DB.working / "Packages" / name / $"{name}-{version}.crvm";
+   
+    
+            if(FS.Local.FileExists(file) && name.Length > 0 && version.Length > 0)
+            {
+                var strm = FS.Local.OpenFile(file,"rb");
+                if(strm != null)
+                {
+                    ctx.WithMimeType("application/crvm").WithContentDisposition($"{name}-{version}.crvm",false).SendStream(strm);
+                    strm.Close();
+                    return true;
+                }
+                
+            }
+            return false;
+        }
+        if(ctx.Path == "/login")
+        {
+            if(ctx.Method == "GET")
+            {
+                ctx.WithMimeType("text/html").SendText(Pages.Login());
+                return true;
+            }
+            else if(ctx.Method == "POST")
+            {
+                
+                var email = ctx.QueryParams.TryGetFirst("email");
+                if(TypeOf(email) != "String")
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>You forgot the email buddy</h1>");
+                    return true;
+                }
+                var password = ctx.QueryParams.TryGetFirst("password");
+                if(TypeOf(password) != "String")
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>You forgot the password buddy</h1>");
+                    return true;
+                }
+
+                var accountId = DB.GetAccountId(email, password);
+                if(accountId == -1)
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>Invalid credentials</h1>");
+                    return true;
+                }
+
+                ctx.StatusCode = 302;
+                ctx.ResponseHeaders.SetValue("Location", "/");
+                ctx.ResponseHeaders.SetValue("Set-Cookie", $"Session={DB.CreateSession(accountId)}; SameSite=Strict");
+                ctx.WriteHeaders();
+                return true;
+            }
+        }
+        if(ctx.Path == "/signup")
+        {
+            if(ctx.Method == "GET")
+            {
+                ctx.WithMimeType("text/html").SendText(Pages.Signup());
+                return true;
+            }
+            else if(ctx.Method == "POST")
+            {
+                var email = ctx.QueryParams.TryGetFirst("email");
+                if(TypeOf(email) != "String")
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>You forgot the email buddy</h1>");
+                    return true;
+                }
+                var displayName = ctx.QueryParams.TryGetFirst("displayName");
+                if(TypeOf(displayName) != "String")
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>You forgot the displayName buddy</h1>");
+                    return true;
+                }
+                var password = ctx.QueryParams.TryGetFirst("password");
+                if(TypeOf(password) != "String")
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>You forgot the password buddy</h1>");
+                    return true;
+                }
+                var passwordconfirm = ctx.QueryParams.TryGetFirst("passwordconfirm");
+                if(TypeOf(passwordconfirm) != "String")
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>You forgot the passwordconfirm buddy</h1>");
+                    return true;
+                }
+
+                if(password != passwordconfirm)
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>The passwords do not match</h1>");
+                    return true;
+                }
+
+                var res = DB.CreateUser(email, displayName, password);
+                if(!res.Success)
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText(%"<h1>Error: {Net.Http.HtmlEncode(res.Reason)}</h1>");
+                    return true;
+                }
+
+
+                ctx.StatusCode = 302;
+                ctx.ResponseHeaders.SetValue("Location", res.Redirect);
+                ctx.WriteHeaders();
+                return true;
+            }
+        }
+        if(ctx.Path == "/css/bootstrap.min.css")
+        {
+            ctx.WithMimeType("text/css").SendBytes(embed("css/bootstrap.min.css"));
+            return true;
+        }
+        if(ctx.Path == "/css/bootstrap.min.css.map")
+        {
+            ctx.WithMimeType("application/json").SendBytes(embed("css/bootstrap.min.css.map"));
+            return true;
+        }
+
+        if(ctx.Path == "/js/bootstrap.min.js")
+        {
+            ctx.WithMimeType("text/javascript").SendBytes(embed("js/bootstrap.min.js"));
+            return true;
+        }
+
+        if(ctx.Path == "/js/bootstrap.min.js.map")
+        {
+            ctx.WithMimeType("application/json").SendBytes(embed("js/bootstrap.min.js.map"));
+            return true;
+        }
+        if(ctx.Path == "/favicon.ico")
+        {
+            ctx.WithMimeType("image/x-icon").SendBytes(embed("favicon.ico"));
+            return true;
+        }
+        if(ctx.Path == "/")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Index());
+            return true;
+        }
+        return false;
+    },4206);
 }

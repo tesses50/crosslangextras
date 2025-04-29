@@ -50,14 +50,16 @@ func Tesses.CrossLang.PackageManager()
         ParseFileName,
         GetPackageServers = ()=>{
             var packageConfigFile = configRoot / "package_servers.json";
+            
             if(FS.Local.RegularFileExists(packageConfigFile))
             {
-                return Json.Decode(FileReadString(FS.Local, packageConfigFile));
+                return Json.Decode(FS.ReadAllText(FS.Local, packageConfigFile));
             }
             return ["https://cpkg.tesseslanguage.com/"];
         },
         GetPackage = (this,name, version) =>
         {
+
             var v = Version.Parse(version);
             var useCache = v.Stage != "dev";
             var pkgFile = packageCache / name / v.ToString();
@@ -71,6 +73,7 @@ func Tesses.CrossLang.PackageManager()
             {
                 //https://cpkg.tesseslanguage.com/api/v1/download?name=MyPackage&version=1.0.0.0-prod
                 var uri = $"{item.TrimEnd('/')}/api/v1/download?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(version)}";
+                Console.WriteLine($"Downloading: {name} {version} from {item}");
                 var req = Net.Http.MakeRequest(uri);
                 if(req.StatusCode == 200)
                 {

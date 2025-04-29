@@ -14,7 +14,7 @@ jobs:
     image: onedev.site.tesses.net/crosslang/crosslang:latest
     interpreter: !DefaultInterpreter
       commands: |
-        bash ./pack.sh
+        crossint ./build.tcross pack
     useTTY: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !PublishArtifactStep

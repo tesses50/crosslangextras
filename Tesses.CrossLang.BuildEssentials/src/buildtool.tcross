@@ -11,15 +11,6 @@ func Tesses.CrossLang.BuildTool(pm)
     
     return {
         DirectoriesCompiled = [],
-        FileReadString = (fs,path) =>{
-            var f = fs.OpenFile(path,"rb");
-            var ms = FS.MemoryStream(true);
-            f.CopyTo(ms);
-            var text = ms.GetBytes().ToString();
-            f.Close();
-            ms.Close();
-            return text;
-        },
         GetPackageDependencies = (this,name,version,dir)=>{
             var dep = pm.GetPackage(name,version);
             if(TypeOf(dep) == "Null") throw $"Package {name} with version {version} does not exist";
@@ -68,7 +59,7 @@ func Tesses.CrossLang.BuildTool(pm)
             var crossConf = dir / "cross.json";
             if(FS.Local.FileExists(crossConf))
             {
-                var configData = Json.Decode(this.FileReadString(FS.Local,crossConf));
+                var configData = Json.Decode(FS.ReadAllText(FS.Local,crossConf));
                 var info = {type = "console"};
                 var name = "out";
                 var version = "1.0.0.0-prod";
@@ -221,7 +212,7 @@ func Tesses.CrossLang.BuildTool(pm)
                         {
                             var src = {
                                 FileName = file.ToString(),
-                                Source = this.FileReadString(FS.Local, file)
+                                Source = FS.ReadAllText(FS.Local, file)
                             };
                             sources.Add(src);
                         }

@@ -6,10 +6,15 @@
 
 # To Build
 ```bash
-./script.sh
+crossint ./build.tcross
 ```
 
 # To Install
 ```bash
-./install.sh
+crossint ./build.tcross install
+```
+
+# To Pack
+```bash
+crossint ./build.tcross pack
 ```
