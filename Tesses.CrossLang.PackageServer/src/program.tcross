@@ -36,7 +36,7 @@ func main(args)
         {
             var name = ctx.QueryParams.TryGetFirst("name");
             if(TypeOf(name) != "String") name = "";
-            ctx.WithMimeType("text/html").SendText(Pages.Package(name));
+            ctx.WithMimeType("text/html").SendText(Pages.Package(ctx,name));
             return true;
         }
         if(ctx.Path == "/packages")
@@ -78,6 +78,34 @@ func main(args)
                 return true;
             }
         }
+        if(ctx.Path == "/change_motto")
+        {
+            if(ctx.Method == "POST")
+            {
+                var motto = ctx.QueryParams.TryGetFirst("motto");
+                if(motto == null) motto = "";
+                var session = DB.GetSession(ctx);
+                if(session == null)
+                {
+                    ctx.StatusCode = 401;
+                    ctx.SendText("<h1>You are not logged in</h1>");
+                    return true;
+                }
+
+                var csrf = ctx.QueryParams.TryGetFirst("csrf");
+                    var result = { Success=false, Reason = "Invalid CSRF"};
+
+                if(DB.VerifyCSRF(session,csrf))
+                {
+                    var userId = DB.GetUserIdFromSession(session);
+                    var url = DB.ChangeMotto(userId,motto);
+                    ctx.StatusCode = 302;
+                    ctx.ResponseHeaders.SetValue("Location", url);
+                    ctx.WriteHeaders();
+                    return true;
+                }
+            }
+        }
         if(ctx.Path == "/upload")
         {
             if(ctx.Method == "GET")
@@ -96,13 +124,13 @@ func main(args)
                 
                         if(name == "package")
                         {
-                            if(hasFile) return FS.MemoryStream(true);
+                            if(hasFile) return new MemoryStream(true);
                             hasFile=true;
                     
                             return strm;
                         }
                         else
-                            return FS.MemoryStream(true);
+                            return new MemoryStream(true);
                     });
                     
                     strm.Close();
@@ -110,6 +138,9 @@ func main(args)
                     var session = DB.GetSession(ctx);
                     if(session == null)
                     {
+
+                        if(FS.Local.FileExists(filePath))
+                            FS.Local.DeleteFile(filePath);
                         ctx.StatusCode = 401;
                         ctx.SendText("<h1>You are not logged in</h1>");
                         return true;
@@ -179,7 +210,7 @@ func main(args)
         {
             if(ctx.Method == "GET")
             {
-                ctx.WithMimeType("text/html").SendText(Pages.Login());
+                ctx.WithMimeType("text/html").SendText(Pages.Login(ctx));
                 return true;
             }
             else if(ctx.Method == "POST")
@@ -219,7 +250,7 @@ func main(args)
         {
             if(ctx.Method == "GET")
             {
-                ctx.WithMimeType("text/html").SendText(Pages.Signup());
+                ctx.WithMimeType("text/html").SendText(Pages.Signup(ctx));
                 return true;
             }
             else if(ctx.Method == "POST")
@@ -275,6 +306,11 @@ func main(args)
                 return true;
             }
         }
+        if(ctx.Path == "/account")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Account(ctx));
+            return true;
+        }
         if(ctx.Path == "/css/bootstrap.min.css")
         {
             ctx.WithMimeType("text/css").SendBytes(embed("css/bootstrap.min.css"));
@@ -304,9 +340,10 @@ func main(args)
         }
         if(ctx.Path == "/")
         {
-            ctx.WithMimeType("text/html").SendText(Pages.Index());
+            ctx.WithMimeType("text/html").SendText(Pages.Index(ctx));
             return true;
         }
+        
         return false;
-    },4206);
+    },DB.Port);
 }

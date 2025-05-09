@@ -1,8 +1,0 @@
-{
-    "project_dependencies": ["../Tesses.CrossLang.Markup"],
-    "info": {
-        "type": "console"
-    },
-    "version": "1.0.0.0-prod",
-    "name": "Tesses.CrossLang.WebSite"
-}

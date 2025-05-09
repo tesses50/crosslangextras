@@ -130,6 +130,203 @@ func main(args)
             }
             return env.GetDictionary().main(myArgs);
         }
+        else if(commandName == "debug")
+        {
+            var offline=false;
+            var buildPath = ".";
+            var nobuild=false;
+            var output="";
+            each(var flag : dd.Flags)
+            {
+                if(flag == "offline")
+                {
+                    offline = true;
+                }
+                else if(flag == "help")
+                {
+                    Console.WriteLine("USAGE: crosslang run [run-flags-and-options] program-arguments...");
+                    Console.WriteLine("USAGE: crosslang run [run-flags-and-options] -- program-arguments-and-options...");
+                    Console.WriteLine("FLAGS:");
+                    Console.WriteLine("offline:  build with no internet (don't fetch files)");
+                    Console.WriteLine("help:     this help");
+                    Console.WriteLine("nobuild:  don't build, just run");
+                    Console.WriteLine();
+                    Console.WriteLine("OPTIONS:");
+                    Console.WriteLine("conf=CONFIGSTRING:  specify a conf string for compile_tool(s), is the property Config");
+                    return 0;
+                }
+                else if(flag == "nobuild")
+                {
+                    nobuild=true;
+                }
+            }
+            var conf = "";
+            each(var option : dd.Options)
+            {
+                if(option.Key == "conf")
+                {
+                    conf = option.Value;
+                }
+            }
+            if(nobuild)
+            {
+                if(FS.Local.FileExists("config.json"))
+                {
+                    var proj = Json.Decode(FS.ReadAllText(FS.Local, "config.json"));
+                    var nameVer = $"{proj.name}-{proj.version}.crvm";
+                    var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
+
+                    output = ./buildDir/nameVer;
+                    if(!FS.Local.FileExists(output))
+                    {
+                        Console.WriteLine($"ERROR: file {output} does not exist.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: could not find project.");
+                    return 1;
+                }
+            }
+            else
+            {
+                var pm = Tesses.CrossLang.PackageManager();
+                pm.Offline = offline;
+                var bt = Tesses.CrossLang.BuildTool(pm);
+                bt.Config = conf;
+                output =  bt.BuildProject(buildPath).Output;
+            }
+            var env = VM.CreateEnvironment({});
+            env.RegisterOnError((ctx)=>{
+                if(ctx.IsBreakpoint)
+                {
+                    Console.WriteLine($"Breakpoint {ctx.Breakpoint.Data} hit at: {ctx.Breakpoint.Filename}:{ctx.Breakpoint.Line}");
+                }
+                else if(TypeOf(ctx.Exception) == "Dictionary")
+                {
+                    Console.WriteLine($"Exception at: {ctx.Exception.Filename}:{ctx.Exception.Line}");
+                    Console.WriteLine(ctx.Exception);
+                }
+                else {
+                    Console.WriteLine("thrown {ctx.Exception}");
+                }
+                GC.BarrierBegin();
+                while(true)
+                {
+                    Console.Write("dbg> ");
+                    var input = Console.ReadLine();
+                    if(input == "continue")
+                    {
+                        break;
+                    }
+                    else if(input.StartsWith("getvar "))
+                    {
+                        var varName = input.Substring(7);
+                        var val = ctx.Environment.GetVariable(varName);
+                        Console.Write($"{TypeOf(val)} ");
+                        if(TypeIsString(val))
+                        Console.WriteLine(val.Escape());
+                        else
+                        Console.WriteLine(val);
+                    }
+                    else if(input.StartsWith("eval "))
+                    {
+                        var evalText = input.Substring(5);
+                        ctx.Environment.Eval(evalText);
+                    }
+                    else if(input == "lsroot")
+                    {
+                        var root = ctx.Environment.GetRootEnvironment();
+                        func printItems(r,name)
+                        {
+                            each(var item : Dictionary.Items(r))
+                            {
+                                switch(TypeOf(item.Value))
+                                {
+                                    case "Dictionary":
+                                        printItems(item.Value,$"{name}{item.Key}.");
+                                        break;
+                                    case "String":
+                                        Console.WriteLine($"{name}{item.Key} = {item.Value.Escape()}");
+                                        break;
+                                    case "Closure":
+                                    case "ExternalMethod":
+                                        if(item.Value.documentation.Length > 0)
+                                        {
+                                            Console.WriteLine($"/^{item.Value.Documentation}^/");
+
+                                        }
+                                        {
+                                            Console.Write($"func {name}{item.Key}(");
+                                            var first=true;
+                                            each(var arg : item.Value.Arguments)
+                                            {
+                                                if(!first) Console.Write($", {arg}");
+                                                else
+                                                Console.Write(arg);
+                                                first=false;
+                                            }
+
+                                            Console.WriteLine(")");
+                                        }
+                                        break;
+                                    default:
+                                        Console.Write($"{name}{item.Key} = ");
+                                        Console.WriteLine(item.Value);
+                                        break;
+                                }
+                            }
+                        }
+
+                        printItems(root.GetDictionary(),"");
+                    }
+                    else if(input == "lsvar")
+                    {
+                        var curVersion = ctx.Environment;
+
+
+                        Console.WriteLine("======================");
+                        while(TypeOf(curVersion) != "RootEnvironment")
+                        {
+                            each(var item : Dictionary.Items(curVersion.GetDictionary()))
+                            {
+                                Console.Write($"{TypeOf(item.Value)} {item.Key} = ");
+                                if(TypeIsString(item.Value))
+                                Console.WriteLine(item.Value.Escape(true));
+                                else
+                                Console.WriteLine(item.Value);
+                            }
+
+                            curVersion = curVersion.GetParentEnvironment();
+
+                            Console.WriteLine("======================");
+                        }
+                    }
+                    else if(input == "help")
+                    {
+                        Console.WriteLine("getvar <VARNAME>: prints variable");
+                        Console.WriteLine("eval <code>: eval code in environment");
+                        Console.WriteLine("lsvar: get variables (not root environment)");
+                        Console.WriteLine("lsroot: get variables on root environment");
+                        Console.WriteLine("continue: continue executing");
+                    }
+
+                }
+                GC.BarrierEnd();
+                return ctx.IsBreakpoint;
+            });
+            env.RegisterEverything();
+            env.LockRegister();
+
+            env.LoadFileWithDependencies(FS.Local,output);
+            var myArgs = [output];
+            for(var i = 1; i < dd.Arguments.Count; i++)
+            {
+                myArgs.Add(dd.Arguments[i]);
+            }
+
+            return env.GetDictionary().main(myArgs);
+        }
         else if(commandName  == "new")
         {
             func newHelp()
@@ -179,7 +376,7 @@ func main(args)
 
                     FS.Local.CreateDirectory(projectPath);
 
-                    var projectDir = FS.SubdirFilesystem(FS.Local, projectPath);
+                    var projectDir = new SubdirFilesystem(FS.Local, projectPath);
 
 
                     var strm = FS.Local.OpenFile(templateFile,"rb");

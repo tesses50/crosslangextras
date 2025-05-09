@@ -21,9 +21,12 @@ func Shell(title,pages,body)
                     <each(var item : pages)>
                         <li class={"nav-item"}>
                             <if(item.active)>
+                            <true>
                             <a class={"nav-link active"} aria-current={"page"} href={item.route}>{item.text}</a>
-                            <else>
+                            </true>
+                            <false>
                             <a class={"nav-link"} href={item.route}>{item.text}</a>
+                            </false>
                             </if>
                         </li>
                     </each>

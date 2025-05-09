@@ -1,5 +1,12 @@
-var count = 0;
+
 func main(args)
 {
-    Net.Http.ListenSimpleWithLoop(Router,4206);
+    Net.Http.ListenSimpleWithLoop((ctx)=>{
+        if(ctx.Path == "/")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Index());
+            return true;
+        }
+        return false;
+    },4206);
 }

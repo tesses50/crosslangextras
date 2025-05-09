@@ -31,20 +31,7 @@ func Tesses.CrossLang.PackageManager()
     var configRoot = Env.CrossLangConfig;
     var packageCache = configRoot / "PackageCache";
     FS.Local.CreateDirectory(packageCache);
-    func FileReadByteArray(fs,path)
-    {
-        var f = fs.OpenFile(path,"rb");
-            var ms = FS.MemoryStream(true);
-            f.CopyTo(ms);
-            var buff = ms.GetBytes();
-            f.Close();
-        return buff;
-    }
-   func FileReadString  (fs,path) {
-            var buff = FileReadByteArray(fs,path).ToString();
-            ms.Close();
-            return text;
-        }
+   
     return {
         Offline = false,
         ParseFileName,
@@ -65,7 +52,7 @@ func Tesses.CrossLang.PackageManager()
             var pkgFile = packageCache / name / v.ToString();
             if(useCache && FS.Local.RegularFileExists(pkgFile))   
             {
-                return FileReadByteArray(FS.Local,pkgFile);
+                return FS.ReadAllBytes(FS.Local,pkgFile);
             }
             if(this.Offline) return null;
 
@@ -77,7 +64,7 @@ func Tesses.CrossLang.PackageManager()
                 var req = Net.Http.MakeRequest(uri);
                 if(req.StatusCode == 200)
                 {
-                    var strm = FS.MemoryStream(true);
+                    var strm = new MemoryStream(true);
                     req.CopyToStream(strm);
                     
                     if(useCache) {

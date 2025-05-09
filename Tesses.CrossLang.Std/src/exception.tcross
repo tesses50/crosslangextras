@@ -1,0 +1,41 @@
+/^
+    Create a new exception
+^/
+func New.Exception(message,$type,$inner)
+{
+    if(TypeIsString(type))
+    {
+        return {
+            Message = message,
+            InnerException = inner,
+            Type = type,
+            ToString = Std.Internal.Exception.ToString
+        };
+    }
+    else
+    {
+        return {
+            Message = message,
+            InnerException = inner,
+            Type = "Exception",
+            ToString = Std.Internal.Exception.ToString
+        };
+    }
+}
+/^Out of range exception^/
+func New.OutOfRangeException(varName, $inner)
+{
+    return new Exception($"{varName} is out of range.","OutOfRangeException",inner);
+}
+/^Exception ToString^/
+func Std.Internal.Exception.ToString(this)
+{
+    var messagePart = $"{this.Type}: {this.Message}";
+    if(this.InnerException != undefined && this.InnerException != null)
+    {
+        var innerEx = this.InnerException.ToString().Replace("\n","\n\t");
+        return $"{messagePart}\nInner exception:\n{innerEx}";
+    }
+    return messagePart;
+}
+

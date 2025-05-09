@@ -11,12 +11,9 @@ func Pages.Upload(ctx)
                 route = "/upload",
                 text = "Upload"
             },
-            {
-                active = false,
-                route = "/login",
-                text = "Login"
-            }
+            DB.LoginButton(ctx,false)
         ];
+    
     var html = <div class={"container min-vh-100 d-flex justify-content-center align-items-center"}>
                 <form action={"./upload"} method={"post"} enctype={"multipart/form-data"}>
                       <h1>Upload Package</h1>

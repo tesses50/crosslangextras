@@ -1,0 +1,119 @@
+func Pages.Account(ctx)
+{
+    var name = ctx.QueryParams.TryGetFirst("name");
+    if(TypeOf(name) != "String") name = "";
+    var active = DB.LoginButton(ctx,false,name);
+    
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+   
+    var user = DB.GetAccountInfo(name);
+    var motto_ta = TypeOf(user.motto) == "String" ? user.motto : "";
+    //var motto=Net.Http.HtmlEncode(motto_ta).Replace("\r","").Replace("\n","<br>");
+    var motto = "";
+    if(!active.active)
+    {
+        var builder = "";
+        func flush()
+        {
+            
+            if(builder.Length > 0)
+            {
+                if(builder.StartsWith("http://") || builder.StartsWith("https://") || builder.StartsWith("ftp://") || builder.StartsWith("ftps://") || builder.StartsWith("magnet:"))
+                {
+                    motto += <a href={builder}>{builder}</a>;
+                }
+                else if(builder.StartsWith("mailto:"))
+                {
+                    motto += <a href={builder}>{builder.Substring(7)}</a>;
+                }
+                else if(builder.StartsWith("tel:"))
+                {
+                    motto += <a href={builder}>{builder.Substring(4)}</a>;
+                }
+                else
+                {
+                    motto += Net.Http.HtmlEncode(builder);
+                }
+                builder="";
+            }
+        }
+        each(var item : motto_ta)
+        {
+            switch(item)
+            {
+                case ' ':
+                    flush();
+                    motto += " ";
+                    break;
+                case '\n':
+                    flush();
+                    motto += "<br>";
+                    break;
+                case '\t':
+                    flush();
+                    motto+= "&tab;";
+                    break;
+                case '\r':
+                    flush();
+                    break;
+                default:
+                    builder += item;
+                    break;
+            }
+        }
+        flush();
+    }
+    
+    var html =
+    <div class="container">
+    <if(TypeOf(user) == "Dictionary")>
+        <true>
+        <h1>{user.accountName}</h1>
+        <a href={$"./account_packages?name={Net.Http.UrlEncode(name)}"}>Packages</a>
+        
+        
+          <if(active.active)>
+            <true>
+                <form action="./change_motto" method="POST">
+                    
+                    <if(motto_ta.Length == 0)>
+                        <true><textarea class="form-control" name="motto" placeholder="Type your motto and/or links here" id="floatingTextarea2" style="height: 100px"></textarea></true>
+                        <false><textarea class="form-control" name="motto" placeholder="Type your motto and/or links here" id="floatingTextarea2" style="height: 100px">{motto_ta}</textarea></false>
+                    
+                    </if>
+                    <input class="btn btn-primary" type="submit" value="Save">
+                    <input type="hidden" name="csrf" value={DB.CreateCSRF(ctx)}>
+                    <a class="btn btn-danger" href="./logout">Logout</a>
+                </form>
+
+            </true>
+            <false>
+            <hr>
+            <p><raw(motto)></p>
+            </false>
+        </if>
+        </true>
+    <false>
+        <if(TypeOf(user) == "String")><true>
+            <div>
+    {user}
+  </div>
+
+        </true></if>
+    </false>
+    </if></div>;
+
+    return Shell($"Account {name}", pages,html);
+}

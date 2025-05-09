@@ -1,4 +1,4 @@
-func Pages.Index()
+func Pages.Index(ctx)
 {
     
     var pages = [
@@ -12,11 +12,7 @@ func Pages.Index()
                 route = "/upload",
                 text = "Upload"
             },
-            {
-                active = false,
-                route = "/login",
-                text = "Login"
-            }
+            DB.LoginButton(ctx,false)
         ];
         var html = <article><h1 class={"display-5"} style={"text-align: center;"}>Make crosslang development faster and more convenient with CPKG</h1><form action={"./packages"} method={"get"}><div class={"container text-center"}><div class={"row"}><div class={"col"}>
                     

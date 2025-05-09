@@ -1,4 +1,4 @@
-func Pages.CheckEmail()
+func Pages.CheckEmail(ctx)
 {
     var pages = [
             {
@@ -11,11 +11,7 @@ func Pages.CheckEmail()
                 route = "/upload",
                 text = "Upload"
             },
-            {
-                active = false,
-                route = "/login",
-                text = "Login"
-            }
+            DB.LoginButton(ctx,false)
         ];
     var html = <div class={"container"}>
                 <h1>Please check your email.</h1>

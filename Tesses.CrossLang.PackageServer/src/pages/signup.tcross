@@ -1,4 +1,4 @@
-func Pages.Signup()
+func Pages.Signup(ctx)
 {
     var pages = [
             {
@@ -11,11 +11,7 @@ func Pages.Signup()
                 route = "/upload",
                 text = "Upload"
             },
-            {
-                active = false,
-                route = "/login",
-                text = "Login"
-            }
+            DB.LoginButton(ctx,false)
         ];
     var html = <div class={"container min-vh-100 d-flex justify-content-center align-items-center"}>
                 <form action={"./signup"} method={"post"} enctype={"application/x-www-form-urlencoded"}>

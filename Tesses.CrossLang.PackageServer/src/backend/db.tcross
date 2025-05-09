@@ -3,15 +3,48 @@ func DB.Open()
     var path = DB.working / "data.db";
     return Sqlite.Open(path);
 }
-
-/*func DB.GetPackageDetails(name)
+func DB.ChangeMotto(userId, motto)
 {
     DB.Lock();
     var dbCon = DB.Open();
-    
-    Sqlite.Close(dbCon);
+    Sqlite.Exec(dbCon,$"UPDATE accounts SET motto = {Sqlite.Escape(motto)} WHERE id = {userId};");
+    var account = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE id = {userId};");
     DB.Unlock();
-}*/
+    if(TypeOf(account) == "List" && account.Length > 0)
+    {
+        return $"/account?name={Net.Http.UrlEncode(account[0].accountName)}";
+    }
+    return "/";
+}
+func DB.LoginButton(ctx,active,$accountPage)
+{
+    var session = DB.GetSession(ctx);
+
+    
+    if(session != null)
+    {
+       DB.Lock();
+       var dbCon = DB.Open();
+       var exec = Sqlite.Exec(dbCon,$"SELECT * FROM sessions s inner join accounts a on s.accountId = a.id WHERE key = {Sqlite.Escape(session)};");
+   
+       Sqlite.Close(dbCon);
+       DB.Unlock(); 
+       var active2 = TypeOf(accountPage) == "String" ? accountPage == exec[0].accountName : false;
+       if(TypeOf(exec) == "List" && exec.Length > 0)
+       {
+            return {
+                active=active2,
+                route = $"/account?name={Net.Http.UrlEncode(exec[0].accountName)}",
+                text = exec[0].accountName
+            };
+       }
+    }           
+    return {
+        active,
+        route = "/login",
+        text = "Login"
+    };
+}
 
 func DB.CanUploadPackagePrefix(userId, packageName)
 {
@@ -404,6 +437,12 @@ func DB.GetUniqueNumber()
     return unum;
 }
 
+func DB.getPort()
+{
+    if(TypeOf(DB.Config.Port) == "Long") return DB.Config.Port;
+    return 4206;
+}
+
 func DB.Init(working)
 {
     DB.working = Path.FromString(working);
@@ -418,7 +457,7 @@ func DB.Init(working)
         if(FS.Local.FileExists(f)) FS.Local.DeleteFile(f);
     }
 
-    DB.mtx = Mutex();
+    DB.mtx = new Mutex();
     var p = DB.working / "conf.json";
     if(FS.Local.FileExists(p))
         DB.Config = Json.Decode(FS.ReadAllText(FS.Local, p));
@@ -430,7 +469,7 @@ func DB.Init(working)
     var dbCon = DB.Open();
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS packages (id INTEGER PRIMARY KEY AUTOINCREMENT, packageName TEXT UNIQUE, accountId INTEGER);");
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS versions (id INTEGER PRIMARY KEY AUTOINCREMENT, packageId INTEGER, version INTEGER, description TEXT, type TEXT, maintainer TEXT, homepage TEXT, repo TEXT, license TEXT, uploadTime INTEGER);");
-    Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, accountName TEXT UNIQUE, password_hash TEXT, password_salt TEXT, motto TEXT, verifyKey TEXT UNIQUE, flags INTEGER);");
+    Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, accountName TEXT UNIQUE, password_hash TEXT, password_salt TEXT, motto TEXT, verifyKey TEXT UNIQUE, verifyExpire INTEGER, flags INTEGER);");
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, accountId INTEGER, key STRING UNIQUE);");
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS reserved_prefixes (id INTEGER PRIMARY KEY AUTOINCREMENT, accountId INTEGER, prefix STRING UNIQUE);");
     Sqlite.Close(dbCon);
@@ -443,6 +482,33 @@ DB.FLAG_RESETPASS = 0b00001000;
 DB.FLAG_VERIFY = 0b00000100;
 
 DB.ITTR = 35000;
+
+func DB.GetAccountInfo(name)
+{
+    DB.Lock();
+
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE accountName = {Sqlite.Escape(name)};");
+   
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+
+    if(TypeOf(exec) == "List")
+    {
+        if(exec.Length == 1)
+        {
+            return exec[0];
+        }
+        else
+        {
+            return "No such user exists";
+        }
+    }
+    else
+    {
+        return exec;
+    }
+}
 
 func DB.GetAccountId(email, password)
 {

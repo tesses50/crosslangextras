@@ -1,4 +1,4 @@
-func Pages.Package(name)
+func Pages.Package(ctx,name)
 {
     var package = DB.GetPackageVersions(name);
 
@@ -13,16 +13,12 @@ func Pages.Package(name)
                 route = "/upload",
                 text = "Upload"
             },
-            {
-                active = false,
-                route = "/login",
-                text = "Login"
-            }
+            DB.LoginButton(ctx,false)
         ];
     
     
    
-    var html = <if(package.Length > 0)><section class={"container"}>
+    var html = <if(package.Length > 0)><true><section class={"container"}>
         <br>
         <img width={"64"} height={"64"} src={$"./api/v1/package_icon.png?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(package[0].version)}"} alt={"icon"}>
         <h1>{name}</h1>
@@ -42,7 +38,9 @@ func Pages.Package(name)
             
                 <div class={"card-body"}>
                     <if(package[0].type == "lib" || package[0].type == "compile_tool")>
+                    <true>
                     crosslang add-dependency {name}
+                    </true>
                     </if>
                 </div>
                 </div>
@@ -60,16 +58,24 @@ func Pages.Package(name)
           <ul>
             <li>Account: <a href={$"./account?name={Net.Http.UrlEncode(package[0].accountName)}"}>{package[0].accountName}</a></li>
             <if(package[0].maintainer.Length > 0)>
+            <true>
             <li>Maintainer: {package[0].maintainer}</li>
+            </true>
             </if>
             <if(package[0].license.Length > 0)>
+            <true>
             <li>License: {package[0].license}</li>
+            </true>
             </if>
             <if(package[0].homepage.Length > 0)>
+            <true>
             <li>Homepage: <a href={package[0].homepage}>{package[0].homepage}</a></li>
+            </true>
             </if>
             <if(package[0].repo.Length > 0)>
+            <true>
             <li>Repo: <a href={package[0].repo}>{package[0].repo}</a></li>
+            </true>
             </if>
             <li>Last updated: {package[0].uploadDate}</li>
             <li>Latest version: {package[0].version}</li>
@@ -77,6 +83,7 @@ func Pages.Package(name)
             <li><a href={package[0].download}>Download</a></li>
           </ul>
           <if(package.Length > 1)>
+          <true>
           <br>
 
           <h3>Older versions</h3>
@@ -92,16 +99,24 @@ func Pages.Package(name)
             <div class={"accordion-body"}>
                   <ul>
                       <if(package[i].maintainer.Length > 0)>
+                      <true>
                       <li>Maintainer: {package[i].maintainer}</li>
+                      </true>
                       </if>
                       <if(package[i].license.Length > 0)>
+                      <true>
                         <li>License: {package[i].license}</li>
+                      </true>
                      </if>
                      <if(package[i].homepage.Length > 0)>
+                     <true>
                     <li>Homepage: <a href={package[i].homepage}>{package[i].homepage}</a></li>
+                    </true>
                     </if>
                       <if(package[i].repo.Length > 0)>
+                        <true>
                         <li>Repo: <a href={package[i].repo}>{package[i].repo}</a></li>
+                        </true>
                       </if>
                       <li>Uploaded: {package[i].uploadDate}</li>
                       <li>Type: {package[i].type}</li>
@@ -113,8 +128,9 @@ func Pages.Package(name)
           
           </for>
           </div>
+          </true>
           </if>
-    </section>
+    </section></true>
     </if>;
     return Shell($"Package {name}", pages,html);
 }

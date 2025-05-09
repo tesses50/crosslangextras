@@ -94,7 +94,7 @@ func Tesses.CrossLang.BuildTool(pm)
                 if(TypeOf(info.type) == "String" && info.type == "template")
                 {
                     //vfs, strm, name, version, info
-                    var subdir = FS.SubdirFilesystem(FS.Local,dir);
+                    var subdir = new SubdirFilesystem(FS.Local,dir);
                     var output = $"{name}-{version}.crvm";
                     var outFile = FS.Local.OpenFile(dir / outputDir / output,"wb");
 
@@ -166,7 +166,7 @@ func Tesses.CrossLang.BuildTool(pm)
 
                         env.LoadFileWithDependencies(FS.Local,newFile);
                         env.GetDictionary().RunTool({
-                                Project = FS.SubdirFilesystem(FS.Local, dir),
+                                Project = new SubdirFilesystem(FS.Local, dir),
                                 ProjectInfo = info,
                                 GeneratedSource = sources,
                                 Config = this.Config
@@ -236,7 +236,7 @@ func Tesses.CrossLang.BuildTool(pm)
                     Info = Json.Encode(info),
                     Icon = icon,
                     Tools = file_tools,
-                    ResourceFileSystem = FS.SubdirFilesystem(FS.Local, dir / resDir),
+                    ResourceFileSystem = new SubdirFilesystem(FS.Local, dir / resDir),
                     Dependencies = file_deps,
                     Output = outFile
                 });

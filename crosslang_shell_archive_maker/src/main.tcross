@@ -13,7 +13,7 @@ func install()
 {
     var d = Env.CrossLangConfig;
     FS.Local.CreateDirectory(d);
-    var sdfs = FS.SubdirFilesystem(FS.Local, d);
+    var sdfs = new SubdirFilesystem(FS.Local, d);
     var strm = FS.Local.OpenFile(name,"rb");
     FS.ExtractArchive(strm, sdfs);
     sdfs.Close();
@@ -23,7 +23,7 @@ func install()
 func create_archive()
 {
     
-    var tmpFS = FS.SubdirFilesystem(FS.Local,"crosslang_shell_archive_maker/tmp");
+    var tmpFS = new SubdirFilesystem(FS.Local,"crosslang_shell_archive_maker/tmp");
     func copyFile(src,dest)
     {
         if(!FS.Local.FileExists(src)) return;
@@ -51,8 +51,8 @@ func create_archive()
     copyFile("Templates/console/bin/Tesses.CrossLang.Template.Console-1.0.0.0-prod.crvm", templates / "console.crvm");
     copyFile("Templates/lib/bin/Tesses.CrossLang.Template.Library-1.0.0.0-prod.crvm", templates / "lib.crvm");
     copyFile("Templates/template/bin/Tesses.CrossLang.Template.Template-1.0.0.0-prod.crvm", templates / "template.crvm");
-    //copyFile("Templates/web/bin/Tesses.CrossLang.Template.Website-1.0.0.0-prod.crvm", templates / "web.crvm");
-    //copyFile("Templates/emptyweb/bin/Tesses.CrossLang.Template.EmptyWebsite-1.0.0.0-prod.crvm", templates / "emptyweb.crvm");
+    copyFile("Templates/web/bin/Tesses.CrossLang.Template.Website-1.0.0.0-prod.crvm", templates / "web.crvm");
+    copyFile("Templates/emptyweb/bin/Tesses.CrossLang.Template.EmptyWebsite-1.0.0.0-prod.crvm", templates / "emptyweb.crvm");
     copyFile("Templates/tool/bin/Tesses.CrossLang.Template.Tool-1.0.0.0-prod.crvm", templates / "tool.crvm");
     var packageCache = r / "PackageCache";
 
@@ -60,10 +60,13 @@ func create_archive()
     tmpFS.CreateDirectory(packageCache / "Tesses.CrossLang.Args");
     tmpFS.CreateDirectory(packageCache / "Tesses.CrossLang.BuildEssentials");
     tmpFS.CreateDirectory(packageCache / "Tesses.CrossLang.Markup");
+    tmpFS.CreateDirectory(packageCache / "Tesses.CrossLang.Std");
     copyFile("Tesses.CrossLang.Args/bin/Tesses.CrossLang.Args-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Args" / "1.0.0.0-prod");
     copyFile("Tesses.CrossLang.BuildEssentials/bin/Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.BuildEssentials" / "1.0.0.0-prod");
     copyFile("Tesses.CrossLang.Markup/bin/Tesses.CrossLang.Markup-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Markup" / "1.0.0.0-prod");
-   
+    copyFile("Tesses.CrossLang.Args/bin/Tesses.CrossLang.Args-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Args" / "1.0.0.0-prod");
+    copyFile("Tesses.CrossLang.Std/bin/Tesses.CrossLang.Std-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Std" / "1.0.0.0-prod");
+
     var installer = FS.Local.OpenFile(name, "wb");
 
     var ifo = {

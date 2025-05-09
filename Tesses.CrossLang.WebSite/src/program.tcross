@@ -1,5 +1,0 @@
-var count = 0;
-func main(args)
-{
-    Net.Http.ListenSimpleWithLoop(Router,4206);
-}
