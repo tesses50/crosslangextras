@@ -1,7 +1,0 @@
-<?page() route="/" ?>
-    <?Shell?>
-        <?arg_component() ?>
-           
-        <?end?>
-    <?end?>
-<?end?>

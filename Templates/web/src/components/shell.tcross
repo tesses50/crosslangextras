@@ -13,20 +13,23 @@ func Components.Shell(title,pages,body)
             <h1>%PROJECT_NAME%</h1>
             <nav>
             <ul>
-                <?code
-                    each(var item : pages)
-                    {
-                ?>
-                <li><a <?code if(item.active) { ?> aria-current="page" <?code } ?> href="<?expr Net.Http.UrlPathEncode(item.route) ?>"><?expr Net.Http.HtmlEncode(item.text) ?></a></li>
-                <?code
-                    }
-                ?>
+                <each(var item : pages)>
+                    <li>
+                        <if(item.active)>
+                            <true>
+                                <a aria-current="page" href={item.route}>{item.text}</a>
+                            </true>
+                            <false>
+                                <a aria-current="page" href={item.route}>{item.text}</a>
+                            </false>
+                        </if>
+                    </li>
+                </each>
             </ul>
             </nav>
         </header>
-        <h1><?expr Net.Http.HtmlEncode(title) ?></h1>
-        <?body?>
-        <?end?>
+        <h1>{title}</h1>
+        <raw(body)>
         <footer>
             <p>Created using <a href="https://crosslang.tesseslanguage.com/">CrossLang</a> and <a href="https://simplecss.org/">SimpleCSS</a></p>
         </footer>

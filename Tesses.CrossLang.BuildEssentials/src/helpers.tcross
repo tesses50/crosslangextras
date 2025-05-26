@@ -17,3 +17,25 @@ func Tesses.CrossLang.GetNameAndDescription(name)
     
     return $"{name}: {description}";
 }
+func Tesses.CrossLang.GetNameAndDescriptionJson(name)
+{
+    var strm = FS.Local.OpenFile(name,"rb");
+    var file = VM.LoadExecutable(strm);
+    
+    strm.Close();
+
+    var name = file.Name;
+    
+    var j = Json.Decode(file.Info);
+    var description = TypeOf(j.description) == "String" ? j.description : "";
+
+    if(j.type == "template")
+        name = TypeOf(j.template_name) == "String" ? j.template_name : name;
+    else if(j.type == "tool")
+        name = TypeOf(j.toolname) == "String" ? j.toolname : name;
+    
+    return {
+        name,
+        description
+    };
+}

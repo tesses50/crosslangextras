@@ -335,6 +335,7 @@ func main(args)
                 Console.WriteLine("FLAGS");
                 Console.WriteLine("--help: Shows this help");
                 Console.WriteLine("--list: Lists all templates");
+                Console.WriteLine("--list-json: List all templates (as json)");
                 Console.WriteLine("ARGUMENTS:");
                 Console.WriteLine("template_name: The name of the template");
                 Console.WriteLine("directory_for_project: The directory for the project, defaults to current directory");
@@ -350,6 +351,16 @@ func main(args)
                     {
                         Console.WriteLine(Tesses.CrossLang.GetNameAndDescription(item));
                     }
+                    return 0;
+                }
+                else if(flag == "list-json")
+                {
+                    var items = [];
+                    each(var item : FS.Local.EnumeratePaths(dir))
+                    {
+                        items.Add(Tesses.CrossLang.GetNameAndDescriptionJson(item));
+                    }
+                    Console.WriteLine(items);
                     return 0;
                 }
                 else if(flag == "help")
@@ -409,13 +420,21 @@ func main(args)
 
                     if(TypeOf(filesToMutate) == "Undefined") filesToMutate = [];
 
-                    each(var f : projectDir.EnumeratePaths(srcDir))
+                    func mutateDir(dir)
                     {
-                        if(projectDir.RegularFileExists(f) && f.GetExtension() == ".tcross")
+                        each(var f : projectDir.EnumeratePaths(dir))
                         {
-                            filesToMutate.Add(f);
+                            if(projectDir.RegularFileExists(f) && f.GetExtension() == ".tcross")
+                            {
+                                filesToMutate.Add(f);
+                            }
+                            else if(projectDir.DirectoryExists(f))
+                            {
+                                mutateDir(f);
+                            }
                         }
                     }
+                    mutateDir(srcDir);
 
                     each(var ent : filesToMutate)
                     {
@@ -429,6 +448,7 @@ func main(args)
 
                             FS.WriteAllText(projectDir, ent, src);
                         }
+                       
                     }
 
                     FS.WriteAllText(projectDir, "/cross.json", Json.Encode(proj,true));

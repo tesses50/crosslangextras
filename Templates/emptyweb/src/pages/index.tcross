@@ -2,8 +2,11 @@ var count = 0;
 
 func Pages.Index()
 {
+    //use null when you wan't to use multiple tags but not emit a div or anything like that
     return Components.Shell(
+        <null>
         <h1>Hello, world</h1>
         <span>Views: {++count}</span>
+        </null>
     );
 }

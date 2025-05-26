@@ -196,6 +196,7 @@ func Tesses.CrossLang.BuildTool(pm)
                     }
                     else if(dep.Info.type == "compile_tool")
                     {
+                        
                         file_tools.Add({
                             Name = dep.Name,
                             Version = dep.Version
@@ -208,7 +209,7 @@ func Tesses.CrossLang.BuildTool(pm)
                 {
                     each(var file : FS.Local.EnumeratePaths(sourceDir))
                     {
-                        if(FS.Local.RegularFileExists(file))
+                        if(FS.Local.RegularFileExists(file) && file.GetExtension()==".tcross")
                         {
                             var src = {
                                 FileName = file.ToString(),

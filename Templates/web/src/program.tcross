@@ -7,7 +7,27 @@ func main(args)
             ctx.WithMimeType("text/html").SendText(Pages.Index());
             return true;
         }
-        else if(ctx.Path == "/simple.min.css")
+        else if(ctx.Path == "/counter")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Counter());
+            return true;
+        }
+        else if(ctx.Path == "/about")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Index());
+            return true;
+        }
+        else if(ctx.Path == "/echo")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Echo(ctx.QueryParams.TryGetFirst("text")));
+            return true;
+        }
+        else if(ctx.Path == "/image.png")
+        {
+            ctx.WithMimeType("image/png").SendBytes(embed("image.png"));
+            return true;
+        }
+        else if(ctx.Path == "/css/simple.min.css")
         {
             ctx.WithMimeType("text/css").SendBytes(embed("simple.min.css"));
             return true;
@@ -17,5 +37,6 @@ func main(args)
             ctx.WithMimeType("image/x-icon").SendBytes(embed("favicon.ico"));
             return true;
         }
+        return false;
     },4206);
 }
