@@ -1,0 +1,27 @@
+func Pages.Index()
+{
+    var pages = [
+            {
+                active = true,
+                route = "/",
+                text = "Home"
+            },
+            {
+                active = false,
+                route = "/counter",
+                text = "Counter"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About"
+            }
+        ];
+   return Components.Shell("Main Page",pages,<section>
+   <form action="./echo" method="GET">
+        <input type="text" name="text" placeholder="Text to echo">
+        <input type="submit" value="Echo it">
+   </form>
+   <p>1 John 4:4: You, dear children, are from God and have overcome them, because the one who is in you is greater than the one who is in the world.</p>
+   </section>);
+}

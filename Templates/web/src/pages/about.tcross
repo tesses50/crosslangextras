@@ -1,0 +1,26 @@
+func Pages.About()
+{
+    var pages = [
+            {
+                active = false,
+                route = "/",
+                text = "Home"
+            },
+            {
+                active = false,
+                route = "/counter",
+                text = "Counter"
+            },
+            {
+                active =  true,
+                route = "/about",
+                text = "About"
+            }
+        ];
+    return Components.Shell(
+        "About Me",
+        pages,
+        <null><img src="./image.png"><p>{ipsum}</p></null>
+    );
+}
+var ipsum="";

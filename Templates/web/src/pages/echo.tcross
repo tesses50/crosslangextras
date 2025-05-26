@@ -1,0 +1,32 @@
+func Pages.Echo(text)
+{
+    var pages = [
+            {
+                active = false,
+                route = "/",
+                text = "Home"
+            },
+            {
+                active = false,
+                route = "/counter",
+                text = "Counter"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About"
+            }
+        ];
+    return Components.Shell(
+        "Echo",
+        pages,
+        <if(text != null)>
+            <true>
+                <p>{text}</p>
+            </true>
+            <false>
+                <p>No text available</p>
+            </false>
+        </if>
+  );
+}

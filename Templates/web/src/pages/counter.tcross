@@ -1,0 +1,25 @@
+func Pages.Counter()
+{
+    var pages = [
+            {
+                active = false,
+                route = "/",
+                text = "Home"
+            },
+            {
+                active = true,
+                route = "/counter",
+                text = "Counter"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About"
+            }
+        ];
+    return Components.Shell(
+        "Counter",
+        pages,
+        <null><h1>This is a counter</h1><raw(Components.Counter())></null>
+  );
+}
