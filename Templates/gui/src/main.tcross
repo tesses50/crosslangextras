@@ -1,0 +1,18 @@
+func btn1_Click(sender,e)
+{
+	Console.WriteLine("Button Clicked");
+}
+func main(args)
+{
+	if(TypeOf(GUI) != "Dictionary")
+	{
+		Console.WriteLine("The GUI is not supported, please build tessesframework with TESSESFRAMEWORK_ENABLE_SDL2.");
+		return 1;
+	}
+	var window = GUI.Window.FromJSON(embed("layout.json"), SDL2.Window.Resizable);
+	var btn1 = window.FindViewById("btn1");
+	btn1.Click += btn1_Click;
+	VM.RunEventLoop();
+	btn.Click -= btn1_Click;
+	window.Dispose(); //we need to destroy it or it will leak
+}

@@ -1,0 +1,14 @@
+func Pages.API.Index()
+{
+    var pages=[{
+                active = true,
+                route = "/api",
+                text = "API Home"
+            }];
+    var html = <null>
+    <h1>API Home</h1>
+    <ul>
+        <li><a href="./api-v1">v1</a></li>
+    </ul></null>;
+    return Shell("CPKG API Home", pages,html);
+}

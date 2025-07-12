@@ -1,0 +1,26 @@
+{
+	"dependencies": [
+	],
+	"info": {
+		"template_extra_text_ftles": [
+			"res/layout.json"
+		],
+		"template_ignored_files": [
+			"bin",
+			"obj"
+		],
+		"template_info": {
+			"type": "app",
+        	"license": "MIT"
+		},
+		"template_name": "gui",
+		"template_project_dependencies": [
+		],
+		"repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
+        "homepage": "https://crosslang.tesseslanguage.com/",
+		"type": "template",
+		"description": "A crosslang gui, using tesses-framework's gui library"
+	},
+	"name": "Tesses.CrossLang.Template.GUI",
+	"version": "1.0.0.0-prod"
+}

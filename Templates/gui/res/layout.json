@@ -1,0 +1,33 @@
+{
+    "Child": {
+        "Type": "AbsoluteView",
+        "Items": [
+            {
+                "Bounds": {
+                    "X": 42,
+                    "Y": 42,
+                    "Width": 200,
+                    "Height": 50
+                },
+                "Type": "ButtonView",
+                "Text": "Click Me",
+                "Id": "btn1",
+                "Active": true
+            }
+        ]
+    },
+    "Palette": {
+        "IsDarkMode": true,
+        "Accent": "#DB0",
+        "Border": "#040",
+        "BorderActive":"#A00",
+        "BorderHover": "#00A",
+        "BorderHoverActive": "#A0A",
+        "FontSize": 20
+    },
+    "Size": {
+        "Width": 640,
+        "Height": 480
+    },
+    "Text": "%PROJECT_NAME%"
+}

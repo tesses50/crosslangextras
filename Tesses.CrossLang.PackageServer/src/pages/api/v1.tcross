@@ -1,0 +1,34 @@
+func Pages.API.V1()
+{
+    var pages=[{
+                active = false,
+                route = "/api",
+                text = "API Home"
+            }];
+    var html = <null>
+        <h1>API v1</h1>
+        <ul>
+            <li>
+                GET /api/v1/package_icon.png?name=PACKAGENAME&version=1.0.0.0-prod<br>
+                Gets the package icon for the package<br>
+                <br>
+                query:<br>
+                <code>name</code>: the name of the package<br>
+                <code>version</code>: the version of the package<br>
+                <br>
+                response: image/png of package
+            </li>
+            <li>
+                GET /api/v1/latest?name=PACKAGENAME<br>
+                Gets the latest version of a package<br>
+                <br>
+                query:<br>
+                <code>name</code>: the name of the package<br>
+                <br>
+                response: json dictionary with a single key <code>version</code> with the string value of the latest version<br>
+                
+            </li>
+        </ul>
+    </null>;
+    return Shell("CPKG API v1", pages,html);
+}
