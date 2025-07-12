@@ -1,6 +1,7 @@
 func Pages.Package(ctx,name)
 {
     var package = DB.GetPackageVersions(name);
+   
 
     var pages = [
             {
@@ -15,7 +16,34 @@ func Pages.Package(ctx,name)
             },
             DB.LoginButton(ctx,false)
         ];
-    
+
+  var installCmd = "";
+  if(package.Length > 0)
+  {
+    switch(package[0].type)
+    {
+        case "lib":
+        case "compiler_tool":
+          installCmd = $"crosslang add-dependency {name}";
+          break;
+        case "console":
+          installCmd = $"crosslang install-console {name} --version={package[0].version}";
+          break;
+        case "app":
+          installCmd = $"crosslang install-app {name} --version={package[0].version}";
+          break;
+        case "tool":
+          installCmd = $"crosslang install-tool {name} --version={package[0].version}";
+          break;
+        case "template":
+          installCmd = $"crosslang install-template {name} --version={package[0].version}";
+          break;
+        default:
+          installCmd = "No instructions to install sorry.";
+          break;
+    }
+
+  }    
     
    
     var html = <if(package.Length > 0)><true><section class={"container"}>
@@ -29,29 +57,33 @@ func Pages.Package(ctx,name)
             <li class={"nav-item"} role={"presentation"}>
               <button class={"nav-link active"} id={"home-tab"} data-bs-toggle={"tab"} data-bs-target={"#home-tab-pane"} type={"button"} role={"tab"} aria-controls={"home-tab-pane"} aria-selected={"true"}>CLI</button>
             </li>
+            <if(package[0].type == "lib" || package[0].type == "compile_tool")>
+            <true>
             <li class={"nav-item"} role={"presentation"}>
               <button class={"nav-link"} id={"profile-tab"} data-bs-toggle={"tab"} data-bs-target={"#profile-tab-pane"} type={"button"} role={"tab"} aria-controls={"profile-tab-pane"} aria-selected={"false"}>cross.json</button>
             </li>
+            </true>
+            </if>
           </ul>
           <div class={"tab-content"} id={"myTabContent"}>
             <div class={"tab-pane fade show active"} id={"home-tab-pane"} role={"tabpanel"} aria-labelledby={"home-tab"} tabindex={"0"}><div class={"card"}>
             
                 <div class={"card-body"}>
-                    <if(package[0].type == "lib" || package[0].type == "compile_tool")>
-                    <true>
-                    crosslang add-dependency {name}
-                    </true>
-                    </if>
+                    {installCmd}
                 </div>
                 </div>
             </div>
-            <div class={"tab-pane fade"} id={"profile-tab-pane"} role={"tabpanel"} aria-labelledby={"profile-tab"} tabindex={"0"}><div class={"card"}>
+            <if(package[0].type == "lib" || package[0].type == "compile_tool")>
+            <true>
+                <div class={"tab-pane fade"} id={"profile-tab-pane"} role={"tabpanel"} aria-labelledby={"profile-tab"} tabindex={"0"}><div class={"card"}>
             
                     <div class={"card-body"}>
                         {Json.Encode({name=name,version = package[0].version })}
                     </div>
                 </div>
             </div>
+            </true>
+            </if>
           </div>
           <br>
           <h3>More options and info</h3>
@@ -77,7 +109,7 @@ func Pages.Package(ctx,name)
             <li>Repo: <a href={package[0].repo}>{package[0].repo}</a></li>
             </true>
             </if>
-            <li>Last updated: {package[0].uploadDate}</li>
+            <li>Last updated: {new DateTime(package[0].uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC")}</li>
             <li>Latest version: {package[0].version}</li>
             <li>Type: {package[0].type}</li>
             <li><a href={package[0].download}>Download</a></li>
@@ -118,7 +150,7 @@ func Pages.Package(ctx,name)
                         <li>Repo: <a href={package[i].repo}>{package[i].repo}</a></li>
                         </true>
                       </if>
-                      <li>Uploaded: {package[i].uploadDate}</li>
+                      <li>Uploaded: {new DateTime(package[i].uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC")}</li>
                       <li>Type: {package[i].type}</li>
                       <li><a href={package[i].download}>Download</a></li>
                   </ul>

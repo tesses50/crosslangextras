@@ -27,18 +27,21 @@ func main(args)
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
     //cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.WebSite"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.Std"]);
-   cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/console"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/console"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/emptyweb"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/web"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/template"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/lib"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/compiletool"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/tool"]);
-    /*cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/gui"]);
+    /*
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
-    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);*/
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
+    */
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","crosslang_shell_archive_maker"]);
     
     if(args.Length > 1)

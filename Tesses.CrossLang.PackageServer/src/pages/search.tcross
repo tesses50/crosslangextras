@@ -1,6 +1,8 @@
 func Pages.Packages(ctx)
 {
     var q = ctx.QueryParams.TryGetFirst("q");
+    var page = ParseLong(ctx.QueryParams.TryGetFirst("page"));
+    page = TypeOf(page) != "Long" ? 1 : page;
     if(TypeOf(q) != "String") q = "";
     var pages = [
             {
@@ -34,8 +36,8 @@ func Pages.Packages(ctx)
     </article>
     +
     <ul>
-        <each(var item : DB.QueryPackages(q,0,20))>
-            <raw(Components.Package(item.packageName,item.version,item.accountName,item.uploadDate,item.description))>
+        <each(var item : DB.QueryPackages(q,(page-1)*20,20))>
+            <raw(Components.Package(item.packageName,item.version,item.accountName,new DateTime(item.uploadTime).ToString("%Y/%m/%d"),item.description))>
         </each>
     </ul>;
     return Shell("Packages",pages,html);

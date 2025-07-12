@@ -81,8 +81,7 @@ func Pages.Account(ctx)
     <if(TypeOf(user) == "Dictionary")>
         <true>
         <h1>{user.accountName}</h1>
-        <a href={$"./account_packages?name={Net.Http.UrlEncode(name)}"}>Packages</a>
-        
+        <a href={$"./account_packages?name={Net.Http.UrlEncode(name)}"}>Packages</a>|<a href={$"./reserved_prefixes?name={Net.Http.UrlEncode(name)}"}>Reserved Prefixes</a>
         
           <if(active.active)>
             <true>

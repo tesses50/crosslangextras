@@ -22,6 +22,8 @@ func Pages.Index(ctx)
                         <input type={"search"} name={"q"} class={"form-control"} placeholder={"Search for packages..."} aria-label={"Search for packages..."} aria-describedby={"button-search"}>
                         <button class={"btn btn-outline-secondary"} type={"submit"} id={"button-search"}>Search</button>
                     </div> 
+
+                    <a href="./api">API</a>
                   </div>
                   <div class={"col"}>
                     

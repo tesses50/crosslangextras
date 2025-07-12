@@ -38,7 +38,7 @@ namespace Tesses.CrossLang
 
         public string license {get;set;}=""; //optional, but recommended to tell people what the license is
 
-        public string readme {get;set;}=""; //optional but tells people about the package
+        public string description {get;set;}=""; //optional but tells people about the package
     }
 
     public static void Main(string[] args)

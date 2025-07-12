@@ -67,7 +67,18 @@ func Tesses.CrossLang.BuildTool(pm)
                 var objDir = "obj";
                 var srcDir = "src";
                 var resDir = "res";
+                var compTime = "none";
                 var icon = "";
+                if(TypeOf(configData.compTime) != "Undefined")
+                    compTime = configData.compTime;
+                
+                if(compTime == "full" && !this.AllowFullCompTime)
+                    throw {
+                        Type="CompTimeException",
+                        Message="Failed to build due to having insecure comptime, use --allow-insecure-comptime if using the shell when building if you trust the program.",
+                        ToString=(this)=>$"{this.Type} on line: {this.Line} {this.Message}"
+                    };
+
                 if(TypeOf(configData.name) != "Undefined")
                     name = configData.name;
                 
@@ -144,7 +155,7 @@ func Tesses.CrossLang.BuildTool(pm)
                 {
                     if(item.Path == dirStr) return item.Data;
                 }
-
+                
 
                 func walk_for_compiling(item,dir2)
                 {
@@ -205,6 +216,7 @@ func Tesses.CrossLang.BuildTool(pm)
                     walk_for_compiling(dep,dir / outputDir);
                 }
 
+
                 func walk_for_source(sourceDir)
                 {
                     each(var file : FS.Local.EnumeratePaths(sourceDir))
@@ -229,6 +241,53 @@ func Tesses.CrossLang.BuildTool(pm)
 
                 var output = $"{name}-{version}.crvm";
                 var outFile = FS.Local.OpenFile(dir / outputDir / output,"wb");
+
+
+                var compTimeEnv = null;
+
+                if(compTime != "none")
+                {
+                    //dir / outputDir;
+
+                    var dict = {};
+                    
+                    compTimeEnv = VM.CreateEnvironment(dict);
+                    switch(compTime)
+                    {
+                        case "secure_file":
+                            compTimeEnv.RegisterConsole();
+                            compTimeEnv.RegisterClass();
+                            compTimeEnv.RegisterCrypto();
+                            compTimeEnv.RegisterDictionary();
+                            compTimeEnv.RegisterJson();
+                            compTimeEnv.RegisterRoot();
+                            compTimeEnv.RegisterIO(false);
+                            
+                            dict.FS.Local = new SubdirFilesystem(FS.Local,dir);
+                            
+                            break;
+                        case "full":
+                            compTimeEnv.RegisterEverything();
+                            break;
+                        default:
+                            //secure
+                            compTimeEnv.RegisterConsole();
+                            compTimeEnv.RegisterClass();
+                            compTimeEnv.RegisterCrypto();
+                            compTimeEnv.RegisterDictionary();
+                            compTimeEnv.RegisterJson();
+                            compTimeEnv.RegisterRoot();
+                            compTimeEnv.RegisterIO(false);
+                            
+                            break;
+                    }
+                    compTimeEnv.LockRegister();
+                    each(var dep : file_deps)
+                    {
+                        compTimeEnv.LoadFileWithDependencies(FS.Local,dir/outputDir/$"{dep.Name}-{dep.Version}.crvm");
+                    }
+                }
+
                 
                 var result = VM.Compile({
                     Name = name,
@@ -239,7 +298,8 @@ func Tesses.CrossLang.BuildTool(pm)
                     Tools = file_tools,
                     ResourceFileSystem = new SubdirFilesystem(FS.Local, dir / resDir),
                     Dependencies = file_deps,
-                    Output = outFile
+                    Output = outFile,
+                    CompTime = compTimeEnv
                 });
 
                 outFile.Close();

@@ -1,18 +1,15 @@
-var count = 0;
 func main(args)
 {
-    Console.WriteLine("In main");
     var dir = ".";
     if(args.Length > 1)
     {
-        
         dir = args[1];
     }
     DB.Init(dir);
 
 
     //should be a route but its crosslang so we can use mountable
-    
+        
     
     mountable.Mount("/package_icon.png", (ctx)=>{
         ctx.ResponseHeaders.SetValue("Content-Type", "image/png");
@@ -22,7 +19,7 @@ func main(args)
     
     /*
         PUT /api/v1/upload Authorization Bearer
-        POST /api/v1/login Json object with username and password returns json object with either 200 for success {"token": "TOKEN_VAL"} or non 2XX if fails {"reason": "SOME ERROR"}
+        POST /api/v1/login Json object with email and password returns json object with either 200 for success {"token": "TOKEN_VAL"} or non 2XX if fails {"reason": "SOME ERROR"}
         POST /api/v1/logout use Authorization Bearer
         GET /api/v1/latest?name=PackageName returns 200 OK with json  {"version": "1.0.0.0-prod"} if it succeeds if it fails returns a failing status code with {"reason": "SOME ERROR"}
         GET /api/v1/download?name=PackageName&version=1.0.0.0-prod returns 200 OK with package bytes or 404 if doesn't exist
@@ -149,7 +146,7 @@ func main(args)
                     var csrf = ctx.QueryParams.TryGetFirst("csrf");
                     var result = { Success=false, Reason = "Invalid CSRF"};
 
-                    if(DB.VerifyCSRF(session,csrf))
+                    if(!DB.VerifyCSRF(session,csrf))
                     {
                         var userId = DB.GetUserIdFromSession(session);
                         result = DB.UploadPackage(userId, filePath);
@@ -174,6 +171,100 @@ func main(args)
                 }
             }
 
+        }
+        if(ctx.Path == "/api")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.API.Index());
+            return true;
+        }
+
+        if(ctx.Path == "/api-v1")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.API.V1());
+            return true;
+        }
+        if(ctx.Path == "/api/v1/upload")
+        {
+            if(ctx.Method == "PUT")   
+            {
+                var session = DB.GetSessionFromBearer(ctx);
+                if(session == null)
+                {
+                    ctx.StatusCode=401;
+                    ctx.SendJson({
+                        reason = "You are not logged in"
+                    });
+                    return true;
+                }
+                var userId = DB.GetUserIdFromSession(session);
+                var filePath = DB.working / "Temp" / $"{DB.GetUniqueNumber()}.crvm";
+                
+                var strm = FS.Local.OpenFile(filePath,"wb");
+
+                ctx.ReadStream(strm);
+                strm.Close();
+                var result = DB.UploadPackage(userId, filePath);
+                if(result.Success)
+                {
+                    ctx.StatusCode = 204;
+                    ctx.ResponseHeaders.SetValue("Content-Length","0");
+                    ctx.WriteHeaders();
+                    return true;
+                }
+                else {
+                    ctx.StatusCode = 400;
+                    ctx.SendJson({reason = result.Reason});
+                    return true;
+                }
+            }
+            else {
+                ctx.StatusCode = 400;
+                ctx.SendJson({
+                    reason = $"Expected PUT method got {ctx.Method}"
+                });
+            }
+            return true;
+        }
+        if(ctx.Path == "/api/v1/login")
+        {
+            if(ctx.Method == "POST")
+            {
+                var json = ctx.ReadJson();
+                if(TypeOf(json) != "Dictionary" || TypeOf(json.email) != "String" || TypeOf(json.password) != "String") {
+                    ctx.StatusCode = 400;
+                    ctx.SendJson({
+                        reason = "Expected a Json Dictionary, with the email and password"
+                    });
+                    return true;
+                }
+
+                var accountId = DB.GetAccountId(json.email, json.password);
+                if(accountId == -1)
+                {
+                    ctx.StatusCode = 401;
+                    
+                    ctx.SendJson({
+                        reason = "Invalid credentials"
+                    });
+                    return true;
+                }
+
+
+
+                ctx.SendJson({
+                    token = DB.CreateSession(accountId)
+                });
+                return true;
+   
+
+            }
+            else {
+                ctx.StatusCode = 400;
+                ctx.SendJson({
+                    reason = $"Expected POST method got {ctx.Method}"
+                });
+            }
+            return true;
         }
         if(ctx.Path == "/api/v1/package_icon.png")
         {

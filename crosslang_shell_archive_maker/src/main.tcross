@@ -54,6 +54,8 @@ func create_archive()
     copyFile("Templates/web/bin/Tesses.CrossLang.Template.Website-1.0.0.0-prod.crvm", templates / "web.crvm");
     copyFile("Templates/emptyweb/bin/Tesses.CrossLang.Template.EmptyWebsite-1.0.0.0-prod.crvm", templates / "emptyweb.crvm");
     copyFile("Templates/tool/bin/Tesses.CrossLang.Template.Tool-1.0.0.0-prod.crvm", templates / "tool.crvm");
+    copyFile("Templates/gui/bin/Tesses.CrossLang.Template.GUI-1.0.0.0-prod.crvm", templates / "gui.crvm");
+    
     var packageCache = r / "PackageCache";
 
     tmpFS.CreateDirectory(packageCache);
