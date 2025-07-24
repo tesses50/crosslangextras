@@ -1,0 +1,74 @@
+/^ base class for stream ^/
+class Stream : HeapObject {
+    /^ Can Read be called ^/
+    public getCanRead()
+    {
+
+    }
+    /^ Can Write be called ^/
+    public getCanWrite()
+    {
+
+    }
+    /^ Can Seek be called ^/
+    public getCanSeek()
+    {
+
+    }
+
+    /^ Read bytes from stream into buffer ^/
+    public Read(buffer, offset, length)
+    {
+
+    }
+    /^ Write bytes to stream from buffer ^/
+    public Write(buffer, offset, length)
+    {
+
+    }
+    /^ Read bytes from stream into buffer, reading multiple times if needed ^/
+    public ReadBlock(buffer, offset, length)
+    {
+
+    }
+    /^ Write bytes to stream from buffer and ensuring that number of bytes is actually writen ^/
+    public WriteBlock(buffer, offset, length)
+    {
+
+    }
+
+    /^ Write text to stream ^/
+    public WriteText(text)
+    {
+
+    }
+    /^ Copy to another stream ^/
+    public CopyTo(stream,$bufferSize)
+    {
+
+    }
+    /^ 
+        Seek to position
+        whence:
+        
+        Stream.Begin: 0
+        Stream.Current: 1
+        Stream.End: 2
+    ^/
+    public Seek(pos, whence)
+    {
+
+    }
+    /^ Flush to disk ^/
+    public Flush()
+    {
+
+    }
+    
+    
+    /^ Close the stream ^/
+    public Close()
+    {
+
+    }
+}

@@ -1,0 +1,24 @@
+class Mutex : HeapObject
+{
+    /^ Create the mutex ^/
+    public Mutex()
+    {
+
+    }
+    /^ Lock the mutex ^/
+    public Lock()
+    {
+
+    }
+    /^ Unlock the mutex ^/
+    public Unlock()
+    {
+
+    }
+
+    /^ Try to lock the mutex ^/
+    public TryLock()
+    {
+
+    }
+}

@@ -49,6 +49,8 @@ func Tesses.CrossLang.BuildTool(pm)
         BuildProject = (this,projectDirectory)=>{
             var dir = FS.MakeFull(projectDirectory);
             var dirStr = dir.ToString();
+            
+        
         
             
             each(var item : this.DirectoriesCompiled)
@@ -249,9 +251,44 @@ func Tesses.CrossLang.BuildTool(pm)
                 {
                     //dir / outputDir;
 
-                    var dict = {};
                     
+
+                    var exec = Env.GetRealExecutablePath("git");
+                    var git_hash = "";
+                    var git_tag = "";
+                    if(FS.Local.FileExists(exec))
+                    {
+                        var process = new Process();
+                        process.FileName = exec.ToString();
+                        process.Arguments = ["rev-parse","HEAD"];
+                        process.RedirectStandardInput = true;
+                        process.RedirectStandardOutput = true;
+                        process.WorkingDirectory = dirStr;
+                        if(process.Start())
+                        {
+                            var memStrm = new MemoryStream(true);
+                            process.StandardOutput.CopyTo(memStrm);
+                            git_hash = memStrm.GetBytes().ToString().Split("\n")[0];
+
+                        }
+                    }
+
+
+
+
+                    var dict = {
+                        BuildTime = {
+                            Git = {
+                                Hash = git_hash,
+                                Tag = git_tag
+                            }
+                        }
+                    };
                     compTimeEnv = VM.CreateEnvironment(dict);
+
+
+
+
                     switch(compTime)
                     {
                         case "secure_file":

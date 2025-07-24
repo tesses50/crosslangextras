@@ -1,0 +1,122 @@
+func DB.GetLatestVersion(name)
+{
+    var sql = $"SELECT * FROM packages p join versions v on p.id = v.packageId and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) and p.packageName = {Sqlite.Escape(name)};";
+    DB.Lock();
+    var dbCon = DB.Open();
+    var res = Sqlite.Exec(dbCon, sql);
+    DB.Unlock();
+
+    if(TypeOf(res) == "List" && res.Length > 0)
+    {
+        return Version.FromLong(ParseLong(res[0].version)).ToString();
+    }
+    return null;
+}
+func DB.GetPackageVersions(name)
+{
+    var sql = $"SELECT * FROM packages p inner join versions v on p.id = v.packageId inner join accounts a on p.accountId = a.id WHERE p.packageName = {Sqlite.Escape(name)} ORDER BY v.version DESC;";
+    var dbCon = DB.Open();
+    var res = Sqlite.Exec(dbCon, sql);
+    
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+
+    var list = [];
+    each(var item : res)
+    {
+        var version = Version.FromLong(ParseLong(item.version)).ToString();
+        var uploadTime = ParseLong(item.uploadTime);
+        list.Add({
+            version,
+            download = $"./api/v1/download?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(version)}",
+            docs = $"./package_docs?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(version)}",
+            accountName = item.accountName,
+            description = item.description,
+            maintainer = item.maintainer,
+            type = item.type,
+            repo = item.repo,
+            homepage = item.homepage,
+            license = item.license,
+            uploadTime,
+            uploadDate=new DateTime(uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC")
+        });
+    }
+    return list;
+}
+func DB.UpdateVersion(pkgInfo)
+{
+
+    DB.Lock();
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM packages WHERE packageName = {Sqlite.Escape(pkgInfo.Name)};");
+    var pkgId = 0;
+
+    if(TypeOf(exec) == "List" && exec.Length == 1)
+    {
+        pkgId = exec[0].id;
+    }
+    var version = pkgInfo.Version.VersionInt;
+    var info = Json.Decode(pkgInfo.Info);
+    var description = info.description;
+    var type = info.type;
+    var maintainer = info.maintainer;
+    var homepage = info.homepage;
+    var repo = info.repo;
+    var license = info.license;
+    if(TypeOf(description) != "String") description="";
+
+    if(TypeOf(type) != "String") type="";
+
+    if(TypeOf(maintainer) != "String") maintainer="";
+
+    if(TypeOf(homepage) != "String") homepage="";
+    
+    if(TypeOf(repo) != "String") repo="";
+
+    if(TypeOf(license) != "String") license="";
+    
+    //CREATE TABLE IF NOT EXISTS versions (id INTEGER PRIMARY KEY AUTOINCREMENT, packageId INTEGER, version INTEGER, description TEXT, type TEXT, maintainer TEXT, homepage TEXT, repo TEXT, license TEXT);
+    //VALUES ({pkgId},{version},{Sqlite.Escape(description)},{Sqlite.Escape(type)},{Sqlite.Escape(maintainer)},{Sqlite.Escape(homepage)},{Sqlite.Escape(repo)},{Sqlite.Escape(license)});
+    Sqlite.Exec(dbCon,$"UPDATE versions SET description = {Sqlite.Escape(description)}, type = {Sqlite.Escape(type)}, maintainer = {Sqlite.Escape(maintainer)}, homepage = {Sqlite.Escape(homepage)}, repo = {Sqlite.Escape(repo)}, license = {Sqlite.Escape(license)}, uploadTime = {DateTime.NowEpoch} WHERE packageId = {pkgId} AND version = {version};");
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+
+}
+func DB.AddVersion(pkgInfo)
+{
+    DB.Lock();
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM packages WHERE packageName = {Sqlite.Escape(pkgInfo.Name)};");
+    var pkgId = 0;
+
+    if(TypeOf(exec) == "List" && exec.Length == 1)
+    {
+        pkgId = exec[0].id;
+    }
+    var version = pkgInfo.Version.VersionInt;
+    var info = Json.Decode(pkgInfo.Info);
+    var description = info.description;
+    var type = info.type;
+    var maintainer = info.maintainer;
+    var homepage = info.homepage;
+    var repo = info.repo;
+    var license = info.license;
+    if(TypeOf(description) != "String") description="";
+
+    if(TypeOf(type) != "String") type="";
+
+    if(TypeOf(maintainer) != "String") maintainer="";
+
+    if(TypeOf(homepage) != "String") homepage="";
+    
+    if(TypeOf(repo) != "String") repo="";
+
+    if(TypeOf(license) != "String") license="";
+    
+    //CREATE TABLE IF NOT EXISTS versions (id INTEGER PRIMARY KEY AUTOINCREMENT, packageId INTEGER, version INTEGER, description TEXT, type TEXT, maintainer TEXT, homepage TEXT, repo TEXT, license TEXT);
+
+    Sqlite.Exec(dbCon,$"INSERT INTO versions (packageId,version,description,type,maintainer,homepage,repo,license,uploadTime) VALUES ({pkgId},{version},{Sqlite.Escape(description)},{Sqlite.Escape(type)},{Sqlite.Escape(maintainer)},{Sqlite.Escape(homepage)},{Sqlite.Escape(repo)},{Sqlite.Escape(license)},{DateTime.NowEpoch});");
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+
+}

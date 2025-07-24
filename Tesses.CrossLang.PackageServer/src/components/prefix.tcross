@@ -1,0 +1,19 @@
+func Components.Prefix(prefixName,isMine,owner,csrf)
+{
+    return 
+        <if(isMine)>
+            <true>
+
+                <form method="POST" action={$"/reserved_prefixes?name={Net.Http.UrlEncode(owner)}"}>
+                    <span>{prefixName}</span>
+                    <input type="hidden" name="action" value="remove">
+                    <input type="hidden" name="csrf" value={csrf}>
+                    <input type="hidden" name="prefix" value={prefixName}>
+                    <input type="submit" class="btn btn-danger btn-sm" value="Delete">
+                </form>
+            </true>
+            <false>
+                <span>{prefixName}</span>
+            </false>
+        </if>;
+}

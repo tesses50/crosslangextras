@@ -1,5 +1,6 @@
 func Pages.Index(ctx)
 {
+    var repo = TypeOf(DB.Config.RepoCommitPrefix) == "String" ? DB.Config.RepoCommitPrefix : "https://onedev.site.tesses.net/crosslang/crosslangextras/~files/";
     
     var pages = [
             {
@@ -14,6 +15,12 @@ func Pages.Index(ctx)
             },
             DB.LoginButton(ctx,false)
         ];
+        var commit = comptime {
+            return BuildTime.Git.Hash;
+        };
+
+
+
         var html = <article><h1 class={"display-5"} style={"text-align: center;"}>Make crosslang development faster and more convenient with CPKG</h1><form action={"./packages"} method={"get"}><div class={"container text-center"}><div class={"row"}><div class={"col"}>
                     
                   </div>
@@ -23,7 +30,8 @@ func Pages.Index(ctx)
                         <button class={"btn btn-outline-secondary"} type={"submit"} id={"button-search"}>Search</button>
                     </div> 
 
-                    <a href="./api">API</a>
+                    <a href="./api">API</a><br>
+                    <a href={$"{repo}{commit}"}>Commit {commit.Remove(8)}</a>
                   </div>
                   <div class={"col"}>
                     

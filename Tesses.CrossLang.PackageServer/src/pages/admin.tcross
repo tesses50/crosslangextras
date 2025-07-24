@@ -1,0 +1,235 @@
+func Pages.Admin(ctx)
+{
+  
+    var active = DB.LoginButton(ctx,false,"");
+    var csrf="";
+
+    
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+    if(!active.admin) ctx.StatusCode = 401;
+    else csrf = DB.CreateCSRF(ctx);
+
+    if(ctx.Method == "POST")
+    {
+        var csrf2 = ctx.QueryParams.TryGetFirst("csrf");
+        var action2 = ctx.QueryParams.TryGetFirst("action");
+        if(TypeOf(action2) != "String") {ctx.StatusCode = 501; return Shell("Unsupported operation", pages,<h1>Unsupported Operation</h1>);}
+        if(!active.admin) {ctx.StatusCode = 401; return Shell("Not an admin", pages,<h1>Not an admin</h1>);}
+        if(TypeOf(csrf2) != "String") {ctx.StatusCode = 401; return Shell("Invalid CSRF", pages,<h1>Invalid CSRF</h1>);}
+        if(DB.VerifyCSRF(active.session, csrf2))
+        {
+            //we have authorization
+            switch(action2)
+            {
+            case "server_config":
+                {
+                    var prefix = ctx.QueryParams.TryGetFirst("prefix");
+                    var port = ctx.QueryParams.TryGetFirstInt("port");
+                    var allowRegistering = ctx.QueryParams.GetFirstBoolean("allowRegistering");
+                    if(TypeOf(prefix) == "String" && TypeOf(port) == "Long" && port >= 1 && port <= 65534)
+                    {
+                        DB.Config.Prefix = prefix;
+                        DB.Config.Port = port;
+                        DB.Config.AllowRegister = allowRegistering;
+                        FS.WriteAllText(FS.Local, DB.working / "conf.json", Json.Encode(DB.Config,true));
+                    }
+                    else {
+                        ctx.StatusCode = 400;
+                        return Shell("Invalid input", pages,<h1>Invalid Input</h1>);
+                    }
+                }
+                break;
+            case "smtp_config":
+                {
+                    var host = ctx.QueryParams.TryGetFirst("host");
+                    var port = ctx.QueryParams.TryGetFirstInt("port");
+                    var tls = ctx.QueryParams.GetFirstBoolean("tls");
+                    var username = ctx.QueryParams.TryGetFirst("username");
+                    var password = ctx.QueryParams.TryGetFirst("password");
+                    var email = ctx.QueryParams.TryGetFirst("email");
+                    var fromname = ctx.QueryParams.TryGetFirst("fromname");
+                    var domain = ctx.QueryParams.TryGetFirst("domain");
+                    if(TypeOf(host) == "String" && TypeOf(username) == "String" && TypeOf(username) == "String" && TypeOf(password) == "String" && TypeOf(email) == "String" && TypeOf(fromname) == "String" && TypeOf(domain) == "String" &&   TypeOf(port) == "Long" && port >= 0 && port <= 65534)
+                    {
+                        if(TypeOf(DB.Config.MailConfig) != "Dictionary")    
+                            DB.Config.MailConfig={};
+                        if(TypeOf(DB.Config.MailConfig.Server) != "Dictionary")    
+                            DB.Config.MailConfig.Server={};
+                        if(TypeOf(DB.Config.MailConfig.Auth) != "Dictionary")    
+                            DB.Config.MailConfig.Auth={};
+                        if(TypeOf(DB.Config.MailConfig.From) != "Dictionary")    
+                            DB.Config.MailConfig.From={};
+                        
+                        DB.Config.MailConfig.Server.host = host;
+                        DB.Config.MailConfig.Server.port = port == 0 ? undefined : port;
+                        DB.Config.MailConfig.Server.tls = tls;
+
+                        DB.Config.MailConfig.Auth.username = username;
+                        
+                        if(password.Length != 0)
+                            DB.Config.MailConfig.Auth.password = password;
+                        
+                        
+                        DB.Config.MailConfig.Domain = domain;
+                        DB.Config.MailConfig.From.email = email;
+                        DB.Config.MailConfig.From.name = fromname;
+                        
+                        FS.WriteAllText(FS.Local, DB.working / "conf.json", Json.Encode(DB.Config,true));
+                    }
+                    else {
+                        ctx.StatusCode = 400;
+                        return Shell("Invalid input", pages,<h1>Invalid Input</h1>);
+                    }
+                }
+                break;
+            default:
+                ctx.StatusCode=501;
+                return Shell($"Unsupported operation {action2}", pages,<h1>Unsupported operation {action2}</h1>);
+            }
+        } 
+        else 
+        {
+            ctx.StatusCode = 401; return Shell("Invalid CSRF", pages,<h1>Invalid CSRF</h1>);
+        }
+    }
+
+
+    var html = <div class="container"><if(active.admin)>
+        <true>
+            /*<if(ctx.Method == "POST")>
+                <true>
+                    <ul>
+                    <each(var item : ctx.QueryParams.ToList())>
+                        <li><b>{item.Key}</b>: {item.Value}</li>
+                    </each>
+                    </ul>
+                </true>
+            </if>*/
+            <fieldset class="border p-2">
+            <legend  class="float-none w-auto">Cache Package</legend>
+            <form action="./admin" method="post">
+                <input type="hidden" name="action" value="cache_package">
+                <input type="hidden" name="csrf" value={csrf}>
+                <input class="form-control" name="url" type="url" placeholder="Package Url" aria-label="Package Url">
+
+                <input type="submit" class="btn btn-primary" value="Add Package">
+            </form>
+            </fieldset>
+            <fieldset class="border p-2">
+            <legend  class="float-none w-auto">Accounts</legend>
+                <form action="./admin_account" method="get">
+                    <div class="mb-3">
+                        <label for="account" class="form-label">Account Name</label>
+                        <input class="form-control" name="account" id="account" type="text" placeholder="Account Name" aria-label="Account Name">
+                    </div>
+                    <input type="submit" class="btn btn-primary" value="Manage Account">
+                </form>
+                <a class="btn btn-primary" href="/admin_accounts">View Accounts</a>
+                <a class="btn btn-primary" href="/admin_register">Register Account</a>
+            </fieldset>
+            <fieldset class="border p-2">
+            <legend  class="float-none w-auto">Server Configuration</legend>
+                <form action="./admin" method="post">
+                <input type="hidden" name="csrf" value={csrf}>
+                <input type="hidden" name="action" value="server_config">
+                <div class="mb-3">
+                    <label for="prefix" class="form-label">Prefix Url (url prefix in emails)</label>
+                    <input class="form-control" name="prefix" id="prefix" type="text" placeholder="Prefix Url" aria-label="Prefix Url (url prefix in emails)" value={TypeOf(DB.Config.Prefix) == "String" ? DB.Config.Prefix : ""}>
+                </div>
+                <div class="mb-3">
+                    <label for="port" class="form-label">Server Listening Port</label>
+                    <input class="form-control" name="port" id="port" type="number" placeholder="Port" aria-label="Server Listening Port" value={TypeOf(DB.Config.Port) == "Long" ? DB.Config.Port : 4206}>
+                </div>
+
+                <div class="form-check">
+                    
+                    <if(DB.Config.AllowRegister)>
+                        <true>
+                            <input class="form-check-input" type="checkbox" name="allowRegistering" id="allowRegistering" checked>
+                        </true>
+                        <false>
+                            <input class="form-check-input" type="checkbox" name="allowRegistering" id="allowRegistering">
+                        </false>
+                    </if>
+                   
+                    //DB.Config.Prefix
+                    <label class="form-check-label" for="allowRegistering">
+                        Allow Registering
+                    </label>
+                    
+                    
+                </div>
+                <input type="submit" class="btn btn-primary" value="Save">
+                </form>
+            </fieldset>
+            <fieldset class="border p-2">
+            <legend  class="float-none w-auto">SMTP Configuration</legend>
+                <form action="./admin" method="post">
+                <input type="hidden" name="csrf" value={csrf}>
+                <input type="hidden" name="action" value="smtp_config">
+                <div class="mb-3">
+                    <label for="host" class="form-label">Host</label>
+                    <input class="form-control" name="host" id="host" type="text" placeholder="Host" aria-label="Host" value={TypeOf(DB.Config.MailConfig.Server.host) == "String" ? DB.Config.MailConfig.Server.host : ""}>
+                </div>
+                <div class="mb-3">
+                    <label for="smtpport" class="form-label">Port (0 for default)</label>
+                    <input class="form-control" name="port" id="smtpport" type="number" placeholder="Port" aria-label="Port" value={TypeOf(DB.Config.MailConfig.Server.port) == "Long" ? DB.Config.MailConfig.Server.port : 0}>
+                </div>
+                <div class="form-check">
+                <if(TypeOf(DB.Config.MailConfig.Server.tls) != "Boolean" || DB.Config.MailConfig.Server.tls)>
+                    <true>
+                        <input class="form-check-input" type="checkbox" name="tls" id="tls" checked>
+                    </true>
+                    <false>
+                        <input class="form-check-input" type="checkbox" name="tls" id="tls">
+                    </false>
+                </if>
+           
+            //DB.Config.Prefix
+                <label class="form-check-label" for="tls">
+                    Enable TLS (you should definitely use this, unless you can{'\''}t in your setup)
+                </label>
+                </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username (without domain)</label>
+                    <input class="form-control" name="username" id="username" type="text" placeholder="Username" aria-label="Username" value={TypeOf(DB.Config.MailConfig.Auth.username) == "String" ? DB.Config.MailConfig.Auth.username : ""}>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password (WARNING this password is stored plaintext)</label>
+                    <input class="form-control" name="password" id="password" type="password" placeholder="Password" aria-label="Password">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email (the email you want in From header)</label>
+                    <input class="form-control" name="email" id="email" type="email" placeholder="Email" aria-label="Email" value={TypeOf(DB.Config.MailConfig.From.email) == "String" ? DB.Config.MailConfig.From.email : ""}>
+                </div>
+                <div class="mb-3">
+                    <label for="fromname" class="form-label">Name (the name you want in From header)</label>
+                    <input class="form-control" name="fromname" id="fromname" type="text" placeholder="Name" aria-label="Name" value={TypeOf(DB.Config.MailConfig.From.name) == "String" ? DB.Config.MailConfig.From.name : ""}>
+                </div>
+                <div class="mb-3">
+                    <label for="domain" class="form-label">Email Domain (if email is user@example.com it will be example.com)</label>
+                    <input class="form-control" name="domain" id="domain" type="text" placeholder="Domain" aria-label="Domain" value={TypeOf(DB.Config.MailConfig.Domain) == "String" ? DB.Config.MailConfig.Domain : ""}>
+                </div>
+                <input type="submit" class="btn btn-primary" value="Save">
+                </form>
+            </fieldset>
+        </true>
+        <false>
+            <h1>You are not authorized in the admin panel</h1>
+        </false>
+    </if></div>;
+
+    return Shell("Admin", pages,html);
+}

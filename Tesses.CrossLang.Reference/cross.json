@@ -1,0 +1,8 @@
+{
+	"info": {
+		"type": "lib",
+		"description": "This is used for reference only, don't include into your project"
+	},
+	"name": "Tesses.CrossLang.Reference",
+	"version": "1.0.0.0-dev"
+}

@@ -1,0 +1,10 @@
+/^ Read string contents from file ^/
+func FS.ReadAllText(filesystem, path)
+{
+
+}
+/^ Write string contents to file ^/
+func FS.WriteAllText(filesystem, path, contents)
+{
+
+}

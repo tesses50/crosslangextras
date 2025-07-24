@@ -1,0 +1,72 @@
+func DB.GetUserIdFromSession(session)
+{
+    DB.Lock();
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM sessions WHERE key = {Sqlite.Escape(session)};");
+   
+    Sqlite.Close(dbCon);
+    DB.Unlock();    
+    
+    if(TypeOf(exec) == "List" && exec.Length == 1) return ParseLong(exec[0].accountId);
+
+    return -1;
+}
+func DB.GetSessionFromBearer(ctx)
+{
+    var auth = ctx.RequestHeaders.TryGetFirst("Authorization");
+    if(TypeOf(auth) == "String")
+    {
+        auth=auth.Split(" ",true,2);
+        if(auth.Length < 2) return null;
+        if(auth[0] != "Bearer") return null;
+        var uid = DB.GetUserIdFromSession(auth[1]);
+        if(uid != -1) return auth[1];
+    }
+    return null;
+}
+func DB.GetSession(ctx)
+{
+    var cookie = ctx.RequestHeaders.TryGetFirst("Cookie");
+    if(TypeOf(cookie) == "String")
+    {
+        each(var part : cookie.Split("; "))
+        {
+            if(part.Length > 0)
+            {
+                var cookieKV = part.Split("=",true,2);
+                if(cookieKV.Length == 2 && cookieKV[0] == "Session")
+                {
+                    var session = cookieKV[1];
+                    var sessionId = DB.GetUserIdFromSession(session);
+                    
+                    if(sessionId != -1)
+                        return session;
+                }
+            }
+        }
+    }
+    return null;
+}
+func DB.CreateSession(userId)
+{
+    DB.Lock();
+    var dbCon = DB.Open();
+  
+    var rand = Net.Http.UrlEncode(Crypto.Base64Encode(Crypto.RandomBytes(32, "CPKG")));
+    Sqlite.Exec(dbCon, $"INSERT INTO sessions (accountId,key) VALUES ({userId},{Sqlite.Escape(rand)});");
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+    return rand;
+}
+func DB.DestroySession(session)
+{
+    if(TypeOf(session) != "String") return false;
+    DB.Lock();
+    var dbCon = DB.Open();
+    var res = Sqlite.Exec(dbCon, $"DELETE FROM sessions WHERE key = {Sqlite.Escape(session)};");
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+    if(TypeOf(res) == "String") return false;
+
+    return true;
+}

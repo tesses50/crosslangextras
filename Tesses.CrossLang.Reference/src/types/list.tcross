@@ -1,0 +1,71 @@
+/^ A list created by using the [] expression ^/
+class List : HeapObject {
+    /^ Returns an Enumerator for the each statement ^/
+    public GetEnumerator()
+    {
+        
+    }
+    /^ Serializes to JSON ^/
+    public ToString()
+    {
+
+    }
+    /^ Insert an item at index ^/
+    public Insert(index, value)
+    {
+
+    }
+    /^ Add an item ^/
+    public Add(item)
+    {
+
+    }
+    /^ Returns whether the list contains the item ^/
+    public Contains(item)
+    {
+
+    }
+    /^ Gets the index of the item (optionally starting at an index) returns -1 if not found ^/
+    public IndexOf(item, $index)
+    {
+
+    }
+    /^ Removes all items that are the same value ^/
+    public RemoveAllEqual(item)
+    {
+
+    }
+    /^ Removes item at index ^/
+    public RemoveAt(index)
+    {
+
+    }
+    /^ Removes all items ^/
+    public Clear()
+    {
+
+    }
+    /^ Gets the item at index, also can use array subscript sugar ^/
+    public GetAt(index)
+    {
+
+    }
+    /^ Sets the item at index to value, also can use array subscript sugar ^/
+    public SetAt(index, value)
+    {
+
+    }
+
+    /^ Gets the nunber of items ^/
+
+    public Count()
+    {
+
+    }
+    /^ Gets the nunber of items ^/
+
+    public Length()
+    {
+
+    }
+}

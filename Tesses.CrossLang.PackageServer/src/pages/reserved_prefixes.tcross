@@ -1,0 +1,97 @@
+func Pages.ReservedPrefixes(ctx)
+{
+    var name = ctx.QueryParams.TryGetFirst("name");
+    if(TypeOf(name) != "String") name = "";
+    var active = DB.LoginButton(ctx,false,name);
+    var csrf="";
+    
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+   
+    var user = DB.GetAccountInfo(name);
+    
+    if(!active.active) ctx.StatusCode = 401;
+    else csrf = DB.CreateCSRF(ctx);
+
+    if(ctx.Method == "POST")
+    {
+        var csrf2 = ctx.QueryParams.TryGetFirst("csrf");
+        var action2 = ctx.QueryParams.TryGetFirst("action");
+        if(TypeOf(action2) != "String") {ctx.StatusCode = 501; return Shell("Unsupported operation", pages,<h1>Unsupported Operation</h1>);}
+        if(!active.active) {ctx.StatusCode = 401; return Shell("Not an", pages,<h1>Not the correct user</h1>);}
+        if(TypeOf(csrf2) != "String") {ctx.StatusCode = 401; return Shell("Invalid CSRF", pages,<h1>Invalid CSRF</h1>);}
+        if(DB.VerifyCSRF(active.session, csrf2))
+        {
+            switch(action2)
+            {
+                case "add":
+                {
+                    var prefix = ctx.QueryParams.TryGetFirst("prefix");
+
+                    var res = DB.CreatePrefix(name, prefix);
+                    if(!res.Success)
+                    {
+                        ctx.StatusCode=403;
+                        return Shell(res.Reason, pages, <h1>{res.Reason}</h1>);
+                    }
+                }
+                    break;
+                case "remove":
+                    var prefix = ctx.QueryParams.TryGetFirst("prefix");
+
+                    var res = DB.RemovePrefix(name, prefix);
+                    if(!res.Success)
+                    {
+                        ctx.StatusCode=403;
+                        return Shell(res.Reason, pages, <h1>{res.Reason}</h1>);
+                    }
+                    break;
+            }
+        }
+    }
+
+    var items = DB.QueryReservedPrefixes(name);
+
+    var html = <div class="container">
+        <if(active.active)>
+            <true>
+                <form method="POST" action={$"/reserved_prefixes?name={Net.Http.UrlEncode(name)}"}>
+                    <input type="hidden" name="action" value="add">
+                    <input type="hidden" name="csrf" value={csrf}>
+                    <div class="mb-3">
+                        <label for="prefix" class="form-label">Prefix</label>
+                        <input type="text" class="form-control" id="prefix" name="prefix" placeholder="Prefix">
+                    </div>
+                    <input type="submit" class="btn btn-primary" value="Add">
+                </form>
+            </true>
+        </if>
+        <if(items.Success)>
+            <true>
+                <ul>
+                    <each(var item : items.Items)>
+                        <li>
+                            <raw(Components.Prefix(item,active.active,name,csrf))>
+                        </li>
+                    </each>
+                </ul>
+            </true>
+            <false>
+                <h1>Failed to get prefixes {items.Reason}</h1>
+            </false>
+        </if>
+    </div>;
+
+    return Shell("Reserved Prefixes", pages, html);
+}

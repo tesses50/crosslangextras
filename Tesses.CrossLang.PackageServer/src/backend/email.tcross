@@ -1,0 +1,171 @@
+func DB.SendVerifyEmail(email,name, verify_hash_str)
+{
+    var emailText = $"
+        <h1>Hello {Net.Http.HtmlEncode(name)}</h1>
+        <span>To verify your account go to <a href=\"{DB.Config.Prefix.TrimEnd('/')}/verify?code={Net.Http.UrlEncode(verify_hash_str)}\">{DB.Config.Prefix.TrimEnd('/')}/verify?code={Net.Http.UrlEncode(verify_hash_str)}</a></span>
+    ";
+    var data = {
+        server = DB.Config.MailConfig.Server,
+        auth = DB.Config.MailConfig.Auth,
+        domain = DB.Config.MailConfig.Domain,
+        from = DB.Config.MailConfig.From,
+        to = email.Replace(">","").Replace("\n",""),
+        subject = "Verify your account on CPKG",
+        body = {
+            type = "text/html",
+            data = emailText
+        }
+    };
+    Net.Smtp.Send(data);
+}
+func DB.SendForgotPasswordEmail(email,name, verify_hash_str)
+{
+    var emailText = $"
+        <h1>Hello {Net.Http.HtmlEncode(name)}</h1>
+        <p>This will expire in 10 minutes</p>
+        <span>To reset your password go to <a href=\"{DB.Config.Prefix.TrimEnd('/')}/new_password?code={Net.Http.UrlEncode(verify_hash_str)}\">{DB.Config.Prefix.TrimEnd('/')}/new_password?code={Net.Http.UrlEncode(verify_hash_str)}</a></span>
+    ";
+    var data = {
+        server = DB.Config.MailConfig.Server,
+        auth = DB.Config.MailConfig.Auth,
+        domain = DB.Config.MailConfig.Domain,
+        from = DB.Config.MailConfig.From,
+        to = email.Replace(">","").Replace("\n",""),
+        subject = "Reset your password for CPKG",
+        body = {
+            type = "text/html",
+            data = emailText
+        }
+    };
+    Net.Smtp.Send(data);
+}
+func DB.UnforgetPassword(verifyKey, password, confirm)
+{
+    if(password != confirm) return {Success=false, Reason = "Passwords do not match."};
+
+    DB.Lock();
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE verifyKey = {Sqlite.Escape(verifyKey)};");
+    if(exec.Length == 1)
+    {
+        var flags = ParseLong(exec[0].flags);
+        var verifyExpire = ParseLong(exec[0].verifyExpire);
+        var now = DateTime.NowEpoch;
+
+        if((flags & DB.FLAG_RESETPASS) == 0) {
+            Sqlite.Close(dbCon);
+            DB.Unlock();
+            return {Success=false,Reason="Invalid or expired verification code"};
+        }       
+
+        if(now < verifyExpire)
+        {
+            flags &= ~DB.FLAG_VERIFY;
+            flags |= DB.FLAG_VERIFIED;
+            flags &= ~DB.FLAG_RESETPASS;
+            var salt = Crypto.RandomBytes(32, "CPKG");
+            var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
+
+            Sqlite.Exec(dbCon,$"UPDATE accounts SET flags = {flags}, password_hash = {Sqlite.Escape(Crypto.Base64Encode(hash))}, password_salt = {Sqlite.Escape(Crypto.Base64Encode(salt))} WHERE id = {exec[0].id};");  
+            Sqlite.Close(dbCon);
+            DB.Unlock();
+            return { Success=true };
+        }
+
+        Sqlite.Close(dbCon);
+        DB.Unlock();
+        return {Success=false, Reason="Invalid or expired verification code"};
+    }
+    else {
+        Sqlite.Close(dbCon);
+        DB.Unlock();
+        
+        return {Success=false, Reason="Invalid or expired verification code"};
+    }
+}
+func DB.ForgotPassword(email)
+{
+    if(TypeOf(DB.Config.MailConfig) != "Dictionary") return {Success=false, Reason="This server can't send emails"};
+
+    DB.Lock();
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE email = {Sqlite.Escape(email)};");
+    var res={Success=false, Reason="Could not find account"};
+    if(TypeOf(exec) != "String" && exec.Length == 1)
+    {
+        Console.WriteLine(exec);
+        var name = exec[0].accountName;
+
+        var flags = ParseLong(exec[0].flags);
+   
+        
+        var verify_hash = Crypto.RandomBytes(32, "CPKG");  
+        var verify_hash_str = Crypto.Base64Encode(verify_hash);
+   
+        
+        flags |= DB.FLAG_RESETPASS;
+       
+        exec = Sqlite.Exec(dbCon,$"UPDATE accounts SET flags = {flags}, verifyKey = {Sqlite.Escape(verify_hash_str)}, verifyExpire = {DateTime.NowEpoch+600} WHERE id = {exec[0].id};");  
+
+        if(TypeOf(exec) == "String") {res = {Success = false, Reason = r};}
+        else 
+        {
+            if(DB.Config.MailConfig)
+                DB.SendForgotPasswordEmail(email,name, verify_hash_str);             
+          
+            res = {Success=true, Redirect="/check_email"};
+        }
+
+            
+        //DB.FLAG_RESETPASS
+    }
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+    return res;
+}
+func DB.VerifyEmail(verifyKey)
+{
+    DB.Lock();
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE verifyKey = {Sqlite.Escape(verifyKey)};");
+    if(exec.Length == 1)
+    {
+        var flags = ParseLong(exec[0].flags);
+        var verifyExpire = ParseLong(exec[0].verifyExpire);
+        var now = DateTime.NowEpoch;
+
+        if((flags & DB.FLAG_RESETPASS) != 0) {
+            Sqlite.Close(dbCon);
+            DB.Unlock();
+            return {Success=false,Reason="Invalid or expired verification code"};
+        }
+
+        if((flags & DB.FLAG_VERIFIED) != 0) {
+            Sqlite.Close(dbCon);
+            DB.Unlock();
+            return { Success=true };
+        }
+        
+
+        if(now < verifyExpire)
+        {
+            flags &= ~DB.FLAG_VERIFY;
+            flags |= DB.FLAG_VERIFIED;
+            Sqlite.Exec(dbCon,$"UPDATE accounts SET flags = {flags} WHERE id = {exec[0].id};");  
+            Sqlite.Close(dbCon);
+            DB.Unlock();
+            return { Success=true };
+        }
+
+        Sqlite.Close(dbCon);
+        DB.Unlock();
+        return {Success=false, Reason="Invalid or expired verification code"};
+    }
+    else {
+        Sqlite.Close(dbCon);
+        DB.Unlock();
+        
+        return {Success=false, Reason="Invalid or expired verification code"};
+    }
+   
+}

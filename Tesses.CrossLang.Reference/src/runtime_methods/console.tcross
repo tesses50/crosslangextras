@@ -1,0 +1,5 @@
+/^ Write Text To Standard Output ^/
+func Console.WriteLine(text)
+{
+
+}

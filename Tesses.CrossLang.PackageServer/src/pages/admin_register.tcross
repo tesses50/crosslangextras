@@ -1,0 +1,96 @@
+func Pages.AdminRegister(ctx)
+{
+    var active = DB.LoginButton(ctx,false,"");
+    var csrf="";
+
+    
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+    if(!active.admin) ctx.StatusCode = 401;
+    else csrf = DB.CreateCSRF(ctx);
+
+    if(ctx.Method == "POST")
+    {
+        var csrf2 = ctx.QueryParams.TryGetFirst("csrf");
+        if(!active.admin) {ctx.StatusCode = 401; return Shell("Not an admin", pages,<h1>Not an admin</h1>);}
+        if(TypeOf(csrf2) != "String") {ctx.StatusCode = 401; return Shell("Invalid CSRF", pages,<h1>Invalid CSRF</h1>);}
+        if(DB.VerifyCSRF(active.session, csrf2))
+        {
+            var email = ctx.QueryParams.TryGetFirst("email");
+            var displayName = ctx.QueryParams.TryGetFirst("displayName");
+            var password = ctx.QueryParams.TryGetFirst("password");
+            var confirm = ctx.QueryParams.TryGetFirst("confirm");
+            var flags = ctx.QueryParams.GetFirstBoolean("verified") ? DB.FLAG_VERIFIED : DB.FLAG_FLAG_VERIFY;
+            flags |= (ctx.QueryParams.GetFirstBoolean("admin") ? DB.FLAG_ADMIN : 0);
+            
+            if(TypeOf(email) != "String" || TypeOf(displayName) != "String" || TypeOf(password) != "String" || TypeOf(confirm) != "String")
+                return Shell("Invalid input",pages,<h1>Invalid input</h1>);
+
+            if(password != confirm)
+                return Shell("Passwords do not match",pages,<h1>Passwords do not match</h1>);
+            
+            var res = DB.CreateUserFromAdmin(email, displayName, password, flags);
+
+            if(!res.Success)
+            {
+                return Shell(res.Reason, pages, <h1>{res.Reason}</h1>);
+            }
+        }
+        else 
+        {
+            ctx.StatusCode = 401; return Shell("Invalid CSRF", pages,<h1>Invalid CSRF</h1>);
+        }
+    }
+
+
+    var html = <div class="container">
+        <if(active.admin)>
+            <true>
+                <form method="POST" action="./admin_register">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input class="form-control" name="email" id="email" type="email" placeholder="Email" aria-label="Email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="displayName" class="form-label">Display Name</label>
+                        <input class="form-control" name="displayName" id="displayName" type="text" placeholder="Display Name" aria-label="Display Name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input class="form-control" name="password" id="password" type="password" placeholder="Password" aria-label="Password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm" class="form-label">Confirm Password</label>
+                        <input class="form-control" name="confirm" id="confirm" type="password" placeholder="Confirm Password" aria-label="Confirm Password">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="admin" id="admin">
+                        <label class="form-check-label" for="admin">Administrator</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="verified" id="verified" checked>
+                        <label class="form-check-label" for="verified">Verified</label>
+                    </div>
+                    <input type="hidden" name="csrf" value={csrf}>
+                    <input type="submit" class="btn btn-primary" value="Register">
+                </form>
+            </true>
+            <false>
+                <h1>You are not authorized in the admin panel</h1>
+            </false>
+        </if>
+    </div>;
+
+    return Shell("Admin Register", pages,html);
+}

@@ -1,0 +1,35 @@
+func Components.DocClassEntry(ent)
+{
+    var mod = ent.Modifier;
+    var args = ";";
+    if(ent.IsAbstract)
+    {
+        mod += " abstract";
+    }
+    if(ent.IsFunction)
+    {
+        args = "(";
+
+        for(var i = 0; i < ent.Arguments.Length; i++)
+        {
+            if(i > 0) args += ", ";
+            args += ent.Arguments[i];
+        }
+
+        args += ")";
+    }
+
+    return <div>
+        <if(ent.Documentation.Length > 0)>
+        <true>
+        {"/^"}
+        <raw(Net.Http.HtmlEncode(ent.Documentation).Replace("\n",<br>))>
+        {"^/"}
+        <br>
+        </true>
+        </if>
+        <code>
+            {mod} {ent.Name}{args}
+        </code>
+    </div>;
+}

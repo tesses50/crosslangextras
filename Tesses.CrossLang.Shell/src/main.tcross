@@ -137,7 +137,7 @@ func main(args)
             env.LockRegister();
 
             env.LoadFileWithDependencies(FS.Local,output);
-            var myArgs = [output];
+            var myArgs = [output.ToString()];
             for(var i = 1; i < dd.Arguments.Count; i++)
             {
                 myArgs.Add(dd.Arguments[i]);
@@ -333,7 +333,7 @@ func main(args)
             env.LockRegister();
 
             env.LoadFileWithDependencies(FS.Local,output);
-            var myArgs = [output];
+            var myArgs = [output.ToString()];
             for(var i = 1; i < dd.Arguments.Count; i++)
             {
                 myArgs.Add(dd.Arguments[i]);

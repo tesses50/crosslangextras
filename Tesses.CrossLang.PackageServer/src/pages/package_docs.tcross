@@ -1,0 +1,52 @@
+func Pages.PackageDocs(ctx)
+{
+    var name = ctx.QueryParams.TryGetFirst("name");
+    if(TypeOf(name) != "String") name = "";
+    var version = ctx.QueryParams.TryGetFirst("version");
+    if(TypeOf(version) != "String") version = "";
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            DB.LoginButton(ctx,false)
+        ];
+
+    var res = DB.GetPackageFileData(name,version);
+    var classes = res.Classes;
+    var functions = res.Functions;
+    var chunks = res.Chunks;
+    Console.WriteLine(classes);
+    each(var item : functions)
+    {
+        item.Arguments = chunks[item.ChunkId].Arguments;
+    }
+
+
+    var html = <div class="container">
+        
+        <h1>Functions</h1>
+        <ul>
+        <each(var fn : functions)>
+            
+            <li><raw(Components.DocFunction(fn))></li>
+        </each>
+        </ul>
+
+        <h1>Classes</h1>
+        <ul>
+        <each(var cls : classes)>
+            
+            <li><raw(Components.DocClass(cls))></li>
+        </each>
+        </ul>
+    </div>;
+    
+    return Shell("Documentation", pages, html);
+}

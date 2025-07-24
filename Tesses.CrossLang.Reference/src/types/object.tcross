@@ -1,0 +1,17 @@
+/^ Base Object ^/
+class Object {
+    /^ Serializes object to String ^/
+    public abstract ToString();
+}
+/^ All garbage collected objects inherit from me ^/
+class HeapObject : Object {
+
+}
+/^ All CrossLang classes inherit from me ^/
+class ClassObject : HeapObject {
+
+}
+/^ A non typesafe native object ^/
+class Native : HeapObject {
+
+}

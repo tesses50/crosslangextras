@@ -1,0 +1,16 @@
+/^
+    Decode JSON String to Object
+^/
+func Json.Decode(text)
+{
+
+}
+
+/^
+    Encode Object to JSON String
+    pretty: true: make pretty, false: compact
+^/
+func Json.Encode(obj, $pretty)
+{
+
+}

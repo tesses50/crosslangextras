@@ -81,7 +81,7 @@ func Pages.Account(ctx)
     <if(TypeOf(user) == "Dictionary")>
         <true>
         <h1>{user.accountName}</h1>
-        <a href={$"./account_packages?name={Net.Http.UrlEncode(name)}"}>Packages</a>|<a href={$"./reserved_prefixes?name={Net.Http.UrlEncode(name)}"}>Reserved Prefixes</a>
+        <a href={$"./packages?account={Net.Http.UrlEncode(name)}"}>Packages</a>|<a href={$"./reserved_prefixes?name={Net.Http.UrlEncode(name)}"}>Reserved Prefixes</a>
         
           <if(active.active)>
             <true>
@@ -94,6 +94,11 @@ func Pages.Account(ctx)
                     </if>
                     <input class="btn btn-primary" type="submit" value="Save">
                     <input type="hidden" name="csrf" value={DB.CreateCSRF(ctx)}>
+                    <if(active.admin)>
+                        <true>
+                    <a class="btn btn-secondary" href="./admin">Admin</a>
+                        </true>
+                    </if>
                     <a class="btn btn-danger" href="./logout">Logout</a>
                 </form>
 

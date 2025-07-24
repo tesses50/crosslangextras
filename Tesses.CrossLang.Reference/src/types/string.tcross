@@ -1,0 +1,18 @@
+/^ 
+    The String Type
+    To Concat a String use the + operator
+^/
+class String : Object {
+    
+
+    /^ Search and replace all ^/
+    public Replace(oldStr, newStr)
+    {
+
+    }
+    /^ Return a copy of the string ^/
+    public ToString()
+    {
+
+    }
+}

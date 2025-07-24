@@ -113,6 +113,7 @@ func Pages.Package(ctx,name)
             <li>Latest version: {package[0].version}</li>
             <li>Type: {package[0].type}</li>
             <li><a href={package[0].download}>Download</a></li>
+            <li><a href={package[0].docs}>View Docs</a></li>
           </ul>
           <if(package.Length > 1)>
           <true>
@@ -153,6 +154,8 @@ func Pages.Package(ctx,name)
                       <li>Uploaded: {new DateTime(package[i].uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC")}</li>
                       <li>Type: {package[i].type}</li>
                       <li><a href={package[i].download}>Download</a></li>
+
+                      <li><a href={package[i].docs}>View Docs</a></li>
                   </ul>
             </div>
           </div>

@@ -4,5 +4,6 @@
         "type": "console"
     },
     "version": "1.0.0.0-prod",
-    "name": "Tesses.CrossLang.PackageServer"
+    "name": "Tesses.CrossLang.PackageServer",
+    "compTime": "secure"
 }

@@ -8,14 +8,7 @@ func main(args)
     DB.Init(dir);
 
 
-    //should be a route but its crosslang so we can use mountable
-        
-    
-    mountable.Mount("/package_icon.png", (ctx)=>{
-        ctx.ResponseHeaders.SetValue("Content-Type", "image/png");
-        ctx.SendBytes(embed("crosslang.png"));
-        return true;
-    });
+   
     
     /*
         PUT /api/v1/upload Authorization Bearer
@@ -29,11 +22,35 @@ func main(args)
 
    
     Net.Http.ListenSimpleWithLoop((ctx)=>{
+        if(ctx.Path == "/check_email")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.CheckEmail(ctx));
+        }
+        if(ctx.Path == "/reserved_prefixes")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.ReservedPrefixes(ctx));
+            return true;
+        }
+        if(ctx.Path == "/admin")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Admin(ctx));
+            return true;
+        }
+        if(ctx.Path == "/admin_register")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.AdminRegister(ctx));
+            return true;
+        }
         if(ctx.Path == "/package")
         {
             var name = ctx.QueryParams.TryGetFirst("name");
             if(TypeOf(name) != "String") name = "";
             ctx.WithMimeType("text/html").SendText(Pages.Package(ctx,name));
+            return true;
+        }
+        if(ctx.Path == "/package_docs")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.PackageDocs(ctx));
             return true;
         }
         if(ctx.Path == "/packages")
@@ -297,6 +314,26 @@ func main(args)
             }
             return false;
         }
+        if(ctx.Path == "/api/v1/logout")
+        {
+            ctx.WithMimeType("application/json").SendText({
+                Success=DB.DestroySession(DB.GetSessionFromBearer(ctx))
+            }.ToString());
+        }
+        if(ctx.Path == "/logout")
+        {
+            if(DB.DestroySession(DB.GetSession(ctx)))
+            {
+                ctx.StatusCode = 302;
+                ctx.ResponseHeaders.SetValue("Location", "/");
+                ctx.WriteHeaders();
+                return true;
+            }
+            else {
+                ctx.WithMimeType("text/html").SendText(Shell("Not logged in",[],<h1>Not logged in</h1>));
+                return true;
+            }
+        }
         if(ctx.Path == "/login")
         {
             if(ctx.Method == "GET")
@@ -333,6 +370,98 @@ func main(args)
                 ctx.StatusCode = 302;
                 ctx.ResponseHeaders.SetValue("Location", "/");
                 ctx.ResponseHeaders.SetValue("Set-Cookie", $"Session={DB.CreateSession(accountId)}; SameSite=Strict");
+                ctx.WriteHeaders();
+                return true;
+            }
+        }
+        if(ctx.Path == "/verify")
+        {
+            var code = ctx.QueryParams.TryGetFirst("code");
+            if(TypeOf(code) == "String")
+            {
+                var res = DB.VerifyEmail(code);
+                if(res.Success)
+                {
+                    ctx.StatusCode = 302;
+                    ctx.ResponseHeaders.SetValue("Location", "/");
+                    ctx.WriteHeaders();
+                    return true;
+                }
+                else {
+                    ctx.StatusCode=401;
+                    ctx.WithMimeType("text/html").SendText(Pages.VerificationFailed(res.Reason));
+                    return true;
+                }
+            }
+            else {
+                ctx.WithMimeType("text/html").SendText(Pages.VerificationFailed("Requires query parameter code"));
+                return true;
+            }
+        }
+        if(ctx.Path == "/new_password")
+        {
+            if(ctx.Method == "GET")
+            {
+                ctx.WithMimeType("text/html").SendText(Pages.NewPassword(ctx));
+                return true;
+            }
+            else if(ctx.Method == "POST")
+            {
+
+                var code = ctx.QueryParams.TryGetFirst("code");
+                var password = ctx.QueryParams.TryGetFirst("password");
+                
+                var confirm = ctx.QueryParams.TryGetFirst("confirm");
+                if(TypeOf(code) == "String" && TypeOf(password) == "String" && TypeOf(confirm) == "String")
+                {
+                    var res = DB.UnforgetPassword(code,password,confirm);
+                    if(res.Success)
+                    {
+                        ctx.StatusCode = 302;
+                        ctx.ResponseHeaders.SetValue("Location", "/");
+                        ctx.WriteHeaders();
+                        return true;
+                    }
+                    else {
+                        ctx.StatusCode=401;
+                        ctx.WithMimeType("text/html").SendText(Pages.ResetPasswordFailed(res.Reason));
+                        return true;
+                    }
+                }
+                else {
+                    ctx.StatusCode = 400;
+                    ctx.WithMimeType("text/html").SendText(Pages.ResetPasswordFailed("Invalid State"));
+                    return true;
+                }
+            }
+        }
+        if(ctx.Path == "/forgot_password")
+        {
+            if(ctx.Method == "GET")
+            {
+                ctx.WithMimeType("text/html").SendText(Pages.ForgotPassword(ctx));
+                return true;
+            }
+            else if(ctx.Method == "POST")
+            {
+                var email = ctx.QueryParams.TryGetFirst("email");   
+                if(TypeOf(email) != "String")
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText("<h1>You forgot the email buddy</h1>");
+                    return true;
+                }
+                var res = DB.ForgotPassword(email);
+                if(!res.Success)
+                {
+                    ctx.StatusCode = 400;
+                    ctx.SendText($"<h1>Error: {Net.Http.HtmlEncode(res.Reason)}</h1>");
+                    return true;
+                }
+
+
+                ctx.StatusCode = 302;
+                ctx.ResponseHeaders.SetValue("Location", res.Redirect);
                 ctx.WriteHeaders();
                 return true;
             }
@@ -386,7 +515,7 @@ func main(args)
                 if(!res.Success)
                 {
                     ctx.StatusCode = 400;
-                    ctx.SendText(%"<h1>Error: {Net.Http.HtmlEncode(res.Reason)}</h1>");
+                    ctx.SendText($"<h1>Error: {Net.Http.HtmlEncode(res.Reason)}</h1>");
                     return true;
                 }
 

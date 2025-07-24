@@ -1,0 +1,219 @@
+func DB.ChangeMotto(userId, motto)
+{
+    DB.Lock();
+    var dbCon = DB.Open();
+    Sqlite.Exec(dbCon,$"UPDATE accounts SET motto = {Sqlite.Escape(motto)} WHERE id = {userId};");
+    var account = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE id = {userId};");
+    DB.Unlock();
+    if(TypeOf(account) == "List" && account.Length > 0)
+    {
+        return $"/account?name={Net.Http.UrlEncode(account[0].accountName)}";
+    }
+    return "/";
+}
+func DB.LoginButton(ctx,active,$accountPage)
+{
+    var session = DB.GetSession(ctx);
+
+    
+    if(session != null)
+    {
+       DB.Lock();
+       var dbCon = DB.Open();
+       var exec = Sqlite.Exec(dbCon,$"SELECT * FROM sessions s inner join accounts a on s.accountId = a.id WHERE key = {Sqlite.Escape(session)};");
+   
+       Sqlite.Close(dbCon);
+       DB.Unlock(); 
+       var active2 = TypeOf(accountPage) == "String" ? accountPage == exec[0].accountName : false;
+       if(TypeOf(exec) == "List" && exec.Length > 0)
+       {
+            return {
+                active=active2,
+                route = $"/account?name={Net.Http.UrlEncode(exec[0].accountName)}",
+                text = exec[0].accountName,
+                admin = (ParseLong(exec[0].flags) & DB.FLAG_ADMIN) != 0,
+                session=session
+            };
+       }
+    }           
+    return {
+        active,
+        route = "/login",
+        text = "Login",
+        admin = false,
+        session=""
+    };
+}
+func DB.GetUserInfo(userId)
+{
+    DB.Lock();
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon, $"SELECT * FROM accounts WHERE id = {userId};");
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+
+    if(TypeOf(exec) == "List" && exec.Length == 1)
+    {
+        var data = exec[0];
+        data.flags = ParseLong(data.flags);
+        return data;
+    }
+
+    return null;
+}
+func DB.CreateUserFromAdmin(email, name, password, flags)
+{
+    var res = {Success=true};
+    DB.Lock();
+    var dbCon = DB.Open();
+    exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE accountName = {Sqlite.Escape(name)};");
+    if(TypeOf(exec) == "List" && exec.Length > 0)
+    {
+        res = {Success=false, Reason = "Name already exists"};
+    }
+    else if((flags & DB.FLAG_VERIFIED) != 0)
+    {
+        var salt = Crypto.RandomBytes(32, "CPKG");
+        var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
+
+        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyExpire, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{0},{flags});");
+        if(TypeOf(r) == "String") res = {Success = false, Reason = r};
+        res = {Success=true};
+    }
+    else {
+
+        var salt = Crypto.RandomBytes(32, "CPKG");
+        var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
+
+        var verify_hash = Crypto.RandomBytes(32, "CPKG");  
+        var verify_hash_str = Crypto.Base64Encode(verify_hash);
+        
+        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyKey, verifyExpire, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{Sqlite.Escape(verify_hash_str)},{DateTime.NowEpoch+600},{flags});");
+        if(TypeOf(r) == "String") res = {Success = false, Reason = r};
+                
+        if(DB.Config.MailConfig)
+            DB.SendVerifyEmail(email,name, verify_hash_str);             
+
+        res = {Success=true};
+    }
+    Sqlite.Close(dbCon);
+    DB.Unlock(); 
+    return res;
+}   
+func DB.CreateUser(email, name, password)
+{
+   var res = {Success = true, Redirect="/"};
+   DB.Lock();
+   var dbCon = DB.Open();
+   if(Sqlite.Exec(dbCon, "SELECT * FROM accounts LIMIT 1;").Length == 0)
+   {
+        //create the admin
+
+        var salt = Crypto.RandomBytes(32, "CPKG");
+        var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
+        
+        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{DB.FLAG_ADMIN|DB.FLAG_VERIFIED});");
+        if(TypeOf(r) == "String") res = {Success = false, Reason = r};
+        
+   }
+   else
+   {
+        var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE email = {Sqlite.Escape(email)};");
+        if(TypeOf(exec) == "List" && exec.Length > 0)
+        {
+            
+            exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE accountName = {Sqlite.Escape(name)};");
+            if(TypeOf(exec) == "List" && exec.Length > 0)
+            {
+                res = {Success=false, Reason = "Email and Name already exists"};
+            }
+            else
+            {   
+                res = {Success=false, Reason = "Email already exists"};
+            }
+        }
+        else {
+            exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE accountName = {Sqlite.Escape(name)};");
+            if(TypeOf(exec) == "List" && exec.Length > 0)
+            {
+                res = {Success=false, Reason = "Name already exists"};
+            }
+            else if(DB.Config.AllowRegister)
+            {
+                //email and name already exists
+                var salt = Crypto.RandomBytes(32, "CPKG");
+                var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
+
+                var verify_hash = Crypto.RandomBytes(32, "CPKG");  
+                var verify_hash_str = Crypto.Base64Encode(verify_hash);
+        
+                var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyKey, verifyExpire, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{Sqlite.Escape(verify_hash_str)},{DateTime.NowEpoch+600},{DB.FLAG_VERIFY});");
+                if(TypeOf(r) == "String") {res = {Success = false, Reason = r};}
+                else {
+                    if(DB.Config.MailConfig)
+                        DB.SendVerifyEmail(email,name, verify_hash_str);             
+                
+                    res = {Success=true, Redirect="/check_email"};
+                }
+            }
+            else
+            {
+                res = {Success=false, Reason="Registration is disabled on this server"};
+            }
+        }
+   }
+   Sqlite.Close(dbCon);
+   DB.Unlock(); 
+   return res;
+}
+func DB.GetAccountId(email, password)
+{
+    DB.Lock();
+
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE email = {Sqlite.Escape(email)};");
+   
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+    var correct=false;
+
+    if(TypeOf(exec) == "List" && exec.Length > 0)
+    {
+        var salt = Crypto.Base64Decode(exec[0].password_salt);
+        var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
+        var hashStr = Crypto.Base64Encode(hash);
+       
+        if(exec[0].password_hash == hashStr)
+        {
+            return ParseLong(exec[0].id);
+        }
+    }
+
+    return -1;
+}
+func DB.GetAccountInfo(name)
+{
+    DB.Lock();
+
+    var dbCon = DB.Open();
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE accountName = {Sqlite.Escape(name)};");
+   
+    Sqlite.Close(dbCon);
+    DB.Unlock();
+
+    if(TypeOf(exec) == "List")
+    {
+        if(exec.Length == 1)
+        {
+            return exec[0];
+        }
+        else
+        {
+            return "No such user exists";
+        }
+    }
+    else
+    {
+        return exec;
+    }
+}

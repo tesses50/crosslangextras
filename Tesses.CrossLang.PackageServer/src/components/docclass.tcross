@@ -1,0 +1,32 @@
+func Components.DocClass(cls)
+{
+    var namePart = $"class {cls.Name}";
+
+    if(cls.Inherits != "ClassObject")
+    namePart += $" : {cls.Inherits}";
+    
+
+    return <div>
+         <if(cls.Documentation.Length > 0)>
+        <true>
+        {"/^"}
+        <raw(Net.Http.HtmlEncode(cls.Documentation).Replace("\n",<br>))>
+        {"^/"}
+        <br>
+        </true>
+        </if>
+        <code>{namePart}</code>
+        <code>{"{"}</code>
+        <ul>
+            <each(var item : cls.Entries)>
+                <if(item.Modifier != "private")>
+                    <true>
+                        <li><raw(Components.DocClassEntry(item))></li>
+                    </true>
+                </if>
+            </each>
+        </ul>
+        <code>{"}"}</code>
+    </div>;
+
+}

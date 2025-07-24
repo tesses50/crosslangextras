@@ -1,0 +1,20 @@
+func Pages.VerificationFailed(reason)
+{
+    var active = DB.LoginButton(ctx,false,"");
+  
+    
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+    return Shell($"Verification Failed {reason}", pages,<h1>Verification Failed {reason}</h1>);
+}
