@@ -1,0 +1,22 @@
+func Tesses.CrossLang.Shell.Default(dd)
+{
+    each(var flag : dd.Flags)
+    {
+        if(flag == "version")
+        {
+            Console.WriteLine($"VM version: {VM.RuntimeVersion}");
+            Console.WriteLine($"Shell version: {main.File.Version}");
+            Console.WriteLine($"Args version: {Tesses.CrossLang.Args.File.Version}");
+            Console.WriteLine($"BuildTool version: {Tesses.CrossLang.BuildTool.File.Version}");
+            return 0;
+        }
+    }
+    Console.WriteLine($"USAGE: crosslang COMMAND [command-arguments]");
+    Console.WriteLine("COMMANDS:");
+    Console.WriteLine("new: create new project");
+    Console.WriteLine("build: build a project");
+    Console.WriteLine("run: run a project");
+    Console.WriteLine("configdir: print the config directory");
+    Console.WriteLine("update-shell: update the shell"); //this command is handled by runtime so we don't have to implement it here
+    return 0;
+}

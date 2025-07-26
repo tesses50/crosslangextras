@@ -1,0 +1,85 @@
+func Tesses.CrossLang.Shell.Run(dd)
+{
+    var offline=false;
+    var buildPath = ".";
+    var nobuild=false;
+    var allowFullCompTime=false;
+    var output="";   
+    each(var flag : dd.Flags)
+    {
+        if(flag == "offline")
+        {
+            offline = true;
+        }
+        else if(flag == "allow-insecure-comptime")
+        {
+            allowFullCompTime=true;
+        }
+        else if(flag == "help")
+        {
+            Console.WriteLine("USAGE: crosslang run [run-flags-and-options] program-arguments...");
+            Console.WriteLine("USAGE: crosslang run [run-flags-and-options] -- program-arguments-and-options...");
+            Console.WriteLine("FLAGS:");
+            Console.WriteLine("offline:                 build with no internet (don't fetch files)");
+            Console.WriteLine("allow-insecure-comptime: Allow full comptime");
+            Console.WriteLine("nobuild:                 don't build, just run");
+            Console.WriteLine("help:                    this help");
+            Console.WriteLine();
+            Console.WriteLine("OPTIONS:");
+            Console.WriteLine("conf=CONFIGSTRING:  specify a conf string for compile_tool(s), is the property Config");
+            return 0;
+        }
+        else if(flag == "nobuild")
+        {
+            nobuild=true;
+        }
+    }
+    var conf = "";
+    each(var option : dd.Options)
+    {
+        if(option.Key == "conf")
+        {
+            conf = option.Value;
+        }
+    }
+    if(nobuild)
+    {
+        if(FS.Local.FileExists("config.json"))
+        {
+            var proj = Json.Decode(FS.ReadAllText(FS.Local, "config.json"));
+            var nameVer = $"{proj.name}-{proj.version}.crvm";
+            var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
+                    
+            output = ./buildDir/nameVer;
+            if(!FS.Local.FileExists(output))
+            {
+                Console.WriteLine($"ERROR: file {output} does not exist.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("ERROR: could not find project.");
+            return 1;
+        }
+    }
+    else
+    {
+        var pm = Tesses.CrossLang.PackageManager();
+        pm.Offline = offline;
+        var bt = Tesses.CrossLang.BuildTool(pm);
+        bt.Config = conf;
+        bt.AllowFullCompTime = allowFullCompTime;
+        output =  bt.BuildProject(buildPath).Output;
+    }
+    var env = VM.CreateEnvironment({});
+    env.RegisterEverything();
+    env.LockRegister();
+
+    env.LoadFileWithDependencies(FS.Local,output);
+    var myArgs = [output.ToString()];
+    for(var i = 1; i < dd.Arguments.Count; i++)
+    {
+        myArgs.Add(dd.Arguments[i]);
+    }
+    return env.GetDictionary().main(myArgs);
+}

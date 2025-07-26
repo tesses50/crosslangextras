@@ -1,0 +1,125 @@
+func Tesses.CrossLang.Shell.New(dd)
+{
+    func newHelp()
+    {
+        Console.WriteLine($"crosslang new [FLAGS] <template_name> [directory_for_project]");
+        Console.WriteLine("FLAGS");
+        Console.WriteLine("--help: Shows this help");
+        Console.WriteLine("--list: Lists all templates");
+        Console.WriteLine("--list-json: List all templates (as json)");
+        Console.WriteLine("ARGUMENTS:");
+        Console.WriteLine("template_name: The name of the template");
+        Console.WriteLine("directory_for_project: The directory for the project, defaults to current directory");
+    }
+    var dir = Env.CrossLangConfig / "Templates";
+
+    each(var flag : dd.Flags)
+    {
+        if(flag == "list")
+        {
+            Console.WriteLine("List of templates:");
+            each(var item : FS.Local.EnumeratePaths(dir))
+            {
+                Console.WriteLine(Tesses.CrossLang.GetNameAndDescription(item));
+            }
+            return 0;
+        }
+        else if(flag == "list-json")
+        {
+            var items = [];
+            each(var item : FS.Local.EnumeratePaths(dir))
+            {
+                items.Add(Tesses.CrossLang.GetNameAndDescriptionJson(item));
+            }
+            Console.WriteLine(items);
+            return 0;
+        }
+        else if(flag == "help")
+        {
+            newHelp();
+            return 1;
+        }
+    }
+
+    if(dd.Arguments.Count < 2)
+    {
+        newHelp();
+        return 1;
+    }
+    else
+    {
+        var templateFile = dir / $"{dd.Arguments[1]}.crvm";
+        if(FS.Local.RegularFileExists(templateFile))
+        {
+            var projectPath = ".";
+            if(dd.Arguments.Count > 2) projectPath = dd.Arguments[2];
+            projectPath = FS.MakeFull(projectPath);
+            FS.Local.CreateDirectory(projectPath);
+            var projectDir = new SubdirFilesystem(FS.Local, projectPath);
+            var strm = FS.Local.OpenFile(templateFile,"rb");
+            var res = FS.ExtractArchive(strm,projectDir);
+            strm.Close();
+
+            if(!projectDir.RegularFileExists("/cross.json"))
+            {
+                Console.WriteLine("Could not find /cross.json in template");
+                return 1;
+            }
+
+            var jsonText = FS.ReadAllText(projectDir, "/cross.json");
+            var proj = Json.Decode(jsonText);
+
+            proj.name = projectPath.GetFileName();
+            proj.version = "1.0.0.0-prod";
+            var old_info = proj.info;
+            proj.info = old_info.template_info;
+            proj.dependencies = old_info.template_project_dependencies;
+            var srcDir = proj.source_directory;
+            if(TypeOf(srcDir) == "Undefined") srcDir = "/src";
+
+            var filesToMutate = old_info.template_extra_text_ftles;
+
+            if(TypeOf(filesToMutate) == "Undefined") filesToMutate = [];
+
+            func mutateDir(dir)
+            {
+                each(var f : projectDir.EnumeratePaths(dir))
+                {
+                    if(projectDir.RegularFileExists(f) && f.GetExtension() == ".tcross")
+                    {
+                        filesToMutate.Add(f);
+                    }
+                    else if(projectDir.DirectoryExists(f))
+                    {
+                        mutateDir(f);
+                    }
+                }
+            }
+            mutateDir(srcDir);
+
+            each(var ent : filesToMutate)
+            {
+                if(projectDir.RegularFileExists(ent))
+                {
+                    var src = FS.ReadAllText(projectDir, ent);
+
+                    src = src.Replace("%PROJECT_NAME%",projectPath.GetFileName());
+                    src = src.Replace("%TEMPLATE_PROJECT_NAME%","%PROJECT_NAME");
+
+                    FS.WriteAllText(projectDir, ent, src);
+                }
+                       
+            }
+
+            FS.WriteAllText(projectDir, "/cross.json", Json.Encode(proj,true));
+
+            projectDir.Close();
+            return 0;
+        }
+        else
+        {
+            Console.WriteLine($"Error could not find template {templateFile}");
+            return 1;
+        }
+    }
+}
