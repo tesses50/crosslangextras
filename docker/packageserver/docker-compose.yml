@@ -1,0 +1,10 @@
+services:
+  pkg:
+    image: onedev.site.tesses.net/crosslang/crosslangextras/packageserver:latest
+    ports:
+      - "4206:4206"
+    volumes:
+      - data:/data
+
+volumes:
+  data:
