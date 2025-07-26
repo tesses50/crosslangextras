@@ -1,4 +1,4 @@
-version: 38
+version: 39
 jobs:
 - name: Build for x86_64
   steps:
@@ -41,6 +41,16 @@ jobs:
     privateKeySecret: tesses_www_private_key
     source: Tesses.CrossLang.ShellPackage-*.crvm
     target: mike@@10.137.42.28:/var/www/downloads/ShellPackage.crvm
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !BuildImageStep
+    name: Build container (package server)
+    dockerfile: Dockerfile.packageserver
+    output: !RegistryOutput
+      tags: onedev.site.tesses.net/crosslang/crosslangextras/packageserver:latest
+    registryLogins:
+    - registryUrl: '@server_url@'
+      userName: '@job_token@'
+      passwordSecret: dockersecret
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !DependencyFinishedTrigger
