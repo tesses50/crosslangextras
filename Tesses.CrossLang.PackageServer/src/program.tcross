@@ -115,7 +115,10 @@ func main(args)
                     var url = DB.ChangeMotto(userId,motto);
                     ctx.StatusCode = 302;
                     ctx.ResponseHeaders.SetValue("Location", url);
-                    ctx.WriteHeaders();
+                    ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href={url}>here</a> if it does not redirect
+                    </null>);
                     return true;
                 }
             }
@@ -176,7 +179,10 @@ func main(args)
                     {
                         ctx.StatusCode = 302;
                         ctx.ResponseHeaders.SetValue("Location", "/");
-                        ctx.WriteHeaders();
+                        ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href="./">here</a> if it does not redirect
+                        </null>);
                     }
                     else
                     {
@@ -326,7 +332,10 @@ func main(args)
             {
                 ctx.StatusCode = 302;
                 ctx.ResponseHeaders.SetValue("Location", "/");
-                ctx.WriteHeaders();
+                ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href="./">here</a> if it does not redirect
+                        </null>);
                 return true;
             }
             else {
@@ -370,7 +379,10 @@ func main(args)
                 ctx.StatusCode = 302;
                 ctx.ResponseHeaders.SetValue("Location", "/");
                 ctx.ResponseHeaders.SetValue("Set-Cookie", $"Session={DB.CreateSession(accountId)}; SameSite=Strict");
-                ctx.WriteHeaders();
+                ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href="./">here</a> if it does not redirect
+                        </null>);
                 return true;
             }
         }
@@ -384,7 +396,10 @@ func main(args)
                 {
                     ctx.StatusCode = 302;
                     ctx.ResponseHeaders.SetValue("Location", "/");
-                    ctx.WriteHeaders();
+                    ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href="./">here</a> if it does not redirect
+                        </null>);
                     return true;
                 }
                 else {
@@ -419,7 +434,10 @@ func main(args)
                     {
                         ctx.StatusCode = 302;
                         ctx.ResponseHeaders.SetValue("Location", "/");
-                        ctx.WriteHeaders();
+                        ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href="./">here</a> if it does not redirect
+                        </null>);
                         return true;
                     }
                     else {
@@ -462,7 +480,10 @@ func main(args)
 
                 ctx.StatusCode = 302;
                 ctx.ResponseHeaders.SetValue("Location", res.Redirect);
-                ctx.WriteHeaders();
+                ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href={res.Redirect}>here</a> if it does not redirect
+                        </null>);
                 return true;
             }
         }
@@ -522,7 +543,10 @@ func main(args)
 
                 ctx.StatusCode = 302;
                 ctx.ResponseHeaders.SetValue("Location", res.Redirect);
-                ctx.WriteHeaders();
+                ctx.WithMimeType("text/html").SendText(<null>
+                        <h1>Redirecting</h1>
+                        Click <a href={res.Redirect}>here</a> if it does not redirect
+                        </null>);
                 return true;
             }
         }
