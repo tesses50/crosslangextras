@@ -1,0 +1,15 @@
+FROM onedev.site.tesses.net/crosslang/crosslang:latest AS build
+
+WORKDIR /crosslangextras
+COPY . .
+
+RUN crossint ./build.tcross install
+WORKDIR /crosslangextras/Tesses.CrossLang.PackageServer
+RUN crosslang build
+
+FROM onedev.site.tesses.net/crosslang/crosslang:latest
+WORKDIR /app
+COPY --from=build /crosslangextras/Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm /app/Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm
+
+EXPOSE 4206
+ENTRYPOINT ["crossvm","Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm","/data"]
