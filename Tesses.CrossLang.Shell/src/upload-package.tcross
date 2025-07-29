@@ -1,0 +1,126 @@
+func Tesses.CrossLang.Shell.UploadPackage(dd)
+{
+     //crosslang upload-package [--host=HOST --token=TOKEN] [--session=NAME] [PACKAGE_FILE]
+            var host=null;
+            var token=null;
+            var session=null;
+            var package=null;
+            var nobuild=false;
+            each(var option : dd.Options)
+            {
+                if(option.Key == "host")
+                {
+                    host = option.Value;
+                }
+                if(option.Key == "token")
+                {
+                    token = option.Value;
+                }
+                if(option.Key == "session")
+                {
+                    session = option.Value;
+                }
+            }
+            if(dd.Arguments.Length > 1)
+            {
+                package = dd.Arguments[1];
+            }
+            else {
+                if(nobuild)
+                {
+                    throw {Type="NotImplementedException", Message="nobuild on upload-package is not implemented",ToString=(this)=>$"{this.Type} on line: {this.Line}: {this.Message}"};
+                }
+                else {
+
+                    var pm = Tesses.CrossLang.PackageManager();
+                    pm.Offline = false;
+                    var bt = Tesses.CrossLang.BuildTool(pm);
+                    bt.Config = "";
+                    bt.AllowFullCompTime = false;
+                    package =  bt.BuildProject(".").Output;
+                }
+            }
+
+            if(TypeOf(host) != "String" || TypeOf(token) != "String")
+            {
+                if(FS.Local.FileExists(Env.CrossLangConfig / "auth.json"))
+                {
+                    var json = Json.Decode(FS.ReadAllText(FS.Local,Env.CrossLangConfig / "auth.json"));
+                    if(json.Length == 0)
+                    {
+                        Console.WriteLine("The auth.json file is empty, use crosslang login to login");
+                        return 1;
+                    }
+                    else if(json.Length == 1)
+                    {
+                        host = json[0].host;
+                        token = json[0].token;
+                    }
+                    else {
+                        if(TypeOf(session) != "String")
+                        {
+                            Console.WriteLine("Multiple entries in auth.json file, session is ambiguous.");
+                            Console.WriteLine("Sessions:");
+                            each(var item : json)
+                            {
+                                Console.WriteLine($"{item.name}: {item.host}");
+                            }
+                            return 1;
+                        }
+                        else {
+                            var found=false;
+                            each(var item : json)
+                            {
+                                if(item.name == session)
+                                {
+                                    found=true;
+                                    host = item.host;
+                                    token = item.token;
+                                    break;
+                                }
+                            }
+                            if(!found) { 
+                                Console.WriteLine($"Could not find session with name: {session}");
+                                return 1;
+                            }
+                        }
+                    }
+                }
+                else { Console.WriteLine("No auth.json file, use crosslang login to login"); return 1;}
+            }
+
+            if(TypeOf(host) != "String" || TypeOf(token) != "String")
+            {
+                Console.WriteLine("You are not logged in, use crosslang login to login");
+                return 1;
+            }
+            var strm = FS.Local.OpenFile(package,"rb");
+            if(strm == null)
+            {
+                Console.WriteLine("Could not open file");
+                return 1;
+            }
+            var req = {
+                Method="PUT",
+                RequestHeaders = [
+                    {Key= "Authorization",Value=$"Bearer {token}"}
+                ],
+                Body = Net.Http.StreamHttpRequestBody(strm,"application/crvm")
+            };
+            var http = Net.Http.MakeRequest($"{host.TrimEnd('/')}/api/v1/upload",req);
+           
+            
+            if(http.StatusCode == 204)
+            {
+                Console.WriteLine("Uploaded package successfully");
+            }
+            else if(http.ResponseHeaders.TryGetFirst("Content-Type") == "application/json")
+            {
+                var json = Json.Decode(http.ReadAsString());
+                Console.WriteLine($"Failed to upload package, {json.reason.TrimEnd('.')}.");
+            }
+            else {
+                Console.WriteLine($"Failed to upload package.");
+            }
+             strm.Close();
+}

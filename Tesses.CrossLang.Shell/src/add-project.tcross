@@ -1,0 +1,61 @@
+func Tesses.CrossLang.Shell.AddProject(dd)
+{
+      //crosslang add-project /path/to/project
+
+            if(dd.Arguments.Count > 1)
+            {
+                var dep = dd.Arguments[1];
+                if(FS.Local.DirectoryExists(dep))
+                {
+                    var path = Path.FromString(dep) / "cross.json";
+                    var pathStr = FS.MakeFull(dep).CollapseRelativeParents().ToString();
+                    if(FS.Local.FileExists(path))
+                    {
+                        if(FS.Local.FileExists("cross.json"))
+                        {
+                            var f = FS.ReadAllText(FS.Local,"cross.json");
+                            var json = Json.Decode(f);
+                            if(TypeOf(json.project_dependencies) == "List")
+                            {
+                                each(var item : json.project_dependencies)
+                                {
+                                    var _path = FS.MakeFull(item).CollapseRelativeParents().ToString();
+                                    
+                                    if(_path == pathStr) 
+                                    {
+                                        Console.WriteLine($"The project {dep} already exists in cross.json.");
+
+                                        return 0;
+                                    }
+                                }
+                                json.project_dependencies.Add(dep);
+                            }
+                            else
+                            {
+                                json.project_dependencies = [dep];
+                                
+                            }
+                            Console.WriteLine($"Added project {dep} to cross.json.");
+                            FS.WriteAllText(FS.Local, "cross.json", Json.Encode(json,true));
+                            return 0;
+                        }
+                        else
+                        {
+                            Console.WriteLine("The current directory does not have a project");
+                            return 1;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"The project file {path} does not exist");
+                        return 1;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("The project directory does not exist");
+                    return 1;
+                }
+            }
+            return 1;
+}

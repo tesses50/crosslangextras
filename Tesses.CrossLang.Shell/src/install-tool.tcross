@@ -1,0 +1,128 @@
+func Tesses.CrossLang.Shell.InstallTool(dd)
+{
+    //crosslang install-tool Tesses.CrossLang.Tool.SomeTool --version=1.0.0.0-prod
+    var toolsDir = Env.CrossLangConfig / "Tools";
+            
+    var offline=false;
+    var buildPath = ".";
+    var nobuild=false;
+    var output=.;   
+    each(var flag : dd.Flags)
+    {
+        if(flag == "offline")
+        {
+            offline = true;
+        }
+        else if(flag == "help")
+        {
+            Console.WriteLine("USAGE: crosslang install-tool [flags-and-options]");
+            Console.WriteLine("USAGE: crosslang install-tool [PackageName] [flags-and-options]");
+            Console.WriteLine("FLAGS:");
+            Console.WriteLine("offline:  build with no internet (don't fetch files)");
+            Console.WriteLine("help:     this help");
+            Console.WriteLine("nobuild:  don't build, just install (irrelevant if you specify a PackageName)");
+            Console.WriteLine();
+            Console.WriteLine("OPTIONS:");
+            Console.WriteLine("conf=CONFIGSTRING:     specify a conf string for compile_tool(s), is the property Config (irrelevant if you specify a PackageName)");
+            Console.WriteLine("version=1.0.0.0-prod:  specify the package version (irrelevant if you don't specify a PackageName)");
+            Console.WriteLine();
+            Console.WriteLine("ARGUMENTS:");
+            Console.WriteLine("PackageName: the package name of a tool you want to download and install, if not specified we install the tool from the current directory");
+            return 0;
+        }
+        else if(flag == "nobuild")
+        {
+            nobuild=true;
+        }
+    }
+            
+    if(dd.Arguments.Length == 1)
+    {
+                
+        var conf = "";
+        each(var option : dd.Options)
+        {
+            if(option.Key == "conf")
+            {
+                conf = option.Value;
+            }
+        }
+
+        if(FS.Local.FileExists("cross.json"))
+        {
+            var proj = Json.Decode(FS.ReadAllText(FS.Local,"cross.json"));
+            var name = TypeOf(proj.info.toolname) == "String" ? proj.info.toolname : proj.name;
+                    
+            if(proj.info.type != "tool")
+            {
+                Console.WriteLine("The project is not a tool");
+                return 1;
+            }
+            if(TypeOf(name) != "String")
+            {
+                Console.WriteLine("The tool does not have a name");
+                return 1;
+            }
+            var toolDir = toolsDir / name;
+            FS.Local.CreateDirectory(toolDir);
+            var toolFile = toolDir / name + ".crvm";
+
+            if(nobuild)
+            {
+                var nameVer = $"{proj.name}-{proj.version}.crvm";
+                var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
+                    
+                output = ./buildDir/nameVer;
+                if(!FS.Local.FileExists(output))
+                {
+                    Console.WriteLine($"ERROR: file {output} does not exist.");
+                    return 1;
+                }
+
+            } 
+            else
+            {
+                var pm = Tesses.CrossLang.PackageManager();
+                pm.Offline = offline;
+                var bt = Tesses.CrossLang.BuildTool(pm);
+                bt.Config = conf;
+                output =  bt.BuildProject(buildPath).Output;
+            }
+                    
+            func CopyCRVM(src,dest)
+            {
+                func copyFile(src,dest)
+                {
+                    var _src = FS.Local.OpenFile(src,"rb");
+                    var _dest = FS.Local.OpenFile(dest, "wb");
+                    _src.CopyTo(_dest);
+                    _src.Close();
+                    _dest.Close();
+                    Console.WriteLine($"{src} -> {dest}");
+                }    
+                if(FS.Local.FileExists(dest)) return;
+                    copyFile(src,dest);
+
+                        
+                var srcStrm = FS.Local.OpenFile(src,"rb");
+                var crvm = VM.LoadExecutable(srcStrm);
+                        
+                srcStrm.Close();
+                each(var dep : crvm.Dependencies)
+                {
+                    var name = $"{dep.Name}-{dep.Version.ToString()}.crvm";
+                    CopyCRVM(src.GetParent()/name, dest.GetParent()/name);
+                }
+            }
+            CopyCRVM(output,toolFile);
+            return 0;
+        }
+        else
+        {
+                    
+            Console.WriteLine("The current directory does not have a project");
+            return 1;
+        }
+    }
+    return 0;
+}

@@ -1,0 +1,5 @@
+func Tesses.CrossLang.Shell.ConfigDir(dd)
+{
+    Console.WriteLine(Env.CrossLangConfig);
+    return 0;
+}

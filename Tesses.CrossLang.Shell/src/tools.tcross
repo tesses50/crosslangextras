@@ -1,0 +1,13 @@
+func Tesses.CrossLang.Shell.Tool(dd)
+{
+    var dir = Env.CrossLangConfig / "Tools";
+    if(dd.Arguments.Length == 1)
+    {
+        Console.WriteLine("List of tools:");
+        each(var item : FS.Local.EnumeratePaths(dir))
+        {
+            Console.WriteLine(Tesses.CrossLang.GetNameAndDescription(item / item.GetFileName() + ".crvm"));
+        }
+        return 0;
+    }
+}

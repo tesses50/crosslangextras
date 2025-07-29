@@ -1,0 +1,40 @@
+func Tesses.CrossLang.Shell.AddDependency(dd)
+{
+    //crosslang add-dependency Tesses.CrossLang.Markup --version=1.0.0.0-prod
+        
+            if(dd.Arguments.Length > 1)
+            {
+                
+                var name = dd.Arguments[1];
+                var version = null;
+                each(var opt : dd.Options)
+                {
+                    if(opt.Key == "version")
+                        version = opt.Value;
+                }
+                if(!FS.Local.FileExists("cross.json"))
+                {
+                    Console.WriteLine("The current directory does not have a project");
+                    return 1;
+                }
+                
+                if(version == null)
+                {
+                    var pm = Tesses.CrossLang.PackageManager();
+                    version = pm.GetLatest(name);
+                }
+                if(version == null)
+                {
+                    Console.WriteLine("Could not get version");
+                    return 1;
+                }
+                else
+                {
+                    var data = Json.Decode(FS.ReadAllText(FS.Local,"cross.json"));
+                    if(TypeOf(data.dependencies) != "List") data.dependencies=[];
+                    data.dependencies.Add({name,version});
+                    FS.WriteAllText(FS.Local,"cross.json",Json.Encode(data,true));
+                }
+            }
+
+}

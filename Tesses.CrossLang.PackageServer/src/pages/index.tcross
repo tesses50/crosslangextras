@@ -32,6 +32,7 @@ func Pages.Index(ctx)
 
                     <a href="./api">API</a><br>
                     <a href={$"{repo}{commit}"}>Commit {commit.Remove(8)}</a>
+                    <p>This website does not use cookies, unless you log in.</p>
                   </div>
                   <div class={"col"}>
                     

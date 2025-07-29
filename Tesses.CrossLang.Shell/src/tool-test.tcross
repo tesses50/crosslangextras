@@ -1,0 +1,27 @@
+func Tesses.CrossLang.Shell.ToolTest(dd)
+{
+    var pm = Tesses.CrossLang.PackageManager();
+    pm.Offline = false;
+    var bt = Tesses.CrossLang.BuildTool(pm);
+           
+    var proj=bt.BuildProject(".");
+
+    var output = proj.Output;
+
+    var env = VM.CreateEnvironment({});
+    env.RegisterEverything();
+    env.LockRegister();
+
+    env.LoadFileWithDependencies(FS.Local,output);
+    var myArgs = [];
+    for(var i = 1; i < dd.Arguments.Count; i++)
+    {
+        myArgs.Add(dd.Arguments[i]);
+    }
+    return env.GetDictionary().RunTool({
+        Arguments=myArgs,
+        Options = dd.Options,
+        Flags = dd.Flags,
+        ToolName = proj.Info.toolname
+    });
+}
