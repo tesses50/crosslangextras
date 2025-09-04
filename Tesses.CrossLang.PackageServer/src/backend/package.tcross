@@ -174,7 +174,7 @@ func DB.QueryPackages(q, offset, limit,$account,$filter)
         }
     }
 
-    var sql = accountId > -1 ? $"SELECT * FROM packages p inner join versions v on p.id = v.packageId{filter} and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId WHERE p.accountId == {accountId}  LIMIT {limit} OFFSET {offset};" : $"SELECT * FROM packages p inner join versions v on p.id = v.packageId and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId  LIMIT {limit} OFFSET {offset};";
+    var sql = accountId > -1 ? $"SELECT * FROM packages p inner join versions v on p.id = v.packageId{filter} and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId WHERE p.accountId == {accountId}  LIMIT {limit} OFFSET {offset};" :$"SELECT * FROM packages p inner join versions v on p.id = v.packageId{filter} and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId  LIMIT {limit} OFFSET {offset};";
     DB.Lock();
     var dbCon = DB.Open();
     var res = Sqlite.Exec(dbCon, sql);

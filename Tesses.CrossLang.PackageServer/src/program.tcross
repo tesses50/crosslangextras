@@ -77,7 +77,7 @@ func main(args)
             
             if(filters.Length > 0)
             {
-                filter = " and (";
+                filter = " AND (";
                 var first = true;
                 each(var item : filters)
                 {
