@@ -73,7 +73,7 @@ func main(args)
         {
             var filter = ctx.QueryParams.TryGetFirst("filter");
             if(TypeOf(filter) != "String") filter = "";
-            var filters = filter.Length > 0 filter.Split(",") : [];
+            var filters = filter.Length > 0 ? filter.Split(",") : [];
             
             if(filters.Length > 0)
             {
