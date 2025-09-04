@@ -21,5 +21,6 @@
         "license": "MIT"
     },
     "version": "1.0.0.0-prod",
-    "name": "Tesses.CrossLang.Template.Tool"
+    "name": "Tesses.CrossLang.Template.Tool",
+    "template_name_pretty": "Tool"
 }

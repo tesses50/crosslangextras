@@ -12,6 +12,7 @@
             "type": "lib"
         },
         "template_ignored_files": ["bin","obj"],
-        "description": "A crosslang library"
+        "description": "A crosslang library",
+        "template_name_pretty": "Library"
     }
 }

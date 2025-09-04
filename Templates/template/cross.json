@@ -21,6 +21,7 @@
         },
         "template_project_dependencies": [],
         "template_extra_text_ftles": [],
-        "template_ignored_files": ["bin","obj"]
+        "template_ignored_files": ["bin","obj"],
+        "template_name_pretty": "Template"
     }
 }

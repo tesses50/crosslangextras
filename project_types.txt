@@ -1,6 +1,6 @@
 console: a console application (or webserver)
 lib: a library
-app: a gui app (used for eventual gui system)
+webapp: A web app (for webview or eventual cloud OS)
 template: used for project templates
 compile_tool: run before source is compiled for project if it is in the dependency tree for the project (and is not linked to said projects)
 tool: a tool invokable via crosslang (gets Tesses.CrossLang.Args for free)

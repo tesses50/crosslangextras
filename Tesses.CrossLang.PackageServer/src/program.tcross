@@ -71,6 +71,26 @@ func main(args)
         }
         if(ctx.Path == "/api/v1/search")
         {
+            var filter = ctx.QueryParams.TryGetFirst("filter");
+            if(TypeOf(filter) != "String") filter = "";
+            var filters = filter.Length > 0 filter.Split(",") : [];
+            
+            if(filters.Length > 0)
+            {
+                filter = " and (";
+                var first = true;
+                each(var item : filters)
+                {
+                    if(!first) {
+                        filter += " OR ";
+                    }
+                    filter += $"v.type = {Sqlite.Escape(item)}";
+                    first=false;
+                }
+                filter += ")";
+            }
+
+
             var q = ctx.QueryParams.TryGetFirst("q");
             if(TypeOf(q) != "String") q = "";
             var offset = ParseLong(ctx.QueryParams.TryGetFirst("offset"));
@@ -79,7 +99,7 @@ func main(args)
             if(TypeOf(limit) != "Long") limit = 20;
             if(limit <= 0) limit = 20;
 
-            var res = DB.QueryPackages(q, offset*limit, limit);
+            var res = DB.QueryPackages(q, offset*limit, limit, undefined, filter);
             if(TypeOf(res) != "List")
             {
                 ctx.StatusCode=500;

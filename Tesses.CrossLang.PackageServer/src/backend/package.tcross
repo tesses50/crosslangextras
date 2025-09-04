@@ -149,10 +149,11 @@ func DB.UploadPackage(userId, filePath)
 
     return {Success=true};
 }
-func DB.QueryPackages(q, offset, limit,$account)
+func DB.QueryPackages(q, offset, limit,$account,$filter)
 {
     if(TypeOf(offset) != "Long") offset = 0;
     if(TypeOf(limit) != "Long") limit = 20;
+    if(TypeOf(filter) != "String") var filter = "";
     var q2 = Sqlite.Escape($"%{q}%");
 
     var accountId = -1;
@@ -173,7 +174,7 @@ func DB.QueryPackages(q, offset, limit,$account)
         }
     }
 
-    var sql = accountId > -1 ? $"SELECT * FROM packages p inner join versions v on p.id = v.packageId and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId WHERE p.accountId == {accountId}  LIMIT {limit} OFFSET {offset};" : $"SELECT * FROM packages p inner join versions v on p.id = v.packageId and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId  LIMIT {limit} OFFSET {offset};";
+    var sql = accountId > -1 ? $"SELECT * FROM packages p inner join versions v on p.id = v.packageId{filter} and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId WHERE p.accountId == {accountId}  LIMIT {limit} OFFSET {offset};" : $"SELECT * FROM packages p inner join versions v on p.id = v.packageId and (p.packageName LIKE {q2} OR v.description LIKE {q2}) and v.version = (SELECT MAX(version) FROM versions WHERE packageId = v.packageId) INNER JOIN accounts a on a.id = p.accountId  LIMIT {limit} OFFSET {offset};";
     DB.Lock();
     var dbCon = DB.Open();
     var res = Sqlite.Exec(dbCon, sql);

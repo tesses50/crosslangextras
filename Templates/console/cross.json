@@ -11,6 +11,7 @@
         "template_info": {
             "type": "console"
         },
+        "template_name_pretty": "Console Application",
         "template_ignored_files": ["bin","obj"],
         "description": "A console application"
     }

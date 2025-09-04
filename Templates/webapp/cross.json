@@ -2,25 +2,24 @@
 	"dependencies": [
 	],
 	"info": {
-		"template_extra_text_ftles": [
-			"res/layout.json"
-		],
+		
 		"template_ignored_files": [
 			"bin",
 			"obj"
 		],
 		"template_info": {
-			"type": "app",
+			"type": "webapp",
         	"license": "MIT"
 		},
-		"template_name": "gui",
+		"template_name": "webapp",
+		"template_name_pretty": "Web Application",
 		"template_project_dependencies": [
 		],
 		"repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
         "homepage": "https://crosslang.tesseslanguage.com/",
 		"type": "template",
-		"description": "A crosslang gui, using tesses-framework's gui library"
+		"description": "A web app (for webview or eventual cloud OS)"
 	},
-	"name": "Tesses.CrossLang.Template.GUI",
+	"name": "Tesses.CrossLang.Template.WebApp",
 	"version": "1.0.0.0-prod"
 }

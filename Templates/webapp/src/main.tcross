@@ -1,0 +1,12 @@
+
+func WebAppMain(args)
+{
+    return (ctx)=>{
+        if(ctx.Path == "/")
+        {
+            ctx.WithMimeType("text/html").SendText(<h1>Hello, world</h1>);
+            return true;
+        }
+        return false;
+    };
+}

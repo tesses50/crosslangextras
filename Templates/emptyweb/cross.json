@@ -12,6 +12,7 @@
         "template_info": {
             "type": "console"
         },
+        "template_name_pretty": "Empty Website",
         "template_extra_text_ftles": [],
         "template_ignored_files": ["bin","obj"]
     }

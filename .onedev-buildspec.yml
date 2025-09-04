@@ -52,6 +52,20 @@ jobs:
       userName: '@job_token@'
       passwordSecret: dockersecret
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
+    name: push to coolify
+    runInContainer: true
+    image: curlimages/curl:latest
+    interpreter: !DefaultInterpreter
+      commands: |
+        curl "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"
+    envVars:
+    - name: COOLIFY_WEBHOOK
+      value: '@secret:COOLIFY_WEBHOOK@'
+    - name: COOLIFY_TOKEN
+      value: '@secret:COOLIFY_TOKEN@'
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   triggers:
   - !DependencyFinishedTrigger
     projects: crosslang
