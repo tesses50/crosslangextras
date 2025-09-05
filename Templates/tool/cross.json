@@ -18,9 +18,9 @@
         "maintainer": "Mike Nolan",
         "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
         "homepage": "https://crosslang.tesseslanguage.com/",
-        "license": "MIT"
+        "license": "MIT",
+        "template_name_pretty": "Tool"
     },
     "version": "1.0.0.0-prod",
-    "name": "Tesses.CrossLang.Template.Tool",
-    "template_name_pretty": "Tool"
+    "name": "Tesses.CrossLang.Template.Tool"
 }

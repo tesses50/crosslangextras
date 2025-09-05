@@ -12,7 +12,7 @@
         "template_info": {
             "type": "console"
         },
-        "template_ignored_files": ["bin","obj"]
-    },
-    "template_name_pretty": "WebSite"
+        "template_ignored_files": ["bin","obj"],
+        "template_name_pretty": "WebSite"
+    }
 }
