@@ -226,6 +226,23 @@ func main(args)
             ctx.WithMimeType("text/html").SendText(Pages.API.V1());
             return true;
         }
+        if(ctx.Path == "/api/v1/versions")
+        {
+            var name = ctx.QueryParams.TryGetFirst("name");
+            if(TypeOf(name) == "String")
+            {
+                var versions = DB.GetPackageVersions(name);
+                ctx.WithMimeType("application/json").SendJson({
+                    success=true,
+                    versions
+                });
+                return true;
+            }
+            ctx.WithMimeType("application/json").SendJson({
+                success=false
+            });
+            return true;
+        }
         if(ctx.Path == "/api/v1/upload")
         {
             if(ctx.Method == "PUT")   
