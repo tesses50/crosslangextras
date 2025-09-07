@@ -1,7 +1,7 @@
-func Tesses.CrossLang.Shell.InstallTool(dd)
+func Tesses.CrossLang.Shell.InstallWebApp(dd)
 {
-    //crosslang install-tool Tesses.CrossLang.Tool.SomeTool --version=1.0.0.0-prod
-    var toolsDir = Env.CrossLangConfig / "Tools";
+    //crosslang install-webapp Tesses.CrossLang.WebApp.SomeWebApp --version=1.0.0.0-prod
+    var toolsDir = Env.CrossLangConfig / "WebApps";
             
     var offline=false;
     var buildPath = ".";
@@ -15,8 +15,8 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
         }
         else if(flag == "help")
         {
-            Console.WriteLine("USAGE: crosslang install-tool [flags-and-options]");
-            Console.WriteLine("USAGE: crosslang install-tool [PackageName] [flags-and-options]");
+            Console.WriteLine("USAGE: crosslang install-webapp [flags-and-options]");
+            Console.WriteLine("USAGE: crosslang install-webapp [PackageName] [flags-and-options]");
             Console.WriteLine("FLAGS:");
             Console.WriteLine("offline:  build with no internet (don't fetch files)");
             Console.WriteLine("help:     this help");
@@ -27,7 +27,7 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
             Console.WriteLine("version=1.0.0.0-prod:  specify the package version (irrelevant if you don't specify a PackageName)");
             Console.WriteLine();
             Console.WriteLine("ARGUMENTS:");
-            Console.WriteLine("PackageName: the package name of a tool you want to download and install, if not specified we install the tool from the current directory");
+            Console.WriteLine("PackageName: the package name of a web application you want to download and install, if not specified we install the web application from the current directory");
             return 0;
         }
         else if(flag == "nobuild")
@@ -62,9 +62,9 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
 		ms.Seek(0,0);
 		var exec = VM.LoadExecutable(ms);
 		var info = Json.Decode(exec.Info);
-		if(info.type != "tool")
+		if(info.type != "webapp")
 		{
-			Console.WriteLine("The project is not a tool");
+			Console.WriteLine("The project is not a web application");
 			ms.Close();
 			return 1;
 		}
@@ -106,7 +106,7 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
 
 			each(var item : exec.Dependencies)
 				downloadDependency(item.Name, item.Version);
-			Console.WriteLine($"Installed tool {info.short_name}");
+			Console.WriteLine($"Installed web application {info.short_name}");
 		}
 
 		ms.Close();
@@ -129,14 +129,14 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
             var proj = Json.Decode(FS.ReadAllText(FS.Local,"cross.json"));
             var name = proj.info.short_name;
                     
-            if(proj.info.type != "tool")
+            if(proj.info.type != "webapp")
             {
-                Console.WriteLine("The project is not a tool");
+                Console.WriteLine("The project is not a web application");
                 return 1;
             }
             if(TypeOf(name) != "String")
             {
-                Console.WriteLine("The tool does not have a name");
+                Console.WriteLine("The web application does not have a name");
                 return 1;
             }
             var toolDir = toolsDir / name;

@@ -1,7 +1,7 @@
-func Tesses.CrossLang.Shell.InstallTool(dd)
+func Tesses.CrossLang.Shell.InstallTemplate(dd)
 {
-    //crosslang install-tool Tesses.CrossLang.Tool.SomeTool --version=1.0.0.0-prod
-    var toolsDir = Env.CrossLangConfig / "Tools";
+    //crosslang install-template Tesses.CrossLang.Tool.Template --version=1.0.0.0-prod
+    var templatesDir = Env.CrossLangConfig / "Templates";
             
     var offline=false;
     var buildPath = ".";
@@ -15,8 +15,8 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
         }
         else if(flag == "help")
         {
-            Console.WriteLine("USAGE: crosslang install-tool [flags-and-options]");
-            Console.WriteLine("USAGE: crosslang install-tool [PackageName] [flags-and-options]");
+            Console.WriteLine("USAGE: crosslang install-template [flags-and-options]");
+            Console.WriteLine("USAGE: crosslang install-template [PackageName] [flags-and-options]");
             Console.WriteLine("FLAGS:");
             Console.WriteLine("offline:  build with no internet (don't fetch files)");
             Console.WriteLine("help:     this help");
@@ -27,7 +27,7 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
             Console.WriteLine("version=1.0.0.0-prod:  specify the package version (irrelevant if you don't specify a PackageName)");
             Console.WriteLine();
             Console.WriteLine("ARGUMENTS:");
-            Console.WriteLine("PackageName: the package name of a tool you want to download and install, if not specified we install the tool from the current directory");
+            Console.WriteLine("PackageName: the package name of a template you want to download and install, if not specified we install the template from the current directory");
             return 0;
         }
         else if(flag == "nobuild")
@@ -62,51 +62,21 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
 		ms.Seek(0,0);
 		var exec = VM.LoadExecutable(ms);
 		var info = Json.Decode(exec.Info);
-		if(info.type != "tool")
+		if(info.type != "template")
 		{
-			Console.WriteLine("The project is not a tool");
+			Console.WriteLine("The project is not a template");
 			ms.Close();
 			return 1;
 		}
 		
 		if(TypeOf(info.short_name) == "String")
 		{
-			var dir = toolsDir / info.short_name;
-			if(FS.Local.DirectoryExists(dir))
-			{
-				each(var item : FS.Local.EnumeratePaths(dir))
-				{
-					if(FS.Local.FileExists(item) && item.GetExtension() == ".crvm")
-					{
-						FS.Local.DeleteFile(item);
-					}
-				}
-			}
-
-			FS.Local.CreateDirectory(dir);
+			
+			
 		
-			FS.WriteAllBytes(FS.Local, dir / info.short_name + ".crvm", ba);
+			FS.WriteAllBytes(FS.Local, templatesDir / info.short_name + ".crvm", ba);
 
-			func downloadDependency(_name, _version)
-			{
-				var ms = new MemoryStream(true);
-				var ba = pm.GetPackage(name, version);
-				ms.WriteBlock(ba,0,ba.Length);
-				ms.Seek(0,0);
-				var exec = VM.LoadExecutable(ms);
-				var execPath = dir / $"{_name}-{_version}.crvm";
-				
-				if(!FS.Local.FileExists(execPath))
-					FS.WriteAllBytes(FS.Local, execPath , ba);
-
-				each(var item : exec.Dependencies)
-					downloadDependency(item.Name, item.Version);
-				ms.Close();
-			}
-
-			each(var item : exec.Dependencies)
-				downloadDependency(item.Name, item.Version);
-			Console.WriteLine($"Installed tool {info.short_name}");
+			Console.WriteLine($"Installed template {info.short_name}");
 		}
 
 		ms.Close();
@@ -129,9 +99,9 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
             var proj = Json.Decode(FS.ReadAllText(FS.Local,"cross.json"));
             var name = proj.info.short_name;
                     
-            if(proj.info.type != "tool")
+            if(proj.info.type != "template")
             {
-                Console.WriteLine("The project is not a tool");
+                Console.WriteLine("The project is not a template");
                 return 1;
             }
             if(TypeOf(name) != "String")
@@ -139,15 +109,13 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
                 Console.WriteLine("The tool does not have a name");
                 return 1;
             }
-            var toolDir = toolsDir / name;
-            FS.Local.CreateDirectory(toolDir);
-            var toolFile = toolDir / name + ".crvm";
+            FS.Local.CreateDirectory(templatesDir);
+            var templateFile = templatesDir / name + ".crvm";
 
             if(nobuild)
             {
                 var nameVer = $"{proj.name}-{proj.version}.crvm";
-                var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
-                    
+                var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";                    
                 output = ./buildDir/nameVer;
                 if(!FS.Local.FileExists(output))
                 {
@@ -165,9 +133,7 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
                 output =  bt.BuildProject(buildPath).Output;
             }
                     
-            func CopyCRVM(src,dest)
-            {
-                func copyFile(src,dest)
+            func copyFile(src,dest)
                 {
                     var _src = FS.Local.OpenFile(src,"rb");
                     var _dest = FS.Local.OpenFile(dest, "wb");
@@ -175,22 +141,8 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
                     _src.Close();
                     _dest.Close();
                     Console.WriteLine($"{src} -> {dest}");
-                }    
-                if(FS.Local.FileExists(dest)) return;
-                    copyFile(src,dest);
-
-                        
-                var srcStrm = FS.Local.OpenFile(src,"rb");
-                var crvm = VM.LoadExecutable(srcStrm);
-                        
-                srcStrm.Close();
-                each(var dep : crvm.Dependencies)
-                {
-                    var name = $"{dep.Name}-{dep.Version.ToString()}.crvm";
-                    CopyCRVM(src.GetParent()/name, dest.GetParent()/name);
-                }
-            }
-            CopyCRVM(output,toolFile);
+                }  
+            copyFile(output,toolFile);
             return 0;
         }
         else

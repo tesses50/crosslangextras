@@ -1,8 +1,21 @@
-func Tesses.CrossLang.Shell.ToolTest(dd)
+func Tesses.CrossLang.Shell.WebAppTest(dd)
 {
+    var port = 4206;
+
+    each(var item : dd.Options)
+    {
+        if(item.Key == "port")
+        {
+            var thePort = ParseLong(item.Value);
+            if(TypeOf(thePort) == "Long") port = thePort;
+        }
+    }
+
+
     var pm = Tesses.CrossLang.PackageManager();
     pm.Offline = false;
     var bt = Tesses.CrossLang.BuildTool(pm);
+    
            
     var proj=bt.BuildProject(".");
 
@@ -13,15 +26,13 @@ func Tesses.CrossLang.Shell.ToolTest(dd)
     env.LockRegister();
 
     env.LoadFileWithDependencies(FS.Local,output);
-    var myArgs = [];
+    var myArgs = [output.ToString()];
     for(var i = 1; i < dd.Arguments.Count; i++)
     {
         myArgs.Add(dd.Arguments[i]);
     }
-    return env.GetDictionary().RunTool({
-        Arguments=myArgs,
-        Options = dd.Options,
-        Flags = dd.Flags,
-        ToolName = proj.Info.short_name
-    });
+    var res = env.GetDictionary().WebAppMain(myArgs);
+
+
+    Net.Http.ListenSimpleWithLoop(res, port);
 }

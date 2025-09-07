@@ -11,8 +11,8 @@
 			"type": "webapp",
         	"license": "MIT"
 		},
-		"template_name": "webapp",
-		"template_name_pretty": "Web Application",
+		"short_name": "webapp",
+		"short_name_pretty": "Web Application",
 		"template_project_dependencies": [
 		],
 		"repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",

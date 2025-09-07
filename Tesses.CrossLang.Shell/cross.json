@@ -1,15 +1,16 @@
 {
-    "name": "Tesses.CrossLang.Shell",
-    "version": "1.0.0.0-prod",
-    "info": {
-        "maintainer": "Mike Nolan",
-        "type": "console",
-        "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
-        "homepage": "https://crosslang.tesseslanguage.com/",
-        "license": "LGPLv3"
-    },
-    "project_dependencies": [
-        "../Tesses.CrossLang.BuildEssentials",
-        "../Tesses.CrossLang.Args"
-    ]
+  "name": "Tesses.CrossLang.Shell",
+  "version": "1.0.0.0-prod",
+  "dependencies": [],
+  "info": {
+    "maintainer": "Mike Nolan",
+    "type": "console",
+    "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
+    "homepage": "https://crosslang.tesseslanguage.com/",
+    "license": "LGPLv3"
+  },
+  "project_dependencies": [
+    "../Tesses.CrossLang.BuildEssentials",
+    "../Tesses.CrossLang.Args"
+  ]
 }

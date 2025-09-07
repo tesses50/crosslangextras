@@ -1,9 +1,9 @@
-func Tesses.CrossLang.Shell.Tool(dd)
+func Tesses.CrossLang.Shell.Console(dd)
 {
-    var dir = Env.CrossLangConfig / "Tools";
+    var dir = Env.CrossLangConfig / "ConsoleApps";
     if(dd.Arguments.Length == 1)
     {
-        Console.WriteLine("List of tools:");
+        Console.WriteLine("List of console applications:");
 		if(FS.Local.DirectoryExists(dir))
         each(var item : FS.Local.EnumeratePaths(dir))
         {
@@ -13,31 +13,27 @@ func Tesses.CrossLang.Shell.Tool(dd)
     }
 	else if(dd.Arguments.Length >= 2)
 	{
-		var toolname = dd.Arguments[1];
-		var toolpath = dir / toolname / toolname + ".crvm";
+		var consolename = dd.Arguments[1];
+		var consolepath = dir / consolename / consolename + ".crvm";
 
-		if(FS.Local.FileExists(toolpath))
+		if(FS.Local.FileExists(consolepath))
 		{
 		
     		var env = VM.CreateEnvironment({});
 		    env.RegisterEverything();
     		env.LockRegister();
 
-	    	env.LoadFileWithDependencies(FS.Local,toolpath);
+	    	env.LoadFileWithDependencies(FS.Local,consolepath);
 	    	var myArgs = [];
+			myArgs.Add(consolepath.ToString());
 		    for(var i = 2; i < dd.Arguments.Count; i++)
     		{
     	    	myArgs.Add(dd.Arguments[i]);
 		    }
-    		return env.GetDictionary().RunTool({
-	    	    Arguments=myArgs,
-    	    	Options = dd.Options,
-	        	Flags = dd.Flags,
-		        ToolName = toolname
-    		});
+    		return env.GetDictionary().main(myArgs);
 		}
 		else {
-			Console.WriteLine($"Could not find tool with name {toolname}.");
+			Console.WriteLine($"Could not find console application with name {consolename}.");
 			return 1;
 		}
 	}

@@ -7,11 +7,11 @@
         "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "MIT",
-        "template_name": "compiletool",
+        "short_name": "compiletool",
         "template_info": {
             "type": "compile_tool"
         },
-        "template_name_pretty": "Compile Tool",
+        "short_name_pretty": "Compile Tool",
         "template_ignored_files": ["bin","obj"],
         "description": "A tool that can be a dependency to a project (including libraries) that runs at compile time"
     }

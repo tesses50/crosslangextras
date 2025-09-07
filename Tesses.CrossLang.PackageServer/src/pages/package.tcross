@@ -29,8 +29,8 @@ func Pages.Package(ctx,name)
         case "console":
           installCmd = $"crosslang install-console {name} --version={package[0].version}";
           break;
-        case "app":
-          installCmd = $"crosslang install-app {name} --version={package[0].version}";
+        case "webapp":
+          installCmd = $"crosslang install-webapp {name} --version={package[0].version}";
           break;
         case "tool":
           installCmd = $"crosslang install-tool {name} --version={package[0].version}";

@@ -7,12 +7,12 @@
         "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "MIT",
-        "template_name": "lib",
+        "short_name": "lib",
         "template_info": {
             "type": "lib"
         },
         "template_ignored_files": ["bin","obj"],
         "description": "A crosslang library",
-        "template_name_pretty": "Library"
+        "short_name_pretty": "Library"
     }
 }

@@ -10,3 +10,7 @@ func WebAppMain(args)
         return false;
     };
 }
+func main(args)
+{
+    Console.WriteLine("use crosslang webapp-test to test");
+}

@@ -7,11 +7,12 @@
         "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "MIT",
-        "template_name": "template",
+        "short_name": "template",
         "description": "A template for a project",
         "template_info": {
             "type": "template",
-            "template_name": "mytemplate",
+            "short_name": "mytemplate",
+            "short_name_pretty": "My Template",
             "template_project_dependencies": [],
             "template_extra_text_ftles": [],
             "template_info": {
@@ -22,6 +23,6 @@
         "template_project_dependencies": [],
         "template_extra_text_ftles": [],
         "template_ignored_files": ["bin","obj"],
-        "template_name_pretty": "Template"
+        "short_name_pretty": "Template"
     }
 }

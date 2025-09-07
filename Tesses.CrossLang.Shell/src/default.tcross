@@ -16,6 +16,21 @@ func Tesses.CrossLang.Shell.Default(dd)
     Console.WriteLine("new: create new project");
     Console.WriteLine("build: build a project");
     Console.WriteLine("run: run a project");
+	Console.WriteLine("debug: debug a project");
+	Console.WriteLine("install-console: install a console application");
+	Console.WriteLine("install-template: install a project template");
+	Console.WriteLine("install-tool: install a tool");
+    Console.WriteLine("install-webapp: install a web application");
+	Console.WriteLine("console: run or list installed console applications");
+	Console.WriteLine("webapp: run or list installed web applications");
+    Console.WriteLine("webapp-test: test a web application in place");
+    Console.WriteLine("tool: run or list installed tools");
+	Console.WriteLine("tool-test: test a tool in place");
+	Console.WriteLine("add-project: add project as a dependency");
+	Console.WriteLine("add-dependency: add package as dependency");
+	Console.WriteLine("upload-package: upload package to cpkg");
+	Console.WriteLine("login: login to cpkg");
+	Console.WriteLine("logout: logout from cpkg");
     Console.WriteLine("configdir: print the config directory");
     Console.WriteLine("update-shell: update the shell"); //this command is handled by runtime so we don't have to implement it here
     return 0;

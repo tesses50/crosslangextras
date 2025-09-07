@@ -7,11 +7,14 @@
         "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "MIT",
-        "template_name": "console",
+        "short_name": "console",
         "template_info": {
-            "type": "console"
+            "type": "console",
+            "short_name": "changeme",
+            "short_name_pretty": "Change Me",
+            "description": "Change Me"
         },
-        "template_name_pretty": "Console Application",
+        "short_name_pretty": "Console Application",
         "template_ignored_files": ["bin","obj"],
         "description": "A console application"
     }

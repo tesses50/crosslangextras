@@ -36,14 +36,22 @@ func main(args)
             case "install-tool":
                 return Tesses.CrossLang.Shell.InstallTool(dd);
                 break;
+            case "install-webapp":
+                return Tesses.CrossLang.Shell.InstallWebApp(dd);
+                break;
             case "console":
                 return Tesses.CrossLang.Shell.Console(dd);
                 break;
             case "tool":
                 return Tesses.CrossLang.Shell.Tool(dd);
                 break;
+            case "webapp":
+                return Tesses.CrossLang.Shell.WebApp(dd);
             case "tool-test":
                 return Tesses.CrossLang.Shell.ToolTest(dd);
+                break;
+            case "webapp-test":
+                return Tesses.CrossLang.Shell.WebAppTest(dd);
                 break;
             case "add-project":
                 return Tesses.CrossLang.Shell.AddProject(dd);

@@ -1,7 +1,7 @@
-func Tesses.CrossLang.Shell.InstallTool(dd)
+func Tesses.CrossLang.Shell.InstallConsole(dd)
 {
-    //crosslang install-tool Tesses.CrossLang.Tool.SomeTool --version=1.0.0.0-prod
-    var toolsDir = Env.CrossLangConfig / "Tools";
+    //crosslang install-console Tesses.CrossLang.Console.SomeConsole --version=1.0.0.0-prod
+    var consoleDir = Env.CrossLangConfig / "ConsoleApps";
             
     var offline=false;
     var buildPath = ".";
@@ -15,8 +15,8 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
         }
         else if(flag == "help")
         {
-            Console.WriteLine("USAGE: crosslang install-tool [flags-and-options]");
-            Console.WriteLine("USAGE: crosslang install-tool [PackageName] [flags-and-options]");
+            Console.WriteLine("USAGE: crosslang install-console [flags-and-options]");
+            Console.WriteLine("USAGE: crosslang install-console [PackageName] [flags-and-options]");
             Console.WriteLine("FLAGS:");
             Console.WriteLine("offline:  build with no internet (don't fetch files)");
             Console.WriteLine("help:     this help");
@@ -27,7 +27,7 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
             Console.WriteLine("version=1.0.0.0-prod:  specify the package version (irrelevant if you don't specify a PackageName)");
             Console.WriteLine();
             Console.WriteLine("ARGUMENTS:");
-            Console.WriteLine("PackageName: the package name of a tool you want to download and install, if not specified we install the tool from the current directory");
+            Console.WriteLine("PackageName: the package name of a console application you want to download and install, if not specified we install the console application from the current directory");
             return 0;
         }
         else if(flag == "nobuild")
@@ -62,16 +62,16 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
 		ms.Seek(0,0);
 		var exec = VM.LoadExecutable(ms);
 		var info = Json.Decode(exec.Info);
-		if(info.type != "tool")
+		if(info.type != "console")
 		{
-			Console.WriteLine("The project is not a tool");
+			Console.WriteLine("The project is not a console application");
 			ms.Close();
 			return 1;
 		}
 		
 		if(TypeOf(info.short_name) == "String")
 		{
-			var dir = toolsDir / info.short_name;
+			var dir = consoleDir / info.short_name;
 			if(FS.Local.DirectoryExists(dir))
 			{
 				each(var item : FS.Local.EnumeratePaths(dir))
@@ -106,7 +106,7 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
 
 			each(var item : exec.Dependencies)
 				downloadDependency(item.Name, item.Version);
-			Console.WriteLine($"Installed tool {info.short_name}");
+			Console.WriteLine($"Installed console application {info.short_name}");
 		}
 
 		ms.Close();
@@ -129,19 +129,19 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
             var proj = Json.Decode(FS.ReadAllText(FS.Local,"cross.json"));
             var name = proj.info.short_name;
                     
-            if(proj.info.type != "tool")
+            if(proj.info.type != "console")
             {
-                Console.WriteLine("The project is not a tool");
+                Console.WriteLine("The project is not a console application");
                 return 1;
             }
             if(TypeOf(name) != "String")
             {
-                Console.WriteLine("The tool does not have a name");
+                Console.WriteLine("The console application does not have a name");
                 return 1;
             }
-            var toolDir = toolsDir / name;
-            FS.Local.CreateDirectory(toolDir);
-            var toolFile = toolDir / name + ".crvm";
+            var consoleDir2 = consoleDir / name;
+            FS.Local.CreateDirectory(consoleDir2);
+            var consoleFile = consoleDir2 / name + ".crvm";
 
             if(nobuild)
             {
@@ -190,7 +190,7 @@ func Tesses.CrossLang.Shell.InstallTool(dd)
                     CopyCRVM(src.GetParent()/name, dest.GetParent()/name);
                 }
             }
-            CopyCRVM(output,toolFile);
+            CopyCRVM(output,consoleFile);
             return 0;
         }
         else

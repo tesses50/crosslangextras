@@ -1,0 +1,54 @@
+func Tesses.CrossLang.Shell.WebApp(dd)
+{
+    var dir = Env.CrossLangConfig / "WebApps";
+    if(dd.Arguments.Length == 1)
+    {
+        Console.WriteLine("List of web applications:");
+        Console.WriteLine("Use --port=PORT to set port");
+        
+		if(FS.Local.DirectoryExists(dir))
+        each(var item : FS.Local.EnumeratePaths(dir))
+        {
+            Console.WriteLine(Tesses.CrossLang.GetNameAndDescription(item / item.GetFileName() + ".crvm"));
+        }
+        return 0;
+    }
+	else if(dd.Arguments.Length >= 2)
+	{
+		var webappname = dd.Arguments[1];
+		var webapppath = dir / webappname / webappname + ".crvm";
+        var port = 4206;
+        each(var item : dd.Options)
+        {
+            if(item.Key == "port")
+            {
+                var thePort = ParseLong(item.Value);
+                if(TypeOf(thePort) == "Long") port = thePort;
+            }
+        }
+
+		if(FS.Local.FileExists(webapppath))
+		{
+		
+    		var env = VM.CreateEnvironment({});
+		    env.RegisterEverything();
+    		env.LockRegister();
+
+	    	env.LoadFileWithDependencies(FS.Local,webapppath);
+	    	var myArgs = [webapppath.ToString()];
+		    for(var i = 2; i < dd.Arguments.Count; i++)
+    		{
+    	    	myArgs.Add(dd.Arguments[i]);
+		    }
+    		var res = env.GetDictionary().WebAppMain(myArgs);
+
+
+            Net.Http.ListenSimpleWithLoop(res, port);
+		}
+		else {
+			Console.WriteLine($"Could not find web application with name {toolname}.");
+			return 1;
+		}
+	}
+
+}
