@@ -53,6 +53,41 @@ jobs:
       passwordSecret: dockersecret
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
+    name: Push packages to CPKG
+    runInContainer: true
+    image: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
+    interpreter: !DefaultInterpreter
+      commands: |
+        cd Tesses.CrossLang.PackageServer
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../Tesses.CrossLang.Args
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../Tesses.CrossLang.BuildEssentials
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../Tesses.CrossLang.Std
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../Templates/compiletool
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../console
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../emptyweb
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../lib
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../template
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../tool
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../web
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../webapp
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+    envVars:
+    - name: CPKG_KEY
+      value: '@secret:CPKG_KEY@'
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
     name: push to coolify
     runInContainer: true
     image: curlimages/curl:latest

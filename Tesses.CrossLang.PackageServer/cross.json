@@ -1,7 +1,9 @@
 {
    
     "info": {
-        "type": "console"
+        "type": "console",
+        "short_name": "packageserver",
+        "short_name_pretty": "Package Server"
     },
     "version": "1.0.0.0-prod",
     "name": "Tesses.CrossLang.PackageServer",
