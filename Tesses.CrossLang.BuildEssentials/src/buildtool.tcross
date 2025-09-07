@@ -123,7 +123,13 @@ func Tesses.CrossLang.BuildTool(pm)
                     FS.CreateArchive(subdir, outFile, name, version, Json.Encode(info),icon);
                     outFile.Close();
                     subdir.Close();
-                    return null;
+                    return {
+                        Name = name,
+                        Version = version,
+                        Info = info,
+                        Dependencies = [],
+                        Output = dir / outputDir / output
+                    };
                 }
 
                 FS.Local.CreateDirectory(dir / objDir / "packages");
