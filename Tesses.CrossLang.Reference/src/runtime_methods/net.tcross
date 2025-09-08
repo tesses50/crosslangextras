@@ -1,0 +1,12 @@
+/^ Get the ip addresses of the machine, pass true if you want ipv6, returns List of schema Net.IPAddress^/
+func Net.getIPAddresses($ipv6)
+{
+
+}
+/^ schema from list entries from return value of Net.getIPAddresses ^/
+class Net.IPAddress {
+    /^ The network interface ^/
+    public Interface;
+    /^ The ip address string ^/
+    public Address;
+}

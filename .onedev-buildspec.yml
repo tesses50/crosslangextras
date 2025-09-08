@@ -66,6 +66,8 @@ jobs:
         crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
         cd ../Tesses.CrossLang.Std
         crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
+        cd ../Tesses.CrossLang.Reference
+        crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
         cd ../Templates/compiletool
         crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
         cd ../console

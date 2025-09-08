@@ -1,5 +1,83 @@
+/^ Get whether terminal is echoing characters read ^/
+func Console.getEcho()
+{
+
+}
+/^ Set whether terminal is echoing characters read ^/
+func Console.setEcho(flag)
+{
+    
+}
+/^ Get whether terminal is buffering line by line (true) or byte by byte (false) ^/
+func Console.getCanonical()
+{
+
+}
+/^ Set whether terminal is buffering line by line (true) or byte by byte (false) ^/
+func Console.setCanonical(flag)
+{
+    
+}
+/^ Get whether terminal is sending signals for CTRL+C (true) or via read (false) ^/
+func Console.getSignals()
+{
+
+}
+/^ Set whether terminal is sending signals for CTRL+C (true) or via read (false) ^/
+func Console.setSignals(flag)
+{
+    
+}
+
+
+
 /^ Write Text To Standard Output ^/
-func Console.WriteLine(text)
+func Console.Write(text)
+{
+
+}
+/^ Write Text To Standard Output with newline ^/
+func Console.WriteLine($text)
+{
+
+}
+/^ Write Text To Standard Error ^/
+func Console.Error(text)
+{
+
+}
+/^ Write Text To Standard Error with newline ^/
+func Console.ErrorLine($text)
+{
+
+}
+/^ Read a byte from stdin ^/
+func Console.Read()
+{
+
+}
+/^ Read a line from stdin ^/
+func Console.ReadLine()
+{
+
+}
+/^ Fatally stop program (only allowed if you have full permissions) with optional message ^/
+func Console.Fatal($error_message)
+{
+
+}
+/^ Get stdin Stream ^/
+func Console.getIn()
+{
+
+}
+/^ Get stdout Stream ^/
+func Console.getOut()
+{
+
+}
+/^ Get stderr Stream ^/
+func Console.getError()
 {
 
 }

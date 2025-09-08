@@ -1,0 +1,30 @@
+/^ Create bytearray but with secure random bytes in it instead of zeros ^/
+func Crypto.RandomBytes(byteCount, personalString)
+{
+
+}
+/^ 
+    Hash passwords with PBKDF2
+    shanum:
+        1: sha1 (please don't)
+        224: sha224 (please use this)
+        256: sha256 (vunerable to length extension attack)
+        384: sha384 (perferably this)
+        512: sha512 (vunerable to length extension attack)
+
+^/
+func Crypto.PBKDF2(pass,salt,itterations,keylen,shanum)
+{
+
+}
+/^ Base64 Encode ^/
+func Crypto.Base64Encode(bytes)
+{
+
+}
+
+/^ Base64 Decode ^/
+func Crypto.Base64Decode(str)
+{
+
+}

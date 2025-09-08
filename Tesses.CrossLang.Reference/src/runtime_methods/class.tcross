@@ -1,0 +1,84 @@
+/^ Get the class info returns ClassInfo^/
+func Class.GetInfo(classInstanceOrClassName)
+{
+
+}
+/^ Get the names of all the loaded classes on root environment ^/
+func Class.GetClassNames()
+{
+
+}
+/^ Create instance of class (supports both name and list of name parts split on '.') ^/
+func Class.CreateInstance(name, args)
+{
+
+}
+/^ Get the name of the class instance ^/
+func Class.Name(instance)
+{
+
+}
+/^ Get the instance specific info, including current values, returns ClassInstanceInfo ^/
+func Class.GetInstanceInfo(instance)
+{
+
+}
+
+/^ Schema for what Class.GetInfo returns ^/
+class ClassInfo : Dictionary {
+    /^ The class name ^/
+    public Name;
+    /^ The class name parts (List of strings split on '.') ^/
+    public NameParts;
+    /^ The base class name ^/
+    public Inherits;
+    
+    /^ The base class name parts (List of strings split on '.') ^/
+    public InheritsParts;
+    /^ Documentation of class ^/
+    public Documentation;
+    /^ List of methods and fields in class with (schema is ClassInfoEntry)^/
+    public Entries;
+}
+/^ The schema of the items in the list Entries in the dictionary that Class.GetInfo returns ^/
+class ClassInfoEntry : Dictionary {
+    /^ Field or method name ^/
+    public Name;
+    /^ Is the method abstract (or is the field unset) ^/
+    public IsAbstract;  
+    /^ Is the entry a method (true) or field (false) ^/
+    public IsFunction;
+    /^ Documentation for entry ^/
+    public Documentation;
+    /^ Chunk id for entry if any ^/
+    public ChunkId;
+    /^ Arguments of entry if any (always a list)^/
+    public Arguments;
+    /^ Modifier (can be public, protected, private or static ) ^/
+    public Modifier;
+}
+
+/^ Schema for what Class.GetInstanceInfo returns ^/
+class ClassInstanceInfo : Dictionary {
+    /^ The class name ^/
+    public Name;
+    /^ The file that the class is from ^/
+    public File;
+    /^ List of all classes this class inherits from (tree) ^/
+    public InheritList;
+
+    /^ List of methods and fields in class with (schema is ClassInstanceInfoEntry)^/
+    public Entries;
+}
+
+/^ The schema of the items in the list Entries in the dictionary that Class.GetInstanceInfo returns ^/
+class ClassInstanceInfoEntry : Dictionary {
+    /^ Field or method name ^/
+    public Name;
+    /^ Is the entry a method (true) or field (false) ^/
+    public IsFunction;
+    /^ Owner for entry (the class that owns it)^/
+    public Owner;
+    /^ The current value of the entry ^/
+    public Value;
+}

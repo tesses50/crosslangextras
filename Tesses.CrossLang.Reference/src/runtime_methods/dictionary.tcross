@@ -1,0 +1,15 @@
+/^ Returns DictionaryEnumerator ^/
+func Dictionary.Items(dictordyndict)
+{
+
+}
+/^ Set field in dictionary ^/
+func Dictionary.SetField(dict, key, value)
+{
+
+}
+/^ Get field in dictionary ^/
+func Dictionary.GetField(dict, key)
+{
+
+}

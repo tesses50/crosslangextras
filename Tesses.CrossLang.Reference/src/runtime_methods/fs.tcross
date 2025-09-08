@@ -8,3 +8,53 @@ func FS.WriteAllText(filesystem, path, contents)
 {
 
 }
+
+/^ Read bytes from file ^/
+func FS.ReadAllBytes(filesystem, path)
+{
+
+}
+/^ Write bytes to file ^/
+func FS.WriteAllBytes(filesystem, path, bytes)
+{
+
+}
+
+/^ Create a crvm archive from fs to strm with name version and info^/
+func FS.CreateArchive(fs, strm, name, version, info)
+{
+
+}
+
+/^ Extract a crvm archive from strm to vfs ^/
+func FS.ExtractArchive(strm, vfs)
+{
+    
+}
+
+
+/^ Its a field FS.Local with type LocalFilesystem ^/
+func FS.getLocal()
+{
+
+}
+
+/^ returns the current working directory ^/
+func FS.getCurrentPath()
+{
+
+}
+
+/^ set the current working directory ^/
+func FS.setCurrentPath(path)
+{
+
+}
+/^ Make absolute path from relative path ^/
+func FS.MakeFull(path)
+{
+
+}
+
+
+
