@@ -62,6 +62,9 @@ func main(args)
             case "upload-package":
                 return Tesses.CrossLang.Shell.UploadPackage(dd);
                 break;
+            case "token":
+                return Tesses.CrossLang.Shell.Token(dd);
+                break;
             case "login":
                 return Tesses.CrossLang.Shell.Login(dd);
                 break;

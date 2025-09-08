@@ -18,6 +18,13 @@ func Tesses.CrossLang.Shell.Login(dd)
     if(dd.Arguments.Length < 3)
     {
         //not valid
+        Console.WriteLine("USAGE: crosslang login [name] [host]");
+        Console.WriteLine("USAGE: crosslang login [name] [host] [token]");
+        Console.WriteLine();
+        Console.WriteLine("ARGUMENTS:");
+        Console.WriteLine("name: the session name");
+        Console.WriteLine("host: the host of the package server such as https://cpkg.tesseslanguage.com/");
+        Console.WriteLIne("token: allows you to login from an existing session token, if it is not included this will ask for email and password");
     }
     else if(dd.Arguments.Length == 3)
     {

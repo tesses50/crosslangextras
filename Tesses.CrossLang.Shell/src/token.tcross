@@ -1,0 +1,43 @@
+func Tesses.CrossLang.Shell.Token(dd)
+{
+    Console.Write("Host: ");
+    var host = Console.ReadLine();
+    Console.Write("Email: ");
+    var email = Console.ReadLine();
+    Console.Write("Password: ");
+       
+    var echo = Console.Echo;
+    Console.Echo = false;
+    var password = Console.ReadLine();
+    Console.Echo = echo;
+    Console.WriteLine();
+
+
+
+        var accountRequest = {
+            email,
+            password
+        };
+
+        var req = {
+                Method="POST",
+                Body = Net.Http.TextHttpRequestBody(accountRequest.ToString(),"application/json")
+        };
+        
+        var http = Net.Http.MakeRequest($"{host.TrimEnd('/')}/api/v1/login",req);
+        if(http.StatusCode == 401 && http.ResponseHeaders.TryGetFirst("Content-Type") == "application/json")
+        {
+
+            var json = Json.Decode(http.ReadAsString());
+            Console.WriteLined($"Failed to login, reason={json.reason}");
+            return 1;
+        } 
+        else if(http.ResponseHeaders.TryGetFirst("Content-Type") == "application/json")
+        {
+            var json = Json.Decode(http.ReadAsString());
+            Console.WriteLine("This will only be shown once");
+            Console.WriteLine($"Here you go: {json.token}");
+
+        }
+
+}

@@ -29,7 +29,8 @@ func Tesses.CrossLang.Shell.Default(dd)
 	Console.WriteLine("add-project: add project as a dependency");
 	Console.WriteLine("add-dependency: add package as dependency");
 	Console.WriteLine("upload-package: upload package to cpkg");
-	Console.WriteLine("login: login to cpkg");
+	Console.WriteLine("token: get a session token for CI/CD pipeline (its interactive), you would put the token in the secrets manually.");
+    Console.WriteLine("login: login to cpkg");
 	Console.WriteLine("logout: logout from cpkg");
     Console.WriteLine("configdir: print the config directory");
     Console.WriteLine("update-shell: update the shell"); //this command is handled by runtime so we don't have to implement it here
