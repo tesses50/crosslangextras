@@ -1,0 +1,33 @@
+func Pages.DeletePackages(ctx)
+{
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            DB.LoginButton(ctx,false)
+        ];
+    var form = <div class="container"><form action="./delete_packages" method="POST">
+                    <b>Please don{"'"}t do this unless you absolutely need to as it may break other software</b>
+                    <label for="packages">One package per line with packagename-packageversion-stage or packagename-* for deleting entire package at once</label>
+                    <textarea class="form-control" name="packages" placeholder="Packages" id="packages" style="height: 100px"></textarea>
+                    <h4>Your credentials are needed due to this being a dangerous action</h4>
+                      <div class="mb-3">
+    <label for="email" class="form-label">Email address</label>
+    <input type="email" class="form-control" id="email" name="email">
+  </div>
+  <div class="mb-3">
+    <label for="pass" class="form-label">Password</label>
+    <input type="password" class="form-control" id="pass" name="password">
+  </div>
+
+                    <input class="btn btn-danger" type="submit" value="Delete Packages">
+    </form></div>;
+    return Shell("Delete packages", pages, form);
+}

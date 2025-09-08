@@ -243,6 +243,23 @@ func main(args)
             });
             return true;
         }
+        if(ctx.Path == "/delete_packages")
+        {
+            if(ctx.Method == "GET")
+            {
+                ctx.WithMimeType("text/html").SendText(Pages.DeletePackages(ctx));
+                return true;
+            }
+            else if(ctx.Method == "POST")
+            {
+                var packages = ctx.QueryParams.TryGetFirst("packages");
+                var email = ctx.QueryParams.TryGetFirst("email");
+                var password = ctx.QueryParams.TryGetFirst("password");
+                var msg = DB.DeletePackages(email,password, packages);
+                var html = <div class="container"><h1>{msg}</h1></div>;
+                ctx.WithMimeType("text/html").SendText(Shell(msg,[], html));
+            }
+        }
         if(ctx.Path == "/api/v1/upload")
         {
             if(ctx.Method == "PUT")   

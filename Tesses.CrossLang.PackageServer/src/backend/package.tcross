@@ -1,3 +1,160 @@
+func DB.DeletePackages(email,password, packageListString)
+{
+    if(TypeOf(email) != "String" || TypeOf(password) != "String")
+    {
+        return "Email or password not set in form";
+    }
+    if(TypeOf(packageListString) != "String")
+    {
+        return "Package List not set in form";
+    }
+
+    var accountId = DB.GetAccountId(email, password);
+    
+    var failed = "";
+
+    func removeVersion(name, version)
+    {
+        var v = Version.Parse(version);
+        if(name.Length == 0)
+        {
+            failed += "No package name\n";
+            return;
+        }
+        if(v == null)
+        {
+            failed += "No package version\n";
+            return;
+        }
+
+        DB.Lock();
+        var db = DB.Open();
+        var exec = Sqlite.Exec(db, $"SELECT * FROM packages WHERE packageName = {Sqlite.Escape(name)};");
+        Sqlite.Close(db);
+        DB.Unlock();
+
+        if(exec.Length == 1)
+        {
+            var id = ParseLong(exec[0].id);
+            if(ParseLong(exec[0].accountId) != accountId)
+            {
+                failed += $"User does not own package {name}\n";
+                return;
+            }
+            DB.Lock();
+            db = DB.Open();
+            exec = Sqlite.Exec(db, $"SELECT * FROM versions WHERE packageId = {id};");
+            var versionId = -1;
+            var shallEraseEntirePackage = false;
+            if(TypeOf(exec) == "List")
+            {
+                if(exec.Length == 1 && ParseLong(exec[0].version) == v.VersionInt)
+                {
+                    shallEraseEntirePackage=true;
+                }
+                else {
+                    each(var item : exec)
+                    {
+                        if(ParseLong(item.version) == v.VersionInt)
+                        {
+                            versionId = ParseLong(item.id);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(versionId > -1)
+            {
+                Sqlite.Exec(db, $"DELETE FROM versions WHERE id = {versionId};");
+                FS.Local.DeleteFile(DB.working / "Packages" / name / $"{name}-{version}.crvm");
+            }
+            Sqlite.Close(db);
+            DB.Unlock();
+            if(shallEraseEntirePackage) {
+                removePackage(name);
+            }
+            if(!shallEraseEntirePackage && versionId == -1)
+            {
+                failed += $"Failed to remove package {name}-{version}.crvm\n";
+            }
+        }
+        else {
+            failed += $"Could not find package {name}-{version}.crvm\n";
+        }
+    }
+
+    func removePackage(name)
+    {
+        if(name.Length == 0)
+        {
+            failed += "No package name\n";
+            return;
+        }
+        DB.Lock();
+        var db = DB.Open();
+        var exec = Sqlite.Exec(db, $"SELECT * FROM packages WHERE packageName = {Sqlite.Escape(name)};");
+        Sqlite.Close(db);
+        DB.Unlock();
+
+        if(exec.Length == 1)
+        {
+            var id = ParseLong(exec[0].id);
+            if(ParseLong(exec[0].accountId) != accountId)
+            {
+                failed += $"User does not own package {name}\n";
+                return;
+            }
+            DB.Lock();
+            db = DB.Open();
+            exec = Sqlite.Exec(db, $"DELETE FROM versions WHERE packageId = {id};");
+            exec = Sqlite.Exec(db, $"DELETE FROM packages WHERE id = {id};");
+            Sqlite.Close(db);
+            DB.Unlock();
+            if(FS.Local.DirectoryExists(DB.working / "Packages" / name))
+                FS.Local.DeleteDirectoryRecurse(DB.working / "Packages" / name);
+        }
+        else {
+            failed += $"Could not find package {name}";
+        }
+    }
+    
+
+    each(var item : packageListString.Replace("\r","").Split("\n"))
+    {
+        var stageOrAstrisk = item.LastIndexOf('-');
+        if(stageOrAstrisk > -1)
+        {
+            if(item[stageOrAstrisk+1] == '*')
+            {
+                removePackage(item.Substring(0, stageOrAstrisk));
+            }
+            else if(item[stageOrAstrisk+1] == 'd' || item[stageOrAstrisk+1] == 'a' || item[stageOrAstrisk+1] == 'b' || item[stageOrAstrisk+1] == 'p') {
+                var versionIdx = item.LastIndexOf('-',stageOrAstrisk-1);
+                if(versionIdx > -1)
+                {
+                    removeVersion(item.Substring(0,versionIdx),item.Substring(versionIdx+1));
+
+
+                } else {
+                    failed += $"{item}, Failed to find version part\n";
+                }
+
+            }   
+            else {
+                failed += $"{item}, Invalid version\n";
+                continue;
+            }
+        }
+        else {
+            failed += $"{item}, No version at all\n";
+        }
+    }
+    
+    if(failed.Length > 0) return failed;
+
+    return "Success";
+}
 func DB.CanUploadPackagePrefix(userId, packageName)
 {
     var prefix = packageName.Split(".",true,2);
