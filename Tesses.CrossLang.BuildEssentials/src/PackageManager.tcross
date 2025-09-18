@@ -1,6 +1,21 @@
-func Tesses.CrossLang.PackageManager()
+/^ The CrossLang Package Manager Client ^/
+class Tesses.CrossLang.PackageManager
 {
-    func ParseFileName(name)
+    private configRoot;
+    private packageCache;
+    /^ Work offline (defaults to false) ^/
+    public Offline = false;
+
+    /^ Construct the Package Manager ^/
+    public PackageManager()
+    {
+        this.configRoot = Env.CrossLangConfig;
+        this.packageCache = configRoot / "PackageCache";
+        
+        FS.Local.CreateDirectory(packageCache);
+    }
+    /^ Parse package filename ^/
+    public ParseFileName(name)
     {
         
         var index = name.LastIndexOf('.');
@@ -28,26 +43,21 @@ func Tesses.CrossLang.PackageManager()
             };
         }
     }
-    var configRoot = Env.CrossLangConfig;
-    var packageCache = configRoot / "PackageCache";
-    FS.Local.CreateDirectory(packageCache);
-   
-    return {
-        Offline = false,
-        ParseFileName,
-        GetPackageServers = ()=>{
-            var packageConfigFile = configRoot / "package_servers.json";
+    /^ Get package servers list ^/
+    public GetPackageServers()
+    {
+        var packageConfigFile = configRoot / "package_servers.json";
             
-            if(FS.Local.RegularFileExists(packageConfigFile))
-            {
-                return Json.Decode(FS.ReadAllText(FS.Local, packageConfigFile));
-            }
-            return ["https://cpkg.tesseslanguage.com/"];
-        },
-        GetPackage = (this,name, version) =>
+        if(FS.Local.RegularFileExists(packageConfigFile))
         {
-
-            var v = Version.Parse(version);
+            return Json.Decode(FS.ReadAllText(FS.Local, packageConfigFile));
+        }
+        return ["https://cpkg.tesseslanguage.com/"];
+    } 
+    /^ Get a package (returns bytearray of package data or null if not found), use GetLatest to get the latest version ^/
+    public GetPackage(name, version)
+    {
+        var v = Version.Parse(version);
             var useCache = v.Stage != "dev";
             var pkgFile = packageCache / name / v.ToString();
             if(useCache && FS.Local.RegularFileExists(pkgFile))   
@@ -81,9 +91,11 @@ func Tesses.CrossLang.PackageManager()
                 }
             }
             return null;
-        },
-        GetLatest = (this,name) => {
-            var pkgServers = this.GetPackageServers();
+    }
+    /^ Get the latest version of a package ^/
+    public GetLatest(name)
+    {
+        var pkgServers = this.GetPackageServers();
             if(this.Offline || pkgServers.Count == 0)
             {
                 //user has declared they are offline or don't have packageServers look through packages locally
@@ -121,6 +133,6 @@ func Tesses.CrossLang.PackageManager()
 
             }
             return null;
-        }
-    };
+    }
+   
 }

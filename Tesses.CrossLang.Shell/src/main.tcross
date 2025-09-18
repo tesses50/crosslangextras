@@ -1,6 +1,6 @@
 func main(args)
 {
-    var dd = Tesses.CrossLang.Args(args);
+    var dd = new Tesses.CrossLang.Args(args);
     if(dd.Arguments.Count > 0)
     {
 
@@ -73,6 +73,9 @@ func main(args)
                 break;
             case "configdir":
                 return Tesses.CrossLang.Shell.ConfigDir(dd);
+                break;
+            case "docs":
+                return Tesses.CrossLang.Shell.Docs(dd);
                 break;
             default:
                 return Tesses.CrossLang.Shell.Default(dd);

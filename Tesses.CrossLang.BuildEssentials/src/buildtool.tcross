@@ -1,6 +1,13 @@
-func Tesses.CrossLang.BuildTool(pm)
+/^ The CrossLang BuildTool (use the function BuildProject) ^/
+class Tesses.CrossLang.BuildTool
 {
-    func copyFile(src,dest)
+    /^ Construct the build tool with Package Manager ^/
+    public BuildTool(pm)
+    {
+        this.PacakgeManager = pm;
+    }
+
+    private copyFile(src,dest)
     {
         var src = FS.Local.OpenFile(src,"rb");
         var dest = FS.Local.OpenFile(dest, "wb");
@@ -8,11 +15,14 @@ func Tesses.CrossLang.BuildTool(pm)
         src.Close();
         dest.Close();
     }
-    
-    return {
-        DirectoriesCompiled = [],
-        GetPackageDependencies = (this,name,version,dir)=>{
-            var dep = pm.GetPackage(name,version);
+    /^ Package Manager Object ^/
+    public PackageManager;
+    /^ Directories compiled ^/
+    public DirectoriesCompiled = [];
+    /^ Get the dependencies (don't use this directly unless you know what you are doing) ^/
+    public GetPackageDependencies(name, version, dir)
+    {
+        var dep = PackageManager.GetPackage(name,version);
             if(TypeOf(dep) == "Null") throw $"Package {name} with version {version} does not exist";
 
             var pkgPath = dir / $"{name}-{version}.crvm";
@@ -45,9 +55,11 @@ func Tesses.CrossLang.BuildTool(pm)
                 Dependencies = deps,
                 Output = pkgPath
             };
-        },
-        BuildProject = (this,projectDirectory)=>{
-            var dir = FS.MakeFull(projectDirectory);
+    }
+    /^ Build the project in the directory projectDirectory ^/
+    public BuildProject(projectDirectory)
+    {
+        var dir = FS.MakeFull(projectDirectory);
             var dirStr = dir.ToString();
             
         
@@ -366,6 +378,7 @@ func Tesses.CrossLang.BuildTool(pm)
                 return myData;
             }
             return null;
-        }
-    };
+
+    }
+    
 }

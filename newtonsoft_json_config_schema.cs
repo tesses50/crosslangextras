@@ -43,6 +43,6 @@ namespace Tesses.CrossLang
 
     public static void Main(string[] args)
     {
-        var project = JsonConvert.DeserializeObject<ProjectFile>(File.ReadAllText("config.json"));
+        var project = JsonConvert.DeserializeObject<ProjectFile>(File.ReadAllText("cross.json"));
     }
 }

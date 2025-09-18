@@ -37,7 +37,7 @@ func Tesses.CrossLang.Shell.InstallConsole(dd)
     }
     if(dd.Arguments.Length == 2)
 	{
-		var pm = Tesses.CrossLang.PackageManager();
+		var pm = new Tesses.CrossLang.PackageManager();
         pm.Offline = offline;
 		var name = dd.Arguments[1];
 		var version = null;
@@ -48,7 +48,7 @@ func Tesses.CrossLang.Shell.InstallConsole(dd)
         }
 		if(version == null)
         {
-            var pm = Tesses.CrossLang.PackageManager();
+            var pm = new Tesses.CrossLang.PackageManager();
             version = pm.GetLatest(name);
         }
         if(version == null)
@@ -158,9 +158,9 @@ func Tesses.CrossLang.Shell.InstallConsole(dd)
             } 
             else
             {
-                var pm = Tesses.CrossLang.PackageManager();
+                var pm = new Tesses.CrossLang.PackageManager();
                 pm.Offline = offline;
-                var bt = Tesses.CrossLang.BuildTool(pm);
+                var bt = new Tesses.CrossLang.BuildTool(pm);
                 bt.Config = conf;
                 output =  bt.BuildProject(buildPath).Output;
             }

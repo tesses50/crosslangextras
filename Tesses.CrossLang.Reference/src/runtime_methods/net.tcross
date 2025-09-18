@@ -3,10 +3,177 @@ func Net.getIPAddresses($ipv6)
 {
 
 }
+/^ Start server with specified port (and block) server is described by Net.Http.Server ^/
+func Net.Http.ListenSimpleWithLoop(server, port)
+{
+    
+}
+
+
 /^ schema from list entries from return value of Net.getIPAddresses ^/
 class Net.IPAddress {
     /^ The network interface ^/
     public Interface;
     /^ The ip address string ^/
     public Address;
+}
+
+/^ schema for server ^/
+class Net.Http.Server {
+    /^ Handle the request (ctx schema is Net.Http.ServerContext) returns true (handled request) or false (didn't handle request)  (any function that accepts a server can also be passed with this directly) ^/
+
+    public Handle(ctx)
+    {
+
+    }
+}
+/^ schema for HTTP ServerContext ^/
+class Net.Http.ServerContext {
+    /^ Is using https (within tessesframework) ^/
+    public Encrypted;
+    /^ Http Method ^/
+    public Method;
+    /^ The client's IP ^/
+    public IP;
+    /^ The client's Port ^/
+    public Port;
+    /^ The original path of the server (if using mountable server) ^/
+    public OriginalPath;
+    /^ The query parameters of url (including post fields) schema is Net.Http.HttpDictionary  ^/
+    public QueryParams;
+    /^ The request headers, schema is Net.Http.HttpDictionary  ^/
+    public RequestHeaders;
+
+    /^ The response headers, schema is Net.Http.HttpDictionary  ^/
+    public ResponseHeaders;
+    /^ Get the path ^/
+    public getPath()
+    {
+
+    }
+    /^ Set the path ^/
+    public setPath(path)
+    {
+
+    }
+    /^ Get the HTTP version ^/
+    public getVersion()
+    {
+        
+    }
+    /^ Set the HTTP version ^/
+    public setVersion(version)
+    {
+        
+    }
+    /^ Get the status code ^/
+    public getStatusCode()
+    {
+
+    }
+
+    /^ Set the status code ^/
+    public setStatusCode()
+    {
+
+    }
+
+    /^ Get raw stream ^/
+    public GetStream()
+    {
+
+    }
+    /^ Open a stream for request ^/
+    public OpenRequestStream()
+    {
+
+    }
+    /^ Open a stream for response ^/
+    public OpenResponseStream()
+    {
+
+    }
+
+    /^ 
+        Parse multipart/form-data
+        pass closure that (mime,filename,name)=>{ return SomeStream; }
+        note: you need to close the streams manually due to how crosslang works
+    ^/
+
+    public ParseFormData(cb)
+    {
+
+    }
+    /^ Is the method post and using multipart/form-data ^/
+    public getNeedToParseFormData()
+    {
+
+    }
+    /^ Read request as string ^/
+    public ReadString()
+    {
+
+    }
+    /^ Read request to stream ^/
+    public ReadStream(strm)
+    {
+
+    }
+    /^ Read request and convert to json ^/
+    public ReadJson()
+    {
+
+    }
+
+    /^ Send response from object and serialize to json ^/
+    public SendJson(object)
+    {
+
+    }
+    /^ Send response from text ^/
+    public SendText(text)
+    {
+
+    }
+    /^ Send response from stream ^/
+
+    public SendStream(strm)
+    {
+
+    }
+
+    /^ Send response from bytearray ^/
+
+    public SendBytes(strm)
+    {
+
+    }
+
+    /^ With mime type (returns the ctx) ^/
+
+    public WithMimeType(mime)
+    {
+
+    }
+    /^ Set the last modified date (returns the ctx) ^/
+    public WithLastModified(date)
+    {
+
+    }
+    /^ Set the content disposition header (returns the ctx) ^/
+    public WithContentDisposition(filename, inline)
+    {
+
+    }
+    /^ Add response header (add it if it already exists) (returns the ctx) ^/
+    public WithHeader(key,value) {
+
+    }
+    /^ Replace response header (adds it if it does not exist) (returns the ctx) ^/
+    public WithSingleHeader(key,value)
+    {
+
+    }
+    /^ Start a websocket session ^/
+   
 }

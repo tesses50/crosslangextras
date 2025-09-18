@@ -44,9 +44,9 @@ func Tesses.CrossLang.Shell.Run(dd)
     }
     if(nobuild)
     {
-        if(FS.Local.FileExists("config.json"))
+        if(FS.Local.FileExists("cross.json"))
         {
-            var proj = Json.Decode(FS.ReadAllText(FS.Local, "config.json"));
+            var proj = Json.Decode(FS.ReadAllText(FS.Local, "cross.json"));
             var nameVer = $"{proj.name}-{proj.version}.crvm";
             var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
                     
@@ -64,9 +64,9 @@ func Tesses.CrossLang.Shell.Run(dd)
     }
     else
     {
-        var pm = Tesses.CrossLang.PackageManager();
+        var pm = new Tesses.CrossLang.PackageManager();
         pm.Offline = offline;
-        var bt = Tesses.CrossLang.BuildTool(pm);
+        var bt = new Tesses.CrossLang.BuildTool(pm);
         bt.Config = conf;
         bt.AllowFullCompTime = allowFullCompTime;
         output =  bt.BuildProject(buildPath).Output;

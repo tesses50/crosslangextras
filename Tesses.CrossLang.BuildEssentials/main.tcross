@@ -1,11 +1,9 @@
+/^ Entrypoint used only when building the shell ^/
 func main(args)
 {
-   var pm = Tesses.CrossLang.PackageManager();
-   //pm.Offline=true;
-   //Console.WriteLine(pm.GetLatest("MyPackage"));
-   //Console.WriteLine(Json.Encode(pm.ParseFileName("BeautifulApp-John-1.0.0.0-prod.crvm")));
-
-    var tool = Tesses.CrossLang.BuildTool(pm);
-    tool.BuildProject(args[1]);
+   var pm = new Tesses.CrossLang.PackageManager();
+  
+   var tool = new Tesses.CrossLang.BuildTool(pm);
+   tool.BuildProject(args[1]);
 
 }

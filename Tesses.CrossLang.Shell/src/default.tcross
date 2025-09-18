@@ -34,5 +34,6 @@ func Tesses.CrossLang.Shell.Default(dd)
 	Console.WriteLine("logout: logout from cpkg");
     Console.WriteLine("configdir: print the config directory");
     Console.WriteLine("update-shell: update the shell"); //this command is handled by runtime so we don't have to implement it here
+    Console.WriteLine("docs: view docs for project, crvm or reference");
     return 0;
 }

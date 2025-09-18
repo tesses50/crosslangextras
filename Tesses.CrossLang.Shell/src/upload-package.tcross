@@ -32,9 +32,9 @@ func Tesses.CrossLang.Shell.UploadPackage(dd)
                 }
                 else {
 
-                    var pm = Tesses.CrossLang.PackageManager();
+                    var pm = new Tesses.CrossLang.PackageManager();
                     pm.Offline = false;
-                    var bt = Tesses.CrossLang.BuildTool(pm);
+                    var bt = new Tesses.CrossLang.BuildTool(pm);
                     bt.Config = "";
                     bt.AllowFullCompTime = false;
                     package =  bt.BuildProject(".").Output;

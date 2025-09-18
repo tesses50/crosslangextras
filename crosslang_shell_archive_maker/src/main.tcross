@@ -44,6 +44,8 @@ func create_archive()
     copyFile("Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Args-1.0.0.0-prod.crvm", shell / "Tesses.CrossLang.Args-1.0.0.0-prod.crvm");
     copyFile("Tesses.CrossLang.Shell/bin/Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm", shell / "Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm");
     copyFile("Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm", shell / "Shell.crvm");
+    copyFile("Tesses.CrossLang.Reference/bin/Tesses.CrossLang.Reference-1.0.0.0-dev.crvm", "Reference.crvm");
+
 
     var templates = r / "Templates";
     tmpFS.CreateDirectory(templates);
@@ -65,7 +67,7 @@ func create_archive()
     tmpFS.CreateDirectory(packageCache / "Tesses.CrossLang.Std");
     copyFile("Tesses.CrossLang.Args/bin/Tesses.CrossLang.Args-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Args" / "1.0.0.0-prod");
     copyFile("Tesses.CrossLang.BuildEssentials/bin/Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.BuildEssentials" / "1.0.0.0-prod");
-    copyFile("Tesses.CrossLang.Markup/bin/Tesses.CrossLang.Markup-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Markup" / "1.0.0.0-prod");
+    //copyFile("Tesses.CrossLang.Markup/bin/Tesses.CrossLang.Markup-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Markup" / "1.0.0.0-prod");
     copyFile("Tesses.CrossLang.Args/bin/Tesses.CrossLang.Args-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Args" / "1.0.0.0-prod");
     copyFile("Tesses.CrossLang.Std/bin/Tesses.CrossLang.Std-1.0.0.0-prod.crvm", packageCache / "Tesses.CrossLang.Std" / "1.0.0.0-prod");
 

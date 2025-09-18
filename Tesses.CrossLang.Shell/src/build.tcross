@@ -38,9 +38,9 @@ func Tesses.CrossLang.Shell.Build(dd)
             conf = option.Value;
         }
     }
-    var pm = Tesses.CrossLang.PackageManager();
+    var pm = new Tesses.CrossLang.PackageManager();
     pm.Offline = offline;
-    var bt = Tesses.CrossLang.BuildTool(pm);
+    var bt = new Tesses.CrossLang.BuildTool(pm);
     bt.Config = conf;
     bt.AllowFullCompTime = allowFullCompTime;
     bt.BuildProject(buildPath);

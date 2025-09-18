@@ -1,3 +1,4 @@
+/^ Get the name and description from executable ^/
 func Tesses.CrossLang.GetNameAndDescription(name)
 {
     var strm = FS.Local.OpenFile(name,"rb");
@@ -15,6 +16,7 @@ func Tesses.CrossLang.GetNameAndDescription(name)
     
     return $"{name}: {description}";
 }
+/^ Get the name and description from executable (as json object) ^/
 func Tesses.CrossLang.GetNameAndDescriptionJson(name)
 {
     var strm = FS.Local.OpenFile(name,"rb");

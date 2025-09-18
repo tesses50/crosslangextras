@@ -1,16 +1,20 @@
-func Tesses.CrossLang.Args(args)
+/^ The CrossLang Arguments Parser ^/
+class Tesses.CrossLang.Args
 {
-    var filename = args[0];
-
-    if(args.Count < 1) return null;
-    var flags = [];
-    var options = [];
-    var pos = [];
-    
-    var onlyPos=false;
-
-    for(var i = 1; i < args.Count; i++)
+    /^ Constructor ^/
+    public Args(args)
     {
+        var filename = args[0];
+
+        if(args.Count < 1) return null;
+        var flags = [];
+        var options = [];
+        var pos = [];
+    
+        var onlyPos=false;
+
+        for(var i = 1; i < args.Count; i++)
+        {
         if(args[i] == "--") {
             onlyPos=true;
             continue;
@@ -26,14 +30,20 @@ func Tesses.CrossLang.Args(args)
         else {
             pos.Add(args[i]);
         }
+        }
+        this.Options = options;
+        this.FileName = filename;
+        this.Flags = flags;
+        this.Arguments = pos;
     }
 
 
-    return {
-        Options = options,
-        FileName = filename,
-        Flags = flags,
-        Arguments = pos,
-    };
-
+    /^ Key value pairs --NAME=VALUE ^/
+    public Options;
+    /^ Flags --NAME ^/
+    public Flags;
+    /^ Executable name ^/
+    public FileName;
+    /^ Positional Arguments ^/
+    public Arguments;
 }

@@ -1,0 +1,256 @@
+
+
+
+func Tesses.CrossLang.Shell.Docs(dd)
+{   
+    func download_reference()
+    {
+        var pm = new Tesses.CrossLang.PackageManager();
+        var latest = pm.GetLatest("Tesses.CrossLang.Reference");
+        if(latest != null)
+        {
+            var pkg = pm.GetPackage("Tesses.CrossLang.Reference", latest);
+            if(TypeOf(pkg) == "ByteArray")
+            {
+                FS.WriteAllBytes(FS.Local,referencePath, pkg);
+            }
+        }
+    }
+    //Console.WriteLine(dd);
+    var override_default=false;
+    
+    var funcs=false;
+    var classes=false;
+
+    var funcs_list=[];
+    var classes_list=[];
+
+    var referencePath = Env.CrossLangConfig / "Reference.crvm";
+
+    func printClasses()
+    {
+        Console.WriteLine("Classes:");
+        each(var cls : classes_list)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"\e[38;5;34m/^{cls.Docs}^/");
+            Console.Write($"\e[38;5;39mclass \e[38;5;42m{cls.Name} ");
+            if(cls.Inherits == "ClassObject")
+            {
+                Console.WriteLine("\e[38;5;15m{");
+            }
+            else {
+                Console.WriteLine($"\e[38;5;15m: \e[38;5;42m{cls.Inherits} \e[38;5;15m{{");
+            }
+            each(var ent : cls.Entries)
+            {
+                Console.WriteLine();
+                Console.WriteLine($"\t\e[38;5;34m/^{ent.Docs}^/");
+                Console.Write($"\t\e[38;5;39m{ent.Modifiers} ");
+                if(ent.IsFunction)
+                {
+                    Console.WriteLine($"\e[38;5;229m{ent.Name}\e[38;5;63m(\e[38;5;15m{ent.Args}\e[38;5;63m)\e[0m");
+                }
+                else {
+                    Console.WriteLine($"\e[38;5;159m{ent.Name}\e[0m;");
+                }
+            }
+
+
+            Console.WriteLine("\e[38;5;15m}\e[0m");
+        }
+    }
+    func printFunctions()
+    {
+        Console.WriteLine("Functions:");
+        each(var fn : funcs_list)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"\e[38;5;34m/^{fn.Docs}^/");
+            Console.WriteLine($"\e[38;5;39mfunc \e[38;5;229m{fn.Name}\e[38;5;63m(\e[38;5;15m{fn.Args}\e[38;5;63m)\e[0m");
+        
+        }
+    }
+
+    func load_crvm(crvm_path)
+    {
+        if(!FS.Local.RegularFileExists(crvm_path)) return;
+        var strm = FS.Local.OpenFile(crvm_path,"rb");
+        var res = VM.LoadExecutable(strm);
+        strm.Close();
+        var classes = res.Classes;
+        var functions = res.Functions;
+        var chunks = res.Chunks;
+        each(var item : functions)
+        {
+            item.Arguments = chunks[item.ChunkId].Arguments;
+
+            var name = "";
+            for(var i = 0; i < item.NameParts.Length; i++)
+            {
+                if(i > 0) name += ".";
+                name += item.NameParts[i];
+            }
+
+            var args = "";
+            for(var i = 0; i < item.Arguments.Length; i++)
+            {
+                if(i > 0) args += ", ";
+                args += item.Arguments[i];
+            }
+
+            funcs_list.Add({
+                Name = name,
+                Args = args,
+                Docs = item.Documentation
+            });
+        }
+        each(var item : classes)
+        {
+            var co = {
+                Name = item.Name,
+                Inherits = item.Inherits,
+                Entries = [],
+                Docs = item.Documentation
+            };
+            each(var ent : item.Entries)
+            {
+                if(ent.Modifier != "private")
+                {
+                    var modifiers = $"{ent.Modifier}";
+                    if(ent.IsAbstract && ent.IsFunction)
+                    {
+                        modifiers += " abstract";
+                    }
+                    var args = "";
+                    for(var i = 0; i < ent.Arguments.Length; i++)
+                    {
+                        if(i > 0) args += ", ";
+                        args += ent.Arguments[i];
+                    }
+
+
+                    co.Entries.Add({
+                        Modifiers = modifiers,
+                        Docs = ent.Documentation,
+                        Name = ent.Name,
+                        IsFunction = ent.IsFunction,
+                        Args = args
+                    });
+                }
+            }
+            classes_list.Add(co);
+        }
+        
+    }
+
+    each(var item : dd.Flags)
+    {
+        switch(item)
+        {
+            case "help":
+                Console.WriteLine("USAGE: crosslang docs [flags]");
+                Console.WriteLine("USAGE: crosslang docs [flags] CRVM1 CRVM2 ...");
+                Console.WriteLine("If no CRVM files are provided it defaults to current directory's project");
+                Console.WriteLine();
+                Console.WriteLine("FLAGS:");
+                Console.WriteLine("help: print this help");
+                Console.WriteLine("functions: only list functions");
+                Console.WriteLine("classes: only list classes");
+                Console.WriteLine("reference: print runtime reference");
+                Console.WriteLine("reference-path: print runtime reference file path");
+                Console.WriteLine("update-reference: update runtime reference");
+                Console.WriteLine("example: print an example");
+                return 0;
+            case "functions":
+                funcs=true;
+                break;
+            case "classes":
+                classes=true;
+                break;
+            case "reference":
+                override_default=true;
+                if(!FS.Local.RegularFileExists(referencePath))
+                {
+                    download_reference();
+                }
+                if(FS.Local.RegularFileExists(referencePath))
+                {
+                    load_crvm(referencePath);
+                }
+                break;
+            case "reference-path":
+                Console.WriteLine(referencePath);
+                return 0;
+            case "update-reference":
+                download_reference();
+                return 0;
+            case "example":
+                override_default=true;
+                funcs_list.Add({
+                    Docs="\nAdds two numbers\n",
+                    Name="Add", 
+                    Args="addend1, addend2"
+                });
+                classes_list.Add({
+                    Docs = "\nMy Sample Class\n",
+                    Name = "Class1",
+                    Inherits = "ClassObject",
+                    Entries = [
+                        {
+                            Docs = "My field",
+                            Modifiers = "protected",
+                            IsFunction = false,
+                            Name = "MyField"
+                        },
+                        {
+                            Docs = "Abstract method",
+                            IsFunction =true,
+                            Modifiers = "protected abstract",
+                            Name = "MyAbstractMethod",
+                            Args = "a, b"
+                        }
+                    ]
+                });
+                break;
+        }
+    }
+
+    if(!override_default)
+    {
+        if(dd.Arguments.Length == 1)
+        {
+            if(FS.Local.FileExists("cross.json"))
+            {
+                var proj = Json.Decode(FS.ReadAllText(FS.Local, "cross.json"));
+                var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
+                    
+                each(var file : FS.Local.EnumeratePaths(FS.MakeFull(buildDir)))
+                {
+                    if(file.GetExtension()==".crvm")
+                    {
+                        load_crvm(file);
+                    }
+                }
+               
+            }
+            else
+            {
+                Console.WriteLine("ERROR: could not find project.");
+                return 1;
+            }
+        }
+        else {
+            for(var i  = 1; i < dd.Arguments.Length; i++)
+            {
+                load_crvm(dd.Arguments[i]);
+            }
+
+        }
+    }
+
+    if((!classes && !funcs) || funcs)
+    printFunctions();
+    if((!classes && !funcs) || classes)
+    printClasses();
+}

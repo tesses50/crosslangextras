@@ -22,7 +22,6 @@ func Pages.PackageDocs(ctx)
     var classes = res.Classes;
     var functions = res.Functions;
     var chunks = res.Chunks;
-    Console.WriteLine(classes);
     each(var item : functions)
     {
         item.Arguments = chunks[item.ChunkId].Arguments;
