@@ -122,7 +122,7 @@ func DB.AddVersion(pkgInfo)
     
     //CREATE TABLE IF NOT EXISTS versions (id INTEGER PRIMARY KEY AUTOINCREMENT, packageId INTEGER, version INTEGER, description TEXT, type TEXT, maintainer TEXT, homepage TEXT, repo TEXT, license TEXT);
 
-    var res = Sqlite.Exec(dbCon,$"INSERT INTO versions (packageId,version,description,type,maintainer,homepage,repo,license,uploadTime,pluginHost) VALUES ({pkgId},{version},{Sqlite.Escape(description)},{Sqlite.Escape(type)},{Sqlite.Escape(maintainer)},{Sqlite.Escape(homepage)},{Sqlite.Escape(repo)},{Sqlite.Escape(license)},{DateTime.NowEpoch},Sqlite.Escape(pluginHost));");
+    var res = Sqlite.Exec(dbCon,$"INSERT INTO versions (packageId,version,description,type,maintainer,homepage,repo,license,uploadTime,pluginHost) VALUES ({pkgId},{version},{Sqlite.Escape(description)},{Sqlite.Escape(type)},{Sqlite.Escape(maintainer)},{Sqlite.Escape(homepage)},{Sqlite.Escape(repo)},{Sqlite.Escape(license)},{DateTime.NowEpoch},{Sqlite.Escape(pluginHost)});");
     Sqlite.Close(dbCon);
     if(TypeOf(res) == "String") throw res;
     DB.Unlock();
