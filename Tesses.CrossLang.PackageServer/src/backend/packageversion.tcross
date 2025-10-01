@@ -40,7 +40,7 @@ func DB.GetPackageVersions(name)
             homepage = item.homepage,
             license = item.license,
             uploadTime,
-            uploadDate=new DateTime(uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC")
+            uploadDate=new DateTime(uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC"),
             pluginHost
         });
     }
