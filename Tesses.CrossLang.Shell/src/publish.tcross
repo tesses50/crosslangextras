@@ -1,0 +1,80 @@
+func Tesses.CrossLang.Shell.Publish(dd)
+{
+    var offline=false;
+    var allowFullCompTime=false;
+    var buildPath = ".";
+    var merge=false;
+    var packagePrefix = "Tesses.CrossLang.Runtime";
+    var out = null;
+    var identifier = "crvm";
+    if(dd.Arguments.Count > 1)
+    {
+        identifier = dd.Arguments[1];
+        if(dd.Arguments.Length > 2)
+        {
+            buildPath = dd.Arguments[2];
+        }
+    }
+    each(var flag : dd.Flags)
+    {
+        if(flag == "offline")
+        {
+            offline = true;
+        }
+        if(flag == "allow-insecure-comptime")
+        {
+            allowFullCompTime=true;
+        }
+        if(flag == "merge")
+        {
+            merge = true;
+        }
+        if(flag == "help")
+        {
+            Console.WriteLine("USAGE: crosslang publish [publish-flags-and-options] identifier projectDir");
+            Console.WriteLine("FLAGS:");
+            Console.WriteLine("offline:                 build with no internet (don't fetch files)");
+            Console.WriteLine("help:                    this help");
+            Console.WriteLine("allow-insecure-comptime: Allow full comptime");
+            Console.WriteLine("merge:                   Merge the crvms into one (when bundling a runtime)");
+            Console.WriteLine();
+            Console.WriteLine("OPTIONS:");
+            Console.WriteLine("conf=CONFIGSTRING:               specify a conf string for compile_tool(s), is the property Config");
+            Console.WriteLine("runtime-package-prefix=PREFIX:   prefix the identifier (defaults to Tesses.CrossLang.Runtime, we add the dot automaticly unless you provide empty string)");
+            Console.WriteLine("out=DIR:                         where to output the published artifact, defaults to projectDir/publish/identifier");
+            return 0;
+        }
+    }
+    var conf = "";
+    each(var option : dd.Options)
+    {
+        if(option.Key == "conf")
+        {
+            conf = option.Value;
+        }
+        if(option.Key == "runtime-package-prefix")
+        {
+            packagePrefix = option.Value;
+        }
+        if(option.Key == "out")
+        {
+            out = option.Value;
+        }
+    }
+    
+
+
+    var pm = new Tesses.CrossLang.PackageManager();
+    pm.Offline = offline;
+    var bt = new Tesses.CrossLang.BuildTool(pm);
+    bt.Config = conf;
+    bt.AllowFullCompTime = allowFullCompTime;
+    var publisher = new Tesses.CrossLang.Publisher(bt, FS.MakeFull(buildPath));
+    publisher.OutputDirectory = out;
+    publisher.RuntimeIdentifier = identifier;
+    publisher.PackagePrefix = packagePrefix;
+    publisher.MergeForRuntimes = merge;
+
+    publisher.Publish();
+    return 0;
+}

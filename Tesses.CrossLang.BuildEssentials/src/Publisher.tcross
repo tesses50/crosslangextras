@@ -1,0 +1,248 @@
+class Tesses.CrossLang.Publisher
+{
+    public Publisher(builder,project_dir)
+    {
+        
+        this.ProjectBuilder = builder;
+        this.ProjectDirectory = project_dir;
+        this.ProjectInfo = Json.Decode(FS.ReadAllText(FS.Local, project_dir / "cross.json"));
+    }
+    /^
+        The project directory to publish
+    ^/
+    public ProjectDirectory;
+
+    /^
+        The project builder
+    ^/
+    public ProjectBuilder;
+    /^
+        The project cross.json contents
+    ^/
+    public ProjectInfo;
+
+
+    /^
+        Where we output the published files
+        If null (which is default) we output at ProjectDirectory / "publish" / RuntimeIdentifier
+    ^/
+    public OutputDirectory = null;
+    /^
+        The runtime identifier
+        
+        builtins:
+        "crvm" (merge to one crvm)
+        "header" (merge to one crvm and generate C header)
+        "cmake" (merge to one crvm and generate C header and create a cmake project)
+
+        actual runtimes can be found here: https://cpkg.tesseslanguage.com/packages?q=Tesses.CrossLang.Runtime. (you need to strip the Tesses.CrossLang.Runtime. from the names)
+
+    ^/
+    public RuntimeIdentifier="crvm";
+    /^
+        The prefix of the package (to prepend onto runtime identifier, we put the trailing period for you)
+    ^/
+    public PackagePrefix = "Tesses.CrossLang.Runtime";
+    /^
+        Merge for runtimes (one crvm file)
+    ^/
+    public MergeForRuntimes = false;
+
+    private Build()
+    {
+        var out = this.ProjectBuilder.BuildProject(this.ProjectDirectory).Output;
+        return FS.MakeFull(out);
+    }
+    
+    private Merge()
+    {
+        var path = this.Build();
+        var objDir = "obj";
+        if(TypeOf(ProjectInfo.obj_directory) == "String")
+            objDir = ProjectInfo.obj_directory;
+
+        var packPath = this.ProjectDirectory / objDir / "merge";
+        if(packPath.Count > 0 && FS.Local.DirectoryExists(packPath))
+        {
+            FS.Local.DeleteDirectoryRecurse(packPath);
+        }
+        FS.Local.CreateDirectory(packPath);
+
+        var pack_dir = new SubdirFilesystem(FS.Local, packPath);
+
+        return packPath / VM.Merge(FS.Local,path,pack_dir);
+    }
+    private CopyBuild(destPath)
+    {
+        func CopyCRVM(src,dest)
+            {
+                func copyFile(src,dest)
+                {
+                    var _src = FS.Local.OpenFile(src,"rb");
+                    var _dest = FS.Local.OpenFile(dest, "wb");
+                    _src.CopyTo(_dest);
+                    _src.Close();
+                    _dest.Close();
+                    Console.WriteLine($"{src} -> {dest}");
+                }    
+                if(FS.Local.FileExists(dest)) return;
+                    copyFile(src,dest);
+
+                        
+                var srcStrm = FS.Local.OpenFile(src,"rb");
+                var crvm = VM.LoadExecutable(srcStrm);
+                        
+                srcStrm.Close();
+                each(var dep : crvm.Dependencies)
+                {
+                    var name = $"{dep.Name}-{dep.Version.ToString()}.crvm";
+                    CopyCRVM(src.GetParent()/name, dest.GetParent()/name);
+                }
+            }
+        CopyCRVM(this.Build(), destPath);
+    }
+
+    private CreateCMake(dir, short_name)
+    {
+        FS.Local.CreateDirectory(dir / "src");
+        var path = this.Merge();
+        var bytes = FS.ReadAllBytes(FS.Local, path);
+        var caps_version = this.FixCHeaderName(short_name);
+        
+        FS.WriteAllText(FS.Local, dir / "src" / $"{short_name}.h", bytes.ToCHeaderFile(caps_version));
+
+        if(!FS.Local.RegularFileExists(dir / "CMakeLists.txt"))
+        {
+            var cmake_file = embed("cml.txt").ToString().Replace("@<<caps_version>>@",caps_version).Replace("@<<short_name>>@",short_name);
+            FS.WriteAllText(FS.Local,dir / "CMakeLists.txt", cmake_file);
+        }
+
+        if(!FS.Local.RegularFileExists(dir / "src"/"main.cpp"))
+        {
+
+            var cppFile = embed("cppfiletemplate.cpp").ToString().Replace("@<<CAPS_VERSION>>@", caps_version).Replace("@<<HEADER>>@",short_name);
+
+            FS.WriteAllText(FS.Local,dir / "src"/"main.cpp", cppFile);
+        }
+    }
+
+    private CopyFile(src,dest)
+    {
+        var srcStrm = FS.Local.OpenFile(src,"rb");
+        var destStrm = FS.Local.OpenFile(dest, "wb");
+
+        srcStrm.CopyTo(destStrm);
+        srcStrm.Close();
+        destStrm.Close();
+    }
+
+    private FixCHeaderName(name)
+    {
+        var myStr = name.ToUpper();
+        name = "";
+        each(var item : myStr)
+        {
+            if((item >= 'A' && item <= 'Z') || (item >= '0' && item <= '9') || item == '_')
+                name += item;
+        }
+        if(name.Length == 0) return "NONAME";
+        else if(name[0] >= '0' && name[0] <= '9') 
+            return $"_{name}";
+        return name;
+    }
+
+
+    /^ Start the publishing process ^/
+    public Publish()
+    {
+        
+
+        var outDir = TypeOf(this.OutputDirectory) == "Null" ? (this.ProjectDirectory / "publish" / this.RuntimeIdentifier) : this.OutputDirectory;
+        var short_name = TypeOf(this.ProjectInfo.info.short_name) == "String" ? this.ProjectInfo.info.short_name : this.ProjectInfo.name;
+
+        FS.Local.CreateDirectory(outDir);
+
+        switch(this.RuntimeIdentifier)
+        {
+            case "crvm":
+            {
+                var path = this.Merge();
+                FS.Local.MoveFile(path, outDir / $"{short_name}.crvm");
+            }
+                break;
+            case "header":
+            {
+                var path = this.Merge();
+                var bytes = FS.ReadAllBytes(FS.Local, path);
+                FS.WriteAllText(FS.Local, outDir / $"{short_name}.h", bytes.ToCHeaderFile(this.FixCHeaderName(short_name)));
+            }
+                break;
+            case "cmake":
+            {
+                this.CreateCMake(outDir, short_name);
+            }
+                break;
+            default:
+            {
+                var runtimePackageName = this.PackagePrefix;
+             
+                if(runtimePackageName.Count > 0 && !runtimePackageName.EndsWith('.'))
+                    runtimePackageName += ".";
+                
+                runtimePackageName += this.RuntimeIdentifier;
+
+                var version = this.ProjectBuilder.PackageManager.GetLatest(runtimePackageName);
+                if(TypeOf(version) != "String")
+                {
+                    throw {
+                        Type="PackageNotFoundException",
+                        Message=$"Could not find package {runtimePackageName}.",
+                        ToString=(this)=>$"{this.Type} on line: {this.Line} {this.Message}"
+                    };
+                }
+
+                var pkgObj = this.ProjectBuilder.PackageManager.GetPackage(runtimePackageName, version);
+                var strm = new MemoryStream(true);
+                strm.WriteBlock(pkgObj,0,pkgObj.Length);
+                strm.Seek(0,0);
+                var sdfs = new SubdirFilesystem(FS.Local, outDir);
+                var archiveResponse = FS.ExtractArchive(strm,sdfs);
+                sdfs.Close();
+
+                var archiveInfo = Json.Decode(archiveResponse.Info);
+
+                if(archiveInfo.executable_can_be_renamed)
+                {
+                    var executable_name_path = /archiveInfo.executable_name;
+                    var executable_extension = executable_name_path.GetExtension();
+                    var newName = outDir/short_name;
+                    if(executable_extension.Length > 0) newName += executable_extension;
+
+                    FS.Local.MoveFile(outDir/archiveInfo.executable_name,newName);
+                    FS.Local.Chmod(newName, 0755);
+                    if(this.MergeForRuntimes)
+                    {
+                        FS.Local.MoveFile(this.Merge(), outDir / short_name + ".crvm");
+                    }
+                    else {
+                        this.CopyBuild(outDir / short_name + ".crvm");
+                    }
+                }
+                else {
+                    var executable_name_path = /archiveInfo.executable_name;
+                    FS.Local.Chmod(outDir/archiveInfo.executable_name, 0755);
+                    var executable_name_no_ext = executable_name_path.ChangeExtension(null).GetFileName();
+                    if(this.MergeForRuntimes)
+                    {
+                        FS.Local.MoveFile(this.Merge(), outDir / executable_name_no_ext  + ".crvm");
+                    }
+                    else {
+                        this.CopyBuild(outDir / executable_name_no_ext + ".crvm");
+                    }
+                }
+            }
+                break;
+            
+        }
+    }
+}

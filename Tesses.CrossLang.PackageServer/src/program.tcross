@@ -71,13 +71,19 @@ func main(args)
         }
         if(ctx.Path == "/api/v1/search")
         {
-            var filter = ctx.QueryParams.TryGetFirst("filter");
-            if(TypeOf(filter) != "String") filter = "";
-            var filters = filter.Length > 0 ? filter.Split(",") : [];
-            
-            if(filters.Length > 0)
+            var filter = "";
+            var type = ctx.QueryParams.TryGetFirst("type");
+            if(TypeOf(type) != "String") type = "";
+            var types = type.Length > 0 ? type.Split(",") : [];
+
+            var pluginHost = ctx.QueryParams.TryGetFirst("pluginHost");
+            if(TypeOf(pluginHost) == "String")
             {
-                filter = " AND (";
+                filter += $" AND v.pluginHost = {Sqlite.Escape(pluginHost)}";
+            }
+            if(types.Length > 0)
+            {
+                filter += " AND (";
                 var first = true;
                 each(var item : filters)
                 {

@@ -112,6 +112,11 @@ func Pages.Package(ctx,name)
             <li>Last updated: {new DateTime(package[0].uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC")}</li>
             <li>Latest version: {package[0].version}</li>
             <li>Type: {package[0].type}</li>
+            <if(packages[0].pluginHost.Length>0)>
+                <true>
+                <li>PluginHost: {package[0].pluginHost}</li>
+                </true>
+            </if>
             <li><a href={package[0].download}>Download</a></li>
             <li><a href={package[0].docs}>View Docs</a></li>
           </ul>
@@ -153,6 +158,11 @@ func Pages.Package(ctx,name)
                       </if>
                       <li>Uploaded: {new DateTime(package[i].uploadTime).ToString("%Y/%m/%d %H:%M:%S UTC")}</li>
                       <li>Type: {package[i].type}</li>
+                      <if(packages[i].pluginHost.Length>0)>
+                        <true>
+                        <li>PluginHost: {package[i].pluginHost}</li>
+                        </true>
+                      </if>
                       <li><a href={package[i].download}>Download</a></li>
 
                       <li><a href={package[i].docs}>View Docs</a></li>

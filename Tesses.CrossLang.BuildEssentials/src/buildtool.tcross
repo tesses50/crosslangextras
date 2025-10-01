@@ -4,16 +4,16 @@ class Tesses.CrossLang.BuildTool
     /^ Construct the build tool with Package Manager ^/
     public BuildTool(pm)
     {
-        this.PacakgeManager = pm;
+        this.PackageManager = pm;
     }
 
     private copyFile(src,dest)
     {
-        var src = FS.Local.OpenFile(src,"rb");
-        var dest = FS.Local.OpenFile(dest, "wb");
-        src.CopyTo(dest);
-        src.Close();
-        dest.Close();
+        var srcStrm = FS.Local.OpenFile(src,"rb");
+        var destStrm = FS.Local.OpenFile(dest, "wb");
+        srcStrm.CopyTo(destStrm);
+        srcStrm.Close();
+        destStrm.Close();
     }
     /^ Package Manager Object ^/
     public PackageManager;
@@ -22,8 +22,9 @@ class Tesses.CrossLang.BuildTool
     /^ Get the dependencies (don't use this directly unless you know what you are doing) ^/
     public GetPackageDependencies(name, version, dir)
     {
-        var dep = PackageManager.GetPackage(name,version);
+        var dep = this.PackageManager.GetPackage(name,version);
             if(TypeOf(dep) == "Null") throw $"Package {name} with version {version} does not exist";
+      
 
             var pkgPath = dir / $"{name}-{version}.crvm";
 
@@ -102,7 +103,7 @@ class Tesses.CrossLang.BuildTool
                     outputDir = configData.bin_directory;
                 
                 if(TypeOf(configData.obj_directory) != "Undefined")
-                    outputDir = configData.obj_directory;
+                    objDir = configData.obj_directory;
                 if(TypeOf(configData.source_directory) != "Undefined")
                     srcDir = configData.source_directory;
                 if(TypeOf(configData.resource_directory) != "Undefined")
@@ -185,7 +186,7 @@ class Tesses.CrossLang.BuildTool
                         FS.Local.CreateDirectory(newDir);
                         var newFile = newDir / $"{item.Name}-{item.Version}.crvm";
 
-                        copyFile(item.Output, newFile);
+                        this.copyFile(item.Output, newFile);
                         each(var item2 : item.Dependencies)
                         {
                             walk_for_compiling(item2, newDir);
@@ -205,7 +206,7 @@ class Tesses.CrossLang.BuildTool
                     }
                     else 
                     {
-                        copyFile(item.Output, dir2 / $"{item.Name}-{item.Version}.crvm");
+                        this.copyFile(item.Output, dir2 / $"{item.Name}-{item.Version}.crvm");
                         each(var item2 : item.Dependencies)
                         {
                             walk_for_compiling(item2, dir2);   

@@ -14,7 +14,7 @@ func cmd(name, args)
 func main(args)
 {
     
-    var args2=["-o","./Tesses.CrossLang.BuildEssentials/bin-tmp","-n","Tesses.CrossLang.BuildEssentials","-v","1.0.0.0-prod","Tesses.CrossLang.BuildEssentials/main.tcross"];
+    var args2=["-o","./Tesses.CrossLang.BuildEssentials/bin-tmp","-r","./Tesses.CrossLang.BuildEssentials/res","-n","Tesses.CrossLang.BuildEssentials","-v","1.0.0.0-prod","Tesses.CrossLang.BuildEssentials/main.tcross"];
     each(var f : FS.Local.EnumeratePaths("./Tesses.CrossLang.BuildEssentials/src"))
     {
         if(f.GetExtension() == ".tcross")

@@ -104,7 +104,7 @@ func DB.Init(working)
     
     var dbCon = DB.Open();
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS packages (id INTEGER PRIMARY KEY AUTOINCREMENT, packageName TEXT UNIQUE, accountId INTEGER);");
-    Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS versions (id INTEGER PRIMARY KEY AUTOINCREMENT, packageId INTEGER, version INTEGER, description TEXT, type TEXT, maintainer TEXT, homepage TEXT, repo TEXT, license TEXT, uploadTime INTEGER);");
+    Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS versions (id INTEGER PRIMARY KEY AUTOINCREMENT, packageId INTEGER, version INTEGER, description TEXT, type TEXT, maintainer TEXT, homepage TEXT, repo TEXT, license TEXT, uploadTime INTEGER, pluginHost TEXT);");
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, accountName TEXT UNIQUE, password_hash TEXT, password_salt TEXT, motto TEXT, verifyKey TEXT UNIQUE, verifyExpire INTEGER, flags INTEGER);");
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, accountId INTEGER, key STRING UNIQUE);");
     Sqlite.Exec(dbCon,"CREATE TABLE IF NOT EXISTS reserved_prefixes (id INTEGER PRIMARY KEY AUTOINCREMENT, accountId INTEGER, prefix STRING UNIQUE);");

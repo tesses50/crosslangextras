@@ -1,0 +1,46 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(@<<short_name>>@)
+
+option(@<<caps_version>>@_FETCHCONTENT "Whether to use fetchcontent" ON)
+option(@<<caps_version>>@_SHARED_CROSSLANG "Whether to use shared crosslang" ON)
+
+add_executable(@<<short_name>>@ src/main.cpp)
+
+if(@<<caps_version>>@_FETCHCONTENT)
+                    
+    set(TESSESFRAMEWORK_ENABLE_EXAMPLES OFF CACHE INTERNAL "For TessesFramework" FORCE)
+    set(TESSESFRAMEWORK_ENABLE_APPS OFF CACHE INTERNAL "For TessesFramework" FORCE)
+                    
+    set(TESSESFRAMEWORK_FETCHCONTENT ON CACHE INTERNAL "For TessesFramework" FORCE)
+    set(CROSSLANG_ENABLE_BINARIES OFF CACHE INTERNAL "For CrossLang" FORCE)
+
+    if(@<<caps_version>>@_SHARED_CROSSLANG)
+        set(TESSESFRAMEWORK_ENABLE_STATIC OFF CACHE INTERNAL "For TessesFramework" FORCE)
+        set(TESSESFRAMEWORK_ENABLE_SHARED ON CACHE INTERNAL "For TessesFramework" FORCE)
+    else()
+        set(TESSESFRAMEWORK_ENABLE_STATIC ON CACHE INTERNAL "For TessesFramework" FORCE)
+        set(TESSESFRAMEWORK_ENABLE_SHARED OFF CACHE INTERNAL "For TessesFramework" FORCE)
+    endif()
+    include(FetchContent)
+    FetchContent_Declare(
+        TessesCrossLang
+        GIT_REPOSITORY https://onedev.site.tesses.net/crosslang.git
+    )
+                    
+    FetchContent_MakeAvailable(TessesCrossLang)
+    if(@<<caps_version>>@_SHARED_CROSSLANG)
+        target_link_libraries(@<<short_name>>@ PUBLIC crosslang_shared)
+    else()
+        target_link_libraries(@<<short_name>>@ PUBLIC crosslang_static)
+    endif()
+else()
+    find_package(TessesCrossLang REQUIRED)
+    if(@<<caps_version>>@_SHARED_CROSSLANG)
+        target_link_libraries(@<<short_name>>@ PUBLIC TessesCrossLang::crosslang_shared)
+    else()
+        target_link_libraries(@<<short_name>>@ PUBLIC TessesCrossLang::crosslang_static)
+    endif()
+endif()
+install(TARGETS @<<short_name>>@ DESTINATION "${CMAKE_INSTALL_BINDIR}")
+            

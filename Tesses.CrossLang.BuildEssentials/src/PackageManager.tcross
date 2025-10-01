@@ -10,9 +10,9 @@ class Tesses.CrossLang.PackageManager
     public PackageManager()
     {
         this.configRoot = Env.CrossLangConfig;
-        this.packageCache = configRoot / "PackageCache";
+        this.packageCache = this.configRoot / "PackageCache";
         
-        FS.Local.CreateDirectory(packageCache);
+        FS.Local.CreateDirectory(this.packageCache);
     }
     /^ Parse package filename ^/
     public ParseFileName(name)
@@ -60,6 +60,7 @@ class Tesses.CrossLang.PackageManager
         var v = Version.Parse(version);
             var useCache = v.Stage != "dev";
             var pkgFile = packageCache / name / v.ToString();
+            
             if(useCache && FS.Local.RegularFileExists(pkgFile))   
             {
                 return FS.ReadAllBytes(FS.Local,pkgFile);
