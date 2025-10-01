@@ -44,6 +44,8 @@ func Tesses.CrossLang.Shell.WebApp(dd)
 
 
             Net.Http.ListenSimpleWithLoop(res, port);
+			res.Close();
+			return 0;
 		}
 		else {
 			Console.WriteLine($"Could not find web application with name {toolname}.");

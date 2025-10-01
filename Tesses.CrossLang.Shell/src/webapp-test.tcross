@@ -35,4 +35,7 @@ func Tesses.CrossLang.Shell.WebAppTest(dd)
 
 
     Net.Http.ListenSimpleWithLoop(res, port);
+
+    res.Close();
+    return 0;
 }

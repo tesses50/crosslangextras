@@ -4,13 +4,13 @@ using namespace Tesses::Framework;
 using namespace Tesses::CrossLang;
 int main(int argc, char** argv)
 {
+    TF_InitWithConsole();
     std::string name = argv[0];
-    Tesses::Framework::Filesystem::LocalFilesystem fs;
-    Tesses::Framework::Filesystem::VFSPath exePath=fs.SystemToVFSPath(name);
+    Tesses::Framework::Filesystem::VFSPath exePath=Tesses::Framework::Filesystem::LocalFS->SystemToVFSPath(name);
     exePath.MakeAbsolute();
 
 
-    TF_InitWithConsole();
+    
         
     GC gc;
     gc.Start();
@@ -54,10 +54,15 @@ int main(int argc, char** argv)
        
         svr.StartAccepting();
         TF_RunEventLoop();
-         TDictionary* _dict;
+        TDictionary* _dict;
+        TClassObject* _co;
         if(GetObjectHeap(res,_dict))
         {
             _dict->CallMethod(ls,"Close",{});
+        }
+        if(GetObjectHeap(res,_co))
+        {
+            _co->CallMethod(ls,"","Close",{});
         }
         TF_Quit();
     }
