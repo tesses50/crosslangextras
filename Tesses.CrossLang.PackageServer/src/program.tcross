@@ -85,7 +85,7 @@ func main(args)
             {
                 filter += " AND (";
                 var first = true;
-                each(var item : filters)
+                each(var item : types)
                 {
                     if(!first) {
                         filter += " OR ";
