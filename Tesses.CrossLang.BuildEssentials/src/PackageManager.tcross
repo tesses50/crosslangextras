@@ -168,7 +168,7 @@ class Tesses.CrossLang.PackageManager
         if(TypeOf(options.server) == "String")
             return handle(options.server) ?? [];
         else {
-            each(var item : : this.GetPackageServers())
+            each(var item : this.GetPackageServers())
             {
                 var r = handle(item);
                 if(TypeOf(r) == "List") return r;
