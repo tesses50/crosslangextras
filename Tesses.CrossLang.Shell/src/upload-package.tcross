@@ -6,6 +6,22 @@ func Tesses.CrossLang.Shell.UploadPackage(dd)
             var session=null;
             var package=null;
             var nobuild=false;
+            each(var flag : dd.Flags)
+            {
+                if(flag == "help")
+                {
+                    Console.WriteLine("crosslang upload-package [options] PackageFile");
+                    Console.WriteLine();
+                    Console.WriteLine("OPTIONS");
+                    Console.WriteLine("host: the host (for ci/cd)");
+                    Console.WriteLine("token: the token (for ci/cd)");
+                    Console.WriteLine("session: if you have multiple sessions logged in pass in session name");
+                    Console.WriteLine();
+                    Console.WriteLine("Positional:");
+                    Console.WriteLine("PackageFile: if specified push the crvm file or if not push the result of the current project");
+                    return 0;
+                }
+            }
             each(var option : dd.Options)
             {
                 if(option.Key == "host")
