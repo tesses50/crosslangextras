@@ -135,5 +135,97 @@ class Tesses.CrossLang.PackageManager
             }
             return null;
     }
-   
+    /^
+        Search for packages based on query
+        Options is a {"server": "SERVER_URL", "type": "lib", "pluginHost": "yourPluginHost","offset":0,"limit": 20}
+    ^/
+    public Search(query, $options)
+    {
+        options = options ?? {};
+
+        var urlBase = "/api/v1/search?q={Net.Http.UrlEncode(query)}";
+        if(TypeOf(options.type) == "String") urlBase += $"&type={Net.Http.UrlEncode(options.type)}";
+        if(TypeOf(options.pluginHost) == "String") urlBase += "&pluginHost={Net.Http.UrlEncode(options.pluginHost)}";
+        if(TypeOf(options.offset) == "Long") urlBase += $"&offset={options.offset}";
+        if(TypeOf(options.limit) == "Long") urlBase += $"&limit={options.limit}";
+
+        func handle(server)
+        {
+            var req = Net.Http.MakeRequest($"{server.TrimEnd('/')}{urlBase}");
+            if(req.StatusCode==200)
+            {
+                try {
+                    var res2=Json.Decode(req.ReadAsString());
+                    return res2.packages;
+                }catch(ex) {
+
+                }
+            }
+
+            return null;
+        }
+
+        if(TypeOf(options.server) == "String")
+            return handle(options.server) ?? [];
+        else {
+            each(var item : : this.GetPackageServers())
+            {
+                var r = handle(item);
+                if(TypeOf(r) == "List") return r;
+
+            }
+            return [];
+        }
+        
+    }
+    /^
+        Download a plugin to directory
+        returns true if succeeds or false if it fails
+    ^/
+    public DownloadPlugin(dirFS, name, version)
+    {
+        var pkg = this.GetPackage(name,version.ToString());
+        if(pkg == null) return false;
+        var ms = new MemoryStream(true);
+        ms.WriteBlock(pkg,0,pkg.Count);
+        ms.Seek(0,0);
+        var vm = VM.LoadExecutable(ms);
+        ms.Close();
+        var info = {};
+        try{info=Json.Decode(vm.Info);}catch(ex){}
+        var short_name = TypeOf(info.short_name) == "String" ? info.short_name : name;
+        dirFS.CreateDirectory(/short_name);
+        each(var file : dirFS.EnumeratePaths(/short_name))
+        {
+            if(file.GetExtension() == ".crvm" && dirFS.FileExists(file))
+            {
+                dirFS.DeleteFile(file);
+            }
+        }
+        FS.WriteAllBytes(dirFS,/short_name/$"{short_name}.crvm", pkg);
+
+        func dlDeps(_vm)
+        {
+            each(var dep : _vm.Dependencies)
+            {
+                var path = /short_name/$"{dep.Name}-{dep.Version.ToString()}";
+                if(!dirFs.RegularFileExists(path))
+                {
+                    var pkg2 = this.GetPackage(dep.Name,dep.Version.ToString());
+                    if(pkg2 == null) return false;
+                    FS.WriteAllBytes(dirFS,path,pkg2);
+                    var ms2 = new MemoryStream(true);
+                    ms2.WriteBlock(pkg2,0,pkg2.Count);
+                    ms2.Seek(0,0);
+                    var vm2 = VM.LoadExecutable(ms2);
+                    ms2.Close();
+                    dlDeps(vm2);
+                }
+            }
+
+            return true;
+        }
+        
+        return dlDeps(vm);
+    }
 }
