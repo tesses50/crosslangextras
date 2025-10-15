@@ -143,11 +143,12 @@ class Tesses.CrossLang.PackageManager
     {
         options = options ?? {};
 
-        var urlBase = "/api/v1/search?q={Net.Http.UrlEncode(query)}";
+        var urlBase = $"/api/v1/search?q={Net.Http.UrlEncode(query)}";
         if(TypeOf(options.type) == "String") urlBase += $"&type={Net.Http.UrlEncode(options.type)}";
-        if(TypeOf(options.pluginHost) == "String") urlBase += "&pluginHost={Net.Http.UrlEncode(options.pluginHost)}";
+        if(TypeOf(options.pluginHost) == "String") urlBase += $"&pluginHost={Net.Http.UrlEncode(options.pluginHost)}";
         if(TypeOf(options.offset) == "Long") urlBase += $"&offset={options.offset}";
         if(TypeOf(options.limit) == "Long") urlBase += $"&limit={options.limit}";
+        
 
         func handle(server)
         {
@@ -158,7 +159,6 @@ class Tesses.CrossLang.PackageManager
                     var res2=Json.Decode(req.ReadAsString());
                     return res2.packages;
                 }catch(ex) {
-
                 }
             }
 
