@@ -91,6 +91,7 @@ func Tesses.CrossLang.Shell.InstallWebApp(dd)
 			{
 				var ms = new MemoryStream(true);
 				var ba = pm.GetPackage(_name, _version);
+                
 				ms.WriteBlock(ba,0,ba.Length);
 				ms.Seek(0,0);
 				var exec = VM.LoadExecutable(ms);
@@ -100,12 +101,12 @@ func Tesses.CrossLang.Shell.InstallWebApp(dd)
 					FS.WriteAllBytes(FS.Local, execPath , ba);
 
 				each(var item : exec.Dependencies)
-					downloadDependency(item.Name, item.Version);
+					downloadDependency(item.Name, item.Version.ToString());
 				ms.Close();
 			}
 
 			each(var item : exec.Dependencies)
-				downloadDependency(item.Name, item.Version);
+				downloadDependency(item.Name, item.Version.ToString());
 			Console.WriteLine($"Installed web application {info.short_name}");
 		}
 

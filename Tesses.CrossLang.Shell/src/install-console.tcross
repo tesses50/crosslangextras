@@ -100,12 +100,12 @@ func Tesses.CrossLang.Shell.InstallConsole(dd)
 					FS.WriteAllBytes(FS.Local, execPath , ba);
 
 				each(var item : exec.Dependencies)
-					downloadDependency(item.Name, item.Version);
+					downloadDependency(item.Name, item.Version.ToString());
 				ms.Close();
 			}
 
 			each(var item : exec.Dependencies)
-				downloadDependency(item.Name, item.Version);
+				downloadDependency(item.Name, item.Version.ToString());
 			Console.WriteLine($"Installed console application {info.short_name}");
 		}
 
