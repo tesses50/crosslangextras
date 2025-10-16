@@ -1,0 +1,7 @@
+/^
+    Copy Stream to another (but with progress event)
+^/
+func Helpers.CopyToProgress(src,dest,progressCB,$precision)
+{
+    
+}

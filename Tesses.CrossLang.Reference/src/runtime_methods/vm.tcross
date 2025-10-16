@@ -1,0 +1,169 @@
+/^
+    Get root environment as a dictionary
+^/
+func VM.getRootEnvironmentAsDictionary()
+{
+
+}
+/^
+    Get root environment, for reflection purposes
+^/
+func VM.getRootEnvironment()
+{
+    
+}
+/^
+    Get current environment, for reflection purposes
+^/
+func VM.getCurrentEnvironment()
+{
+
+}
+/^
+    Create root environment
+^/
+func VM.CreateEnvironment($dict)
+{
+
+}
+/^
+    Load a crossvm executable
+^/
+func VM.LoadExecutable(strm)
+{
+
+}
+/^
+    Eval source code
+^/
+func VM.Eval(source)
+{
+
+}
+/^
+    Compile source code (dict schema is VM.CompileDictionary)
+    Returns {Success=true} if it succeeds or {Success=false, Reason="Reason String"} if it fails
+^/
+func VM.Compile(dict)
+{
+
+}
+/^
+    Get the ast of a program
+^/
+func VM.SourceToAst(source)
+{
+
+}
+/^
+    Get the runtime version
+^/
+func VM.getRuntimeVersion()
+{
+
+}
+/^
+    Is the program still running
+^/
+func VM.getIsRunning()
+{
+
+}
+/^
+    Run an itteration of the event loop
+^/
+func VM.RunEventLoopItteration()
+{
+
+}
+/^
+    Run the event loop
+^/
+func VM.RunEventLoop()
+{
+
+}
+/^
+    Merge all crvm files into one and returns path inside destVFS of output
+    You should have srcFS a SubdirFilesystem to directory with executable
+    so if the source executable was /app/bin/app-1.0.0.0-prod.crvm you should pass a SubdirFilesystem pointing to the directory /app/bin and sourcePath set to /app-1.0.0.0-prod.crvm and destVFS to a empty SubdirFilesystem
+^/
+func VM.Merge(srcVFS,sourcePath,destVFS)
+{
+
+}
+/^
+    Disassemble crvm file
+^/
+func VM.Disassemble(strm,vfs,$generateJSON,$extractResources)
+{
+
+}
+/^
+    Assemble crvm file
+^/
+func VM.Assemble(vfs)
+{
+
+}
+/^
+    Schema for VM.Compile dict
+^/
+class VM.CompileDictionary : dictionary
+{
+    /^
+        Name (defaults to out)
+    ^/  
+    public Name;
+    /^
+        Version like 1.0.0.0-prod
+    ^/
+    public Version;
+    /^
+        List of dictionaries that look like this
+        {
+            Source = "func main(args){Console.WriteLine(42);}",
+            FileName = "/home/mike/Documents/Code/app/main.tcross"
+        }
+    ^/
+    public Sources;
+
+    /^ 
+        List of dictionaries that look like this
+        {
+            Name = "Tesses.CrossLang.Args",
+            Version = "1.0.0.0-prod"
+        }
+    ^/
+    public Dependencies;
+    /^ 
+        Compile Tools we were built with
+        List of dictionaries that look like this
+        {
+            Name = "SomePackage",
+            Version = "1.0.0.0-prod"
+        }
+    ^/
+    public Tools;
+    /^
+        cross.json info section as a string
+    ^/
+    public Info;
+    /^
+        Icon filename (relative to root in ResourceFileSystem)
+    ^/
+    public Icon;
+    /^
+        comptime's RootEnvironment
+    ^/
+    public CompTime;
+    /^
+        Filesystem that embed and Icon looks in
+    ^/
+    public ResourceFileSystem;
+    /^
+        Output stream
+    ^/
+    public Output;
+
+}

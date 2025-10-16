@@ -22,7 +22,7 @@ func Pages.Echo(text)
         pages,
         <if(text != null)>
             <true>
-                <p>{text}</p>
+                <plink(text)>
             </true>
             <false>
                 <p>No text available</p>

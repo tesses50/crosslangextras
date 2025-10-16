@@ -1,0 +1,21 @@
+/^
+    Create a Path from string
+^/
+func Path.FromString(path)
+{
+
+}
+/^
+    Create a Path from parts
+^/
+func Path.Create(relative,parts)
+{
+
+}
+/^
+    Create Absolute Root Path
+^/
+func Path.Root()
+{
+    
+}

@@ -14,7 +14,7 @@ func main(args)
         }
         else if(ctx.Path == "/about")
         {
-            ctx.WithMimeType("text/html").SendText(Pages.Index());
+            ctx.WithMimeType("text/html").SendText(Pages.About());
             return true;
         }
         else if(ctx.Path == "/echo")

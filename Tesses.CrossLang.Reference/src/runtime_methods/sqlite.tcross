@@ -1,0 +1,56 @@
+/^
+    Returns instance of SQLiteDatabase
+^/
+func Sqlite.Open(filename)
+{
+
+}
+/^
+    Escapes a String, Long or Double (everything else returns NULL)
+^/
+func Sqlite.Escape(v)
+{
+
+}
+/^
+    Closes the db
+^/
+func Sqlite.Close(db)
+{
+
+}
+/^
+    Returns a string if an error happens
+    Returns list of dictionaries that the column values are accessed by dictionary keys
+^/
+func Sqlite.Exec(db,sql)
+{
+    
+}
+/^
+    Sqlite Database Instance
+^/
+class SQLiteDatabase {
+    /^
+        Throws if an error happens
+        Returns list of dictionaries that the column values are accessed by dictionary keys
+    ^/
+    public Exec(sql)
+    {
+
+    }
+    /^
+        Escapes a String, Long or Double (everything else returns NULL)
+    ^/
+    public Escape(v)
+    {
+
+    }
+    /^
+        Closes the database
+    ^/
+    public Close()
+    {
+
+    }
+}

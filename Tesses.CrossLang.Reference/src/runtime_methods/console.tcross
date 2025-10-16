@@ -28,8 +28,11 @@ func Console.setSignals(flag)
 {
     
 }
+/^ Clear the console ^/
+func Console.Clear()
+{
 
-
+}
 
 /^ Write Text To Standard Output ^/
 func Console.Write(text)
@@ -78,6 +81,21 @@ func Console.getOut()
 }
 /^ Get stderr Stream ^/
 func Console.getError()
+{
+
+}
+/^
+    Returns Width and Weight of terminal in cells as dictionary
+^/
+func Console.getSize()
+{
+
+}
+/^
+    p: Long 0-100, Double: 0.0-1.0
+    you must call this everytime you want to update progress
+^/
+func Console.ProgressBar(p)
 {
 
 }

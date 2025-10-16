@@ -47,6 +47,11 @@ class Stream : HeapObject {
     {
 
     }
+    /^ Copy to another stream and limit ^/
+    public CopyToLimit(stream,count,$bufferSize)
+    {
+
+    }
     /^ 
         Seek to position
         whence:

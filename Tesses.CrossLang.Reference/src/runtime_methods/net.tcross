@@ -3,12 +3,308 @@ func Net.getIPAddresses($ipv6)
 {
 
 }
+
+/^
+    Send an email
+
+    dict looks like this from crosslang's point of view
+    {
+        server = { 
+            host = "smtp.example.com",
+            tls = true,
+            port = 465 //You can omit this
+        },
+        auth = {
+            username = "from",
+            password = "THEPASSWORD"
+        },
+        domain = "example.com",
+        from = {
+            name = "The name shown in the mail where it is from",
+            email = "from@example.com"
+        },
+        to = "to@example.com",
+        subject = "My little message",
+        body = {
+            type = "text/html",
+            data = "<h1>Hello, world</h1>"
+        },
+        attachments = [
+            {
+                name = "myimg.png",
+                type = "image/png",
+                data = embed("myimg.png")
+            }
+        ]
+    }
+^/
+func Net.Smtp.Send(dict)
+{
+
+}
+
 /^ Start server with specified port (and block) server is described by Net.Http.Server ^/
 func Net.Http.ListenSimpleWithLoop(server, port)
 {
     
 }
+/^
+    Listen on unused port
+^/
+func Net.Http.ListenOnUnusedPort(server)
+{
 
+}
+/^
+    Create a http server (allows multiple)
+    server schema is Net.Http.Server
+^/
+func Net.Http.HttpServer(server,portOrUnixPath, $printIPs)
+{
+
+}
+/^
+    Create a file server
+    returns schema Net.Http.FileServer
+^/
+func Net.Http.FileServer(vfs,allowListing,spa)
+{
+
+}
+/^
+    Create a server you can mount to, must mount parents before child
+    returns schema Net.Http.MountableServer
+^/
+func Net.Http.MountableServer(root)
+{
+
+}
+/^
+    Download file to string
+^/
+func Net.Http.DownloadToString(url)
+{
+
+}
+/^
+    Download file to stream
+^/
+func Net.Http.DownloadToStream(url,strm)
+{
+
+}
+/^
+    Download file to file
+^/
+func Net.Http.DownloadToFile(url,vfs,path)
+{
+
+}
+/^
+    Create a websocket connection
+^/
+func Net.Http.WebSocketClient(url,headers,conn,$successCB)
+{
+
+}
+/^
+    Convert text like this: "My page is https://tesses.net/\nExample email is mailto:example@example.com" to "My page is <a href=\"https://tesses.net/\"">https:/tesses.net/</a><br>Example email is <a href=\"mailto:example@example.com\">example@example.com</a>"
+    
+    for html expressions you can use <plink("Some\nText")> (the string can be dynamic) will become <p>Some<br>Text</p> instead of this function if you want a p tag with the returned value
+^/
+func Net.Http.HtmlP(text)
+{
+
+}
+/^ Html encode some text (this will be implicit in html expressions) ^/
+func Net.Http.HtmlEncode(html)
+{
+
+}
+/^
+    Encode url query params
+^/
+func Net.Http.UrlEncode(param)
+{
+
+}
+/^
+    Decode url query params (this is done implcitly on server ctx.QueryParams)
+^/
+func Net.Http.UrlDecode(param)
+{
+
+}
+/^
+    Encode url path
+^/
+func Net.Http.UrlPathEncode(param)
+{
+
+}
+/^
+    Decode url path
+^/
+func Net.Http.UrlDecode(param)
+{
+
+}
+/^
+    Get mimetype from filename
+^/
+func Net.Http.MimeType(filename)
+{
+
+}
+/^
+    Create stream for request body
+    strm: a stream
+    mimeType: the mimetype
+^/
+func Net.Http.StreamHttpRequestBody(strm, mimeType)
+{
+
+}
+/^
+    Create text for request body
+    text: some text
+    mimeType: the mimetype
+^/
+func Net.Http.TextHttpRequestBody(text, mimeType)
+{
+
+}
+/^
+    Create json for request body
+    json: some json
+^/
+func Net.Http.JsonHttpRequestBody(json)
+{
+
+}
+/^ The second parameter's schema for Net.Http.MakeRequest ^/
+class Net.Http.HttpRequestExtra : Dictionary
+{
+    /^
+        The http method (defaults to GET) its a string
+    ^/
+    public Method;
+
+    /^
+        Ignore the ssl errors (defaults to false)
+    ^/
+    public IgnoreSSLErrors;
+
+    /^
+        Follow redirects (defaults to false)
+    ^/
+    public FollowRedirects;
+
+    /^
+        Trusted certificate string (if it uses self signed certificate)
+    ^/
+    public TrustedRootCertBundle;
+    /^
+        List of request headers [{"Key": "User-Agent","Value": "Your User Agent"}]
+    ^/
+    public RequestHeaders;
+    /^ 
+        Body (can be either any of the Net.Http.*HttpRequestBody or a dictionary with the schema Net.Http.DictionaryHttpRequestBody)
+    ^/
+    public Body;
+}
+public Net.Http.DictionaryHttpRequestBody : Dictionary {
+    /^
+        Handle the headers (so you can add headers), schema is Net.Http.HttpDictionary
+    ^/
+    public HandleHeaders(httpdict)
+    {}
+
+    /^
+        Write to the stream
+    ^/
+    public Write(strm)
+    {
+
+    }
+}
+/^ The response of Net.Http.MakeRequest ^/
+class Net.Http.HttpResponse
+{
+    /^
+        Copy response to stream
+    ^/
+    public CopyToStream(strm)
+    {
+
+    }
+    /^
+        Read the response as a string
+    ^/
+
+    public ReadAsString()
+    {
+
+    }
+
+    /^
+        Read the response as json
+    ^/
+    public ReadAsJson()
+    {
+
+    }
+    /^
+        Read the response as a stream
+    ^/
+    public ReadAsStream()
+    {
+
+    }
+    /^ 
+        Get the status code
+    ^/
+    public getStatusCode()
+    {
+
+    }
+
+    /^
+        Get the http version
+    ^/
+    public getVersion()
+    {
+
+    }
+    /^
+        Get the response headers, schema is Net.Http.HttpDictionary
+    ^/
+    public getResponseHeaders()
+    {
+
+    }
+
+}
+
+/^
+    url: the url of the request
+    extra: optional (extra parameters for http request schema is: Net.Http.HttpRequestExtra)
+    returns Net.Http.HttpResponse
+
+    extra example
+    {
+        Method = "POST",
+        FollowRedirects = true,
+        RequestHeaders = [
+            {Key = "User-Agent", Value = "curl/7.54.1"}
+        ],
+        Body = Net.Http.JsonHttpRequestBody({MyItem = 5})
+    }
+^/
+func Net.Http.MakeRequest(url,$extra)
+{
+
+}
 
 /^ schema from list entries from return value of Net.getIPAddresses ^/
 class Net.IPAddress {
@@ -18,11 +314,118 @@ class Net.IPAddress {
     public Address;
 }
 
-/^ schema for server ^/
+/^ schema for server (dict or class) or can be closure instead (ctx)=>{ return false;} ^/
 class Net.Http.Server {
     /^ Handle the request (ctx schema is Net.Http.ServerContext) returns true (handled request) or false (didn't handle request)  (any function that accepts a server can also be passed with this directly) ^/
 
     public Handle(ctx)
+    {
+
+    }
+}
+/^ schema for Net.Http.FileServer ^/
+class Net.Http.FileServer : Net.Http.Server {}
+/^ schema for Net.Http.MountableServer ^/
+class Net.Http.MountableServer : Net.Http.Server {
+    /^
+        Add server mount
+        path: a path or string such as /mount (if req is /mount/a svr will see /a )
+
+    ^/
+    public Mount(path, svr)
+    {
+
+    }
+    /^
+        Remove server mount
+        path: same path as when you mounted
+    ^/
+    public Unmount(path)
+    {
+
+    }
+}
+
+/^ schema for Net.Http.HttpDictionary ^/
+class Net.Http.HttpDictionary : NativeObject {
+    /^
+        Add a String, Long, Double or DateTime (adds)
+    ^/
+    public AddValue(key, value)
+    {
+
+    }
+    /^
+        Set a String, Long, Double or DateTime (replaces all)
+    ^/
+    public SetValue(key, value)
+    {
+
+    }
+    /^
+        Clears the dictionary (or if key is provided just the key)
+    ^/
+    public Clear($key)
+    {
+
+    }
+    /^
+        Try to get the first boolean (otherwise returns false)
+    ^/
+    public GetFirstBoolean(key)
+    {
+
+    }
+    /^
+        Try to get the first string or return null if there is no values with key
+    ^/
+    public TryGetFirst(key)
+    {
+
+    }
+    /^
+        Does TryGetFirst and checks if it is a Double else returns null
+    ^/
+    public TryGetFirstDouble(key)
+    {
+        
+    }
+    /^
+        Does TryGetFirst and checks if it is a Long else returns null
+    ^/
+    public TryGetFirstInt(key)
+    {
+        
+    }
+    /^
+        Does TryGetFirst and checks if it is a Date else returns null
+    ^/
+    public TryGetFirstDate(key)
+    {
+        
+    }
+    /^ 
+        Returns a list of all key value pairs {"Key": "","Value": ""}
+    ^/
+    public ToList()
+    {
+
+    }
+    /^
+        Tries to get the Content-Disposition header if not returns null
+        Returns dictionary like this {"Type":"attachment","FileName":"pic.png","FieldName": ""} if it succeeds
+    ^/
+    public TryGetContentDisposition()
+    {
+
+    }
+    /^
+        Set the content-disposition header
+        filename: The filename
+        type: "inline" or "attachment"
+        fieldname: the field (ex in multipart/form-data)
+    ^/
+    public SetContentDisposition(filename,type,$fieldname)
     {
 
     }
@@ -97,7 +500,7 @@ class Net.Http.ServerContext {
     /^ 
         Parse multipart/form-data
         pass closure that (mime,filename,name)=>{ return SomeStream; }
-        note: you need to close the streams manually due to how crosslang works
+        or a vfs (the files will be extracted to root (indexed) will return list of {"RealFileName": "/1.bin","FileName": "file.png","Mime": "image/png","Name": "file"}) (Name is the field name) 
     ^/
 
     public ParseFormData(cb)
@@ -148,6 +551,14 @@ class Net.Http.ServerContext {
     {
 
     }
+    /^
+        Send a redirect to path
+        status_code is optional
+    ^/
+    public SendRedirect(path,$status_code)
+    {
+
+    }
 
     /^ With mime type (returns the ctx) ^/
 
@@ -165,6 +576,15 @@ class Net.Http.ServerContext {
     {
 
     }
+    /^
+        With a redirect to path
+        status_code is optional
+        returns ctx
+    ^/
+    public WithLocationHeader(path,$status_code)
+    {
+
+    }
     /^ Add response header (add it if it already exists) (returns the ctx) ^/
     public WithHeader(key,value) {
 
@@ -174,6 +594,43 @@ class Net.Http.ServerContext {
     {
 
     }
-    /^ Start a websocket session ^/
+    /^
+        Start a websocket session
+        session schema is Net.Http.WebSocketServerSession
+    ^/
+    public StartWebSocketSession(session)
+    {
+        
+    }
+    /^
+        Get the path with query params (will have POST params)
+    ^/
+    public GetUrlWithQuery()
+    {
+
+    }
+    /^
+
+        Get the original path with query params (will have POST params)
+    ^/
+    public GetOriginalPathWithQuery()
+    {
+
+    }
+    /^
+        Get the absolute path
+    ^/;
+    public MakeAbsolute(path)
+    {
+
+    }
+    /^
+        Get the server root
+    ^/
+    public GetServerRoot()
+    {
+
+    }
+    
    
 }

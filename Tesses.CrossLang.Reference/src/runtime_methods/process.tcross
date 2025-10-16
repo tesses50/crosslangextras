@@ -1,0 +1,129 @@
+/^
+    Create a proces object
+^/
+class Process : NativeObject {
+    /^
+        The constructor
+    ^/
+    public Process()
+    {
+
+    }
+    /^
+        Must be absolute
+    ^/
+    public FileName;
+    /^
+        Redirect stdin
+    ^/
+    public RedirectStandardInput;
+    /^
+        Redirect stdout
+    ^/
+    public RedirectStandardOutput;
+    /^
+        Redirect stderr
+    ^/
+    public RedirectStandardError;
+    /^
+        Set the directory the process will be running in
+        Must be a string
+    ^/
+    public WorkingDirectory;
+    /^
+        Inherit parent environment variables
+    ^/
+    public InheritParentEnvironment;
+    /^
+        CommandLine Arguments (list of strings not a string)
+        No need to put filename as first arg
+    ^/
+    public Arguments;
+    /^
+        List of environment variables
+        {Key="",Value= ""}
+    ^/
+    public Environment;
+    /^
+        Returns true if it started, false if not
+    ^/
+    public Start()
+    {
+
+    }
+    /^
+        Wait for process to exit
+    ^/
+    public Join()
+    {
+
+    }
+    /^
+        Wait for process to exit
+    ^/
+    public WaitForExit()
+    {
+        
+    }
+    /^
+        Has the process exited
+    ^/
+    public getHasExited()
+    {
+
+    }
+    /^
+        Terminate the process
+    ^/
+    public Terminate()
+    {
+
+    }
+    /^
+        Close the stdin stream
+    ^/
+    public CloseStdInNow()
+    {
+
+    }
+    /^
+        Kill with signal
+    ^/
+    public Kill(sig)
+    {
+
+    }
+    /^
+        Get the stdin stream
+    ^/
+    public getStandardInput(){}
+    /^
+        Get the stdout stream
+    ^/
+    public getStandardOutput(){}
+    /^
+        Get the stderr stream
+    ^/
+    public getStandardError(){}
+}
+
+/^
+    example dict
+    {
+        FileName = "git",
+        Arguments = ["clone","https://gitea.site.tesses.net/tesses50/crosslang.git"],
+        Environment = [],
+        InheritParentEnvironment=true,
+        RedirectStandardInput=false,
+        RedirectStandardOutput=false,
+        RedirectStandardError=false,
+        WorkingDirectory="/tmp"
+    }
+
+    returns instance of Process or null if fails    
+^/
+
+func Process.Start(dict)
+{
+
+}

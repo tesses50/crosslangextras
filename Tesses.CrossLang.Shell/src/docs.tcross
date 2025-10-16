@@ -21,6 +21,7 @@ func Tesses.CrossLang.Shell.Docs(dd)
     
     var funcs=false;
     var classes=false;
+    var markdown=false;
 
     var funcs_list=[];
     var classes_list=[];
@@ -29,46 +30,99 @@ func Tesses.CrossLang.Shell.Docs(dd)
 
     func printClasses()
     {
+        if(markdown)
+        Console.WriteLine("## Classes");
+        else
         Console.WriteLine("Classes:");
         each(var cls : classes_list)
         {
-            Console.WriteLine();
-            Console.WriteLine($"\e[38;5;34m/^{cls.Docs}^/");
-            Console.Write($"\e[38;5;39mclass \e[38;5;42m{cls.Name} ");
-            if(cls.Inherits == "ClassObject")
+            if(markdown)
             {
-                Console.WriteLine("\e[38;5;15m{");
+                Console.WriteLine();
+                Console.WriteLine("```csharp");
+                Console.WriteLine($"/^{cls.Docs}^/");
+                Console.Write($"class {cls.Name} ");
             }
             else {
-                Console.WriteLine($"\e[38;5;15m: \e[38;5;42m{cls.Inherits} \e[38;5;15m{{");
+                Console.WriteLine();
+                Console.WriteLine($"\e[38;5;34m/^{cls.Docs}^/");
+                Console.Write($"\e[38;5;39mclass \e[38;5;42m{cls.Name} ");
+            }
+
+            if(cls.Inherits == "ClassObject")
+            {
+                if(markdown)
+                    Console.WriteLine("{");
+                else
+                    Console.WriteLine("\e[38;5;15m{");
+            }
+            else {
+                if(markdown)
+                    Console.WriteLine($": {cls.Inherits} {");
+                else
+                    Console.WriteLine($"\e[38;5;15m: \e[38;5;42m{cls.Inherits} \e[38;5;15m{{");
+                
             }
             each(var ent : cls.Entries)
             {
-                Console.WriteLine();
-                Console.WriteLine($"\t\e[38;5;34m/^{ent.Docs}^/");
-                Console.Write($"\t\e[38;5;39m{ent.Modifiers} ");
+                if(markdown)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine($"\t/^{ent.Docs}^/");
+                    Console.Write($"\t{ent.Modifiers} ");
+                }
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine($"\t\e[38;5;34m/^{ent.Docs}^/");
+                    Console.Write($"\t\e[38;5;39m{ent.Modifiers} ");
+                }
                 if(ent.IsFunction)
                 {
-                    Console.WriteLine($"\e[38;5;229m{ent.Name}\e[38;5;63m(\e[38;5;15m{ent.Args}\e[38;5;63m)\e[0m");
+                    if(markdown)
+                        Console.WriteLine($"{ent.Name}({ent.Args})");
+                    else
+                        Console.WriteLine($"\e[38;5;229m{ent.Name}\e[38;5;63m(\e[38;5;15m{ent.Args}\e[38;5;63m)\e[0m");
                 }
                 else {
-                    Console.WriteLine($"\e[38;5;159m{ent.Name}\e[0m;");
+                    if(markdown)
+                        Console.WriteLine($"{ent.Name};");
+                    else
+                        Console.WriteLine($"\e[38;5;159m{ent.Name}\e[0m;");
                 }
             }
 
-
-            Console.WriteLine("\e[38;5;15m}\e[0m");
+            if(markdown)
+            {
+                Console.WriteLine("}");
+                Console.WriteLine("```");
+            }
+            else
+                Console.WriteLine("\e[38;5;15m}\e[0m");
         }
     }
     func printFunctions()
     {
-        Console.WriteLine("Functions:");
+        if(markdown)
+            Console.WriteLine("## Functions");
+        else
+            Console.WriteLine("Functions:");
         each(var fn : funcs_list)
         {
-            Console.WriteLine();
-            Console.WriteLine($"\e[38;5;34m/^{fn.Docs}^/");
-            Console.WriteLine($"\e[38;5;39mfunc \e[38;5;229m{fn.Name}\e[38;5;63m(\e[38;5;15m{fn.Args}\e[38;5;63m)\e[0m");
-        
+            if(markdown)
+            {
+                Console.WriteLine();
+                Console.WriteLine("```go");
+                Console.WriteLine($"/^{fn.Docs}^/");
+                Console.WriteLine($"func {fn.Name}({fn.Args})");
+                Console.WriteLine("```");
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine($"\e[38;5;34m/^{fn.Docs}^/");
+                Console.WriteLine($"\e[38;5;39mfunc \e[38;5;229m{fn.Name}\e[38;5;63m(\e[38;5;15m{fn.Args}\e[38;5;63m)\e[0m");
+            }
         }
     }
 
@@ -161,7 +215,11 @@ func Tesses.CrossLang.Shell.Docs(dd)
                 Console.WriteLine("reference-path: print runtime reference file path");
                 Console.WriteLine("update-reference: update runtime reference");
                 Console.WriteLine("example: print an example");
+                Console.WriteLine("markdown: print as markdown");
                 return 0;
+            case "markdown":
+                markdown=true;
+                break;
             case "functions":
                 funcs=true;
                 break;

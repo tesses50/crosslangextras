@@ -1,0 +1,145 @@
+/^
+    Parse Long from String
+    base: (optional) base of number
+    returns null if it fails
+^/
+func ParseLong(str,$base)
+{
+
+}
+/^
+    Parse Double from String
+    returns null if it fails
+^/
+func ParseDouble(str)
+{
+
+}
+/^
+    Get type of object as String
+^/
+func TypeOf(o)
+{
+
+}
+/^
+    Is object defined
+^/
+func TypeIsDefined(o)
+{
+
+}
+/^
+    Is object heap
+^/
+func TypeIsHeap(o)
+{
+
+}
+/^
+    Is object number
+^/
+func TypeIsNumber(o)
+{
+
+}
+/^
+    Is object long
+^/
+func TypeIsLong(o)
+{
+
+}
+/^
+    Is object double
+^/
+func TypeIsDouble(o)
+{
+
+}
+/^
+    Is object string
+^/
+func TypeIsString(o)
+{
+
+}
+/^
+    Is object callable
+^/
+func TypeIsCallable(o)
+{
+
+}
+/^
+    Is object a class
+^/
+func TypeIsClass(o)
+{
+
+}
+/^
+    Is object a dictionary
+^/
+func TypeIsDictionary(o)
+{
+
+}
+/^
+    Is object a list
+^/
+func TypeIsList(o)
+{
+
+}
+/^
+    Is object a stream
+^/
+func TypeIsStream(o)
+{
+
+}
+/^
+    Is object a vfs
+^/
+func TypeIsVFS(o)
+{
+
+}
+/^
+    Is object a datetime
+^/
+func TypeIsDateTime(o)
+{
+
+}
+/^
+    Parse version from string,
+    if TypeIsVersion(textOrVersion) return textOrVersion
+^/
+func Version.Parse(textOrVersion)
+{
+
+}
+/^
+    Create version from ByteArray
+^/
+func Version.FromByteArray(ba, offset)
+{
+
+}
+/^
+    Create version from long
+^/
+func Version.FromLong(num)
+{
+
+}
+
+/^
+    Load a native plugin, requires a dynamic linker and shared build of libcrosslang
+^/
+func Reflection.LoadNativePlugin(path)
+{
+
+}
