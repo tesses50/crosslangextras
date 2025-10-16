@@ -1,4 +1,4 @@
-/^ Get the ip addresses of the machine, pass true if you want ipv6, returns List of schema Net.IPAddress^/
+/^ Get the ip addresses of the machine, pass true if you want ipv6, returns List of schema Net.IPAddress ^/
 func Net.getIPAddresses($ipv6)
 {
 
@@ -213,12 +213,14 @@ class Net.Http.HttpRequestExtra : Dictionary
     ^/
     public Body;
 }
-public Net.Http.DictionaryHttpRequestBody : Dictionary {
+class Net.Http.DictionaryHttpRequestBody : Dictionary {
     /^
         Handle the headers (so you can add headers), schema is Net.Http.HttpDictionary
     ^/
     public HandleHeaders(httpdict)
-    {}
+    {
+
+    }
 
     /^
         Write to the stream
@@ -324,7 +326,9 @@ class Net.Http.Server {
     }
 }
 /^ schema for Net.Http.FileServer ^/
-class Net.Http.FileServer : Net.Http.Server {}
+class Net.Http.FileServer : Net.Http.Server {
+    
+}
 /^ schema for Net.Http.MountableServer ^/
 class Net.Http.MountableServer : Net.Http.Server {
     /^
@@ -619,7 +623,7 @@ class Net.Http.ServerContext {
     }
     /^
         Get the absolute path
-    ^/;
+    ^/
     public MakeAbsolute(path)
     {
 
