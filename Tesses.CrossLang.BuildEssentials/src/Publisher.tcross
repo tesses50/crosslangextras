@@ -164,6 +164,17 @@ class Tesses.CrossLang.Publisher
 
         switch(this.RuntimeIdentifier)
         {
+            case "copy":
+            {
+                if(this.MergeForRuntimes)
+                {
+                    FS.Local.MoveFile(this.Merge(), outDir / short_name + ".crvm");
+                }
+                else {
+                    this.CopyBuild(outDir / short_name + ".crvm");
+                }
+            }
+                break;
             case "crvm":
             {
                 var path = this.Merge();
