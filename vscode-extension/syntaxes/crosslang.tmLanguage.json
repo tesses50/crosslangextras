@@ -1,0 +1,137 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "CrossLang",
+	"patterns": [
+		{
+			"include": "#comment" 
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#chars"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#function"
+		},
+		{
+			"include": "#identifier"
+		},
+		{
+			"include": "#consts"
+		},
+		{
+			"include": "#double"
+		},
+		{
+			"include": "#long"
+		},
+        {
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"comment": {
+			"patterns": [{
+				"name": "comment.line.double-slash.crosslang",
+				"begin": "//",
+				"end": "\\n"
+			},
+			{
+				"name": "comment.block.crosslang",
+				"begin": "\\/\\*",
+				"end": "\\*\\/"
+			},
+			{
+				"name": "comment.line.crosslang",
+				"begin": "#",
+				"end": "\\n"
+			},
+			{
+				"name":"comment.block.documentation.crosslang",
+				"begin": "\\/\\^",
+				"end": "\\^\\/"
+			}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.crosslang",
+			"begin": "\\\"",
+			"end": "\\\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.crosslang",
+					"match": "\\\\."
+				}
+			]
+		},
+		"operators": {
+			"patterns": [{
+				"name": "keyword.operator",
+				"match": "(\\+|\\-|\\*|\\\/|\\%|\\!|\\||\\&|\\^|\\<\\<|\\>\\>|\\<|\\>|\\=)"
+			}]
+		},
+		"function": {
+			"patterns": [{
+				"name": "entity.name.function.crosslang",
+				"match": "\\b[_a-zA-Z\\x80-\\xFF\\$][_a-zA-Z0-9\\x80-\\xFF\\$]*\\("
+			}]
+		},
+		"identifier": {
+			"patterns": [{
+				"name": "entity.name.crosslang",
+				"match": "\\b[_a-zA-Z\\x80-\\xFF\\$][_a-zA-Z0-9\\x80-\\xFF\\$]*"
+			}]
+		},
+		"double": {
+			"name": "constant.numeric.crosslang",
+			"match": "\\b[0-9][0-9]*\\.[0-9]*\\b"
+		},
+		
+		"long": {
+			"patterns": [
+				{
+					"name": "constant.numeric.crosslang",
+					"match": "\\b[0-9][0-9]*\\b"
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					
+					"name": "constant.language.crosslang",
+					"match": "\\b(true|false|null|undefined|this)\\b"
+				},
+				{
+					"name": "keyword.operator.new.crosslang",
+					"match": "\\bnew\\b"
+				},
+				{
+					"name": "keyword.control.crosslang",
+					"match": "\\b(if|else|while|for|do|return|each|break|try|catch|finally|defer|enumerable|yield|switch|case|default|await)\\b"
+				},
+				{
+					"name": "keyword.crosslang",
+					"match": "\\b(var|const|func|class|public|private|protected|static|operator|embed|async)\\b"
+				}
+			]
+		},
+		"chars": {
+			"name": "constant.character.crosslang",
+			"begin": "'",
+			"end": "'",
+			"patterns": [
+				{
+					"name": "constant.character.escape.crosslang",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.crosslang"
+}
+

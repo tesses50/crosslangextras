@@ -4,3 +4,4 @@ obj
 shell_archive
 tmp
 *.crvm
+*.vsix

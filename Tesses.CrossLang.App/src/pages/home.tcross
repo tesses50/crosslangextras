@@ -1,0 +1,60 @@
+func GetWebAppsDir()
+    Env.CrossLangConfig / "WebApps";
+
+enumerable func QueryApps()
+{
+    var wad = GetWebAppsDir();
+    if(FS.Local.DirectoryExists(wad))
+    {
+        each(var item : FS.Local.EnumeratePaths(wad))
+        {
+            if(FS.Local.DirectoryExists(item) && item.GetFileName() != "crosslang")
+            {
+               
+                var path = item/item.GetFileName() + ".crvm";
+                
+                var strm = FS.Local.OpenFile(path, "rb");
+                var vmFile = VM.LoadExecutable(strm);
+                 var info={};
+                try {
+                    info = Json.Decode(vmFile.Info);
+                } catch(ex) {
+
+                }
+                var em = embed("icon.png");
+                var fullName = info.short_name_pretty ?? info.short_name ?? item.GetFileName();
+                yield {
+                    href = $"./launch?app={Net.Http.UrlEncode(item.GetFileName())}",
+                    name = fullName,
+                    icon = $"data:image/png;base64,{Crypto.Base64Encode(vmFile.Icon ?? em)}"
+                };
+            }
+        }
+    }
+};
+
+
+
+func Pages.Home()
+{
+
+
+
+
+    var html = <div class="list">
+        <each(var app : QueryApps())>
+            <div class="row">
+                <div class="min">
+                    <img src={app.icon} alt="Icon">
+                </div>
+                <div class="max">
+                    <a href={app.href}>{app.name}</a>
+                </div>
+            </div>
+        </each>
+
+    </div>;
+
+
+    return Components.Shell("Home",html,0);
+}

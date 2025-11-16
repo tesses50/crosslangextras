@@ -99,6 +99,13 @@ class Tesses.CrossLang.Publisher
                     CopyCRVM(src.GetParent()/name, dest.GetParent()/name);
                 }
             }
+        each(var item : FS.Local.EnumeratePaths(destPath.GetParent()))
+        {
+            if(item.GetExtension() == ".crvm" && FS.Local.FileExists(item))
+            {
+                FS.Local.DeleteFile(item);
+            }
+        }
         CopyCRVM(this.Build(), destPath);
     }
 

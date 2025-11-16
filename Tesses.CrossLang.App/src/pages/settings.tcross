@@ -1,0 +1,90 @@
+func Pages.Settings(ctx)
+{
+    var darkmode = null;
+    var f = Env.CrossLangConfig / "prefs.json";
+    var o = {};
+    if(FS.Local.FileExists(f))
+    {
+        o = Json.Decode(FS.ReadAllText(FS.Local, f));
+        darkmode = o.darkmode ?? null;
+    }
+    
+    if(ctx.Method == "POST")
+    {
+        var action = ctx.QueryParams.TryGetFirst("action");
+        var darkMode = ctx.QueryParams.TryGetFirst("darkmode");
+        if(action == "darkmode")
+        {
+            o = o ?? {};
+            switch(darkMode)
+            {
+                case "default":
+                    darkmode = null;
+                    o.darkmode = null;
+                    break;
+                case "light":
+                    darkmode = false;
+                    o.darkmode = false;
+                    break;
+                case "dark":
+                    darkmode = true;
+                    o.darkmode = true;
+                    break;
+            }
+        }
+
+        FS.WriteAllText(FS.Local,f, Json.Encode(o,true));
+    }
+
+    
+    var html =
+    <null>
+    <form hx-post="./settings" hx-target="body">
+        <input type="hidden" name="action" value="darkmode">
+        <fieldset>
+  <legend>Light/Dark Preference (Needs a restart)</legend>
+  <nav class="vertical">
+    <label class="radio">
+      
+      <if(darkmode == null)>
+        <true>
+            <input type="radio" name="darkmode" value="default" checked>
+        </true>
+        <false>
+            <input type="radio"  name="darkmode" value="default">
+        </false>
+      </if>
+      <span>System Default</span>
+    </label>
+    <label class="radio">
+      <if(darkmode == false)>
+        <true>
+            <input type="radio" name="darkmode" value="light" checked>
+        </true>
+        <false>
+            <input type="radio"  name="darkmode" value="light">
+        </false>
+      </if>
+      
+      <span>Light Mode</span>
+    </label>
+    <label class="radio">
+      <if(darkmode == true)>
+        <true>
+            <input type="radio" name="darkmode" value="dark" checked>
+        </true>
+        <false>
+            <input type="radio"  name="darkmode" value="dark">
+        </false>
+      </if>
+      
+      <span>Dark Mode</span>
+    </label>
+    <button>Save</button>
+  </nav>
+</fieldset>
+    </form>
+    </null>;
+
+    return Components.Shell("Settings", html,2);
+}

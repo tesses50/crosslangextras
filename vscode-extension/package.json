@@ -1,0 +1,27 @@
+{
+  "name": "crosslang",
+  "displayName": "Crosslang",
+  "description": "CrossLang Language Support",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.0.0"
+  },
+  "publisher": "tesses50",
+  "repository": "https://onedev.site.tesses.net/crosslang/crosslangextras",
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "crosslang",
+      "aliases": ["CrossLang", "crosslang"],
+      "extensions": [".tcross"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "crosslang",
+      "scopeName": "source.crosslang",
+      "path": "./syntaxes/crosslang.tmLanguage.json"
+    }]
+  }
+}

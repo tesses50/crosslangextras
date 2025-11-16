@@ -1,0 +1,53 @@
+func Components.Shell(title, html,idx)
+{
+    var pages = [
+        {
+            url="./",
+            label = "Home",
+            icon = "home",
+			classStr=""
+        },
+		{
+            url="./get-more-apps",
+            label = "More Apps",
+            icon = "deployed_code_update",
+			classStr=""
+        },
+		{
+            url="./settings",
+            label = "Settings",
+            icon = "settings",
+			classStr=""
+        }
+    ];
+
+	pages[idx].classStr = "active";
+
+     return 
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    	<meta charset="UTF-8">
+    	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    	<title>CrossLang - {title}</title>
+    	<link rel="stylesheet" href={(/"beer.min.css").MakeRelative(mypage).ToString()}>
+    	<link rel="stylesheet" href={(/"theme.css").MakeRelative(mypage).ToString()}>
+    	<script src="htmx.min.js" defer></script>
+    	<script type="module" src={(/"beer.min.js").MakeRelative(mypage).ToString()} defer></script>
+	</head>
+	<body>
+		<nav class="left max">
+			<each(var page : pages)>
+				<a hx-get={page.url} hx-target="body" hx-push-url="true" class={page.classStr}>
+      				<i>{page.icon}</i>
+      				<span>{page.label}</span>
+    			</a>
+  			</each>
+		</nav>
+		<main class="responsive">
+    		<raw(html)>
+		</main>
+	</body>
+</html>;
+    
+}

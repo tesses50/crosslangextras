@@ -1,0 +1,96 @@
+func Components.PackageItem(tytd,item)
+{
+    
+    var html = <div class="row">
+        <div class="min">
+            <img width="64" height="64" src={item.thumb} alt="Package thumbnail">
+        </div>
+        <div class="max">
+            <div class="col">
+                <div class="min">
+                    <span>{item.name}</span>
+                </div>
+                <div class="min">
+                    <span>{item.version}</span>
+                </div>
+            </div>
+        </div>  
+        <div class="min">
+            <raw(Components.InstallButton(tytd,item.name,item.version))>
+        </div>
+    </div>;
+
+    return html;
+}
+/^
+	Get whether package is installed
+	version must be the current version as a Version not string
+	returns 0 if not, 1 if installed or 2 if can update
+^/
+func PackageState(packages,name, version)
+{
+	each(var item : packages)
+	{
+		if(item.Name == name) {
+			if(item.Version < version) return 2;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+
+func Components.InstallButton(packages, name, version, $confirm)
+{
+    var id = Crypto.Base64Encode(new ByteArray($"{name}-{version}")).Replace("=","");
+    
+    var version = Version.Parse(version);
+
+    if(version != null)
+    {
+
+        var state = PackageState(packages,name,version);
+        return <div id={id}>
+            <if(state == 0)>
+                <true>
+                    <button hx-post="./package-manage" hx-vals={Json.Encode({action="install",name=name,version=version.ToString()})} hx-target={$"#{id}"} hx-swap="outerHTML">Install</button>
+                </true>
+                <false>
+                    <if(confirm)>
+                        <true>
+                            <div class="row">
+                                <div class="min">
+                                    <button hx-post="./package-manage" hx-vals={Json.Encode({action="confirm",name=name,version=version.ToString()})} hx-target={$"#{id}"} hx-swap="outerHTML">Yes Uninstall</button>
+                                </div>
+                                <div class="min">
+                                    <button hx-post="./package-manage" hx-vals={Json.Encode({action="cancel",name=name,version=version.ToString()})} hx-target={$"#{id}"} hx-swap="outerHTML">Cancel</button>
+                                </div>
+                            </div>
+                        </true>
+                        <false>
+                            <if(state == 1)>
+                                <true>
+                                    <button hx-post="./package-manage" hx-vals={Json.Encode({action="uninstall",name=name,version=version.ToString()})} hx-target={$"#{id}"} hx-swap="outerHTML">Uninstall</button>
+                                </true>
+                                <false>
+                                    <nav class="group split">
+                                        <button hx-post="./package-manage" hx-vals={Json.Encode({action="install",name=name,version=version.ToString()})} hx-target={$"#{id}"} hx-swap="outerHTML" class="left-round">
+                                            <i>update</i>
+                                            <span>Update</span>
+                                        </button>
+                                        <button hx-post="./package-manage" hx-vals={Json.Encode({action="uninstall",name=name,version=version.ToString()})} hx-target={$"#{id}"} hx-swap="outerHTML" class="right-round square">
+                                            <i>delete</i>
+                                        </button>
+                                    </nav>
+                                </false>
+                            </if>
+                        </false>
+                    </if>
+                    
+                </false>
+            </if>
+        </div>;
+    }
+    return "";
+}

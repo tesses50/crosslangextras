@@ -1,0 +1,53 @@
+func GetPackages()
+{
+    var packages=[];
+    var dir = Env.CrossLangConfig / "WebApps";
+    if(FS.Local.DirectoryExists(dir))
+    each(var path : FS.Local.EnumeratePaths(dir))
+    {
+        var name = path.GetFileName();
+        var crvm=path / name + ".crvm";
+        if(FS.Local.FileExists(crvm))
+        {
+            var strm = FS.Local.OpenFile(crvm,"rb");
+            packages.Add(VM.LoadExecutable(strm));
+            strm.Close();
+        }
+    }
+    return packages;
+}
+
+func PackageInstall(name,version)
+{
+
+    each(var item : GetPackages())
+    {
+	    if(item.Name == name)
+		{	
+		    if(item.Version >= version) 
+			{
+				return;
+			}
+		}
+	}
+    var dir = new SubdirFilesystem(FS.Local,Env.CrossLangConfig / "WebApps");
+	pm.DownloadPlugin(dir,name,version);
+}
+func PackageUninstall(name)
+{
+	each(var item : GetPackages())
+	{
+		if(item.Name == name)
+		{
+            var info = Json.Decode(item.Info);
+            var pn = TypeOf(info.short_name) == "String" ? info.short_name : name;
+            var pp = Env.CrossLangConfig / "WebApps" / pn;
+            
+			
+            if(FS.Local.DirectoryExists(pp))
+			    FS.Local.DeleteDirectoryRecurse(pp);
+				
+			break;
+		}
+	}
+}

@@ -9,6 +9,17 @@ jobs:
     withSubmodules: true
     condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
   - !CommandStep
+    name: Build VSCode Extension
+    runInContainer: true
+    image: node:latest
+    interpreter: !DefaultInterpreter
+      commands: |
+        cd vscode-extension
+        npm install -g @@vscode/vsce
+        vsce package
+    useTTY: true
+    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+  - !CommandStep
     name: Build everything
     runInContainer: true
     image: onedev.site.tesses.net/crosslang/crosslang:latest

@@ -1,0 +1,65 @@
+var pm = new Tesses.CrossLang.PackageManager();
+func Pages.GetMoreApps(ctx)
+{
+    var installed=GetPackages();
+    var q = ctx.QueryParams.TryGetFirst("q");
+    if(TypeOf(q) != "String")
+    {
+        q = "";
+    }
+    var server = ctx.QueryParams.TryGetFirst("server");
+    if(TypeOf(server) != "String") server = "https://cpkg.tesseslanguage.com/";
+    var items=[];
+    var items2 = [];
+    
+    each(var item : pm.Search(q,{server,type="webapp"}))
+    {
+        items2.Add({
+            name = item.packageName,
+            version = item.version,
+            url = $"{server}/package?name={Net.Http.UrlEncode(item.packageName)}",
+            thumb = $"{server}/api/v1/package_icon.png?name={Net.Http.UrlEncode(item.packageName)}&version={Net.Http.UrlEncode(item.version)}"
+        });
+    }
+    each(var item : pm.GetPackageServers())
+    {
+        items.Add({
+            active = items.Count == 0,
+            url = item
+        });
+    }
+    
+    var html = <null>
+        <form hx-get="./get-more-apps" hx-target="body" hx-push-url="true">
+          
+         <div class="field suffix border round">
+                <select name="server">
+                    <each(var item : items)>
+                        <if(item.active)>
+                            <true>
+                                <option value={item.url} selected>{item.url}</option>
+                            </true>
+                            <false>
+                                <option value={item.url}>{item.url}</option>
+                            </false>
+                        </if>
+                    </each>
+                </select>
+                <i>arrow_drop_down</i>
+            </div>
+        <div class="row no-space">
+            <div class="field border left-round max">
+                <input type="text" name="q" value={q}>
+            </div>
+            <button type="submit" class="large right-round min">Search</button>
+            
+        </div>
+       
+    </form>
+    <each(var item : items2)>
+        <raw(Components.PackageItem(installed,item))>
+
+    </each>
+    </null>;
+    return Components.Shell("More Apps",html,1);
+}

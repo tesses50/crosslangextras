@@ -35,6 +35,7 @@ func main(args)
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/compiletool"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/tool"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Templates/webapp"]);
+
     /*
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);
     cmd("crossvm",["./Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm","build","Tesses.CrossLang.PackageServer"]);

@@ -1,0 +1,114 @@
+var AppResources = [
+    {path="/beer.min.css",value=embed("beer.min.css")},
+    {path="/beer.min.js",value=embed("beer.min.js")},
+    {path="/htmx.min.js",value=embed("htmx.min.js")},
+    {path="/material-symbols-outlined.woff2",value=embed("material-symbols-outlined.woff2")},
+    {path="/material-symbols-rounded.woff2",value=embed("material-symbols-rounded.woff2")},
+    {path="/material-symbols-sharp.woff2",value=embed("material-symbols-sharp.woff2")},
+    {path="/material-symbols-subset.woff2",value=embed("material-symbols-subset.woff2")},
+    {path="/favicon.ico",value=embed("favicon.ico")},
+    {path="/theme.css",value=embed("theme.css")}
+];
+var SERVER = (ctx)=>{
+    if(ctx.Path == "/")
+    {
+        ctx.WithMimeType("text/html").SendText(Pages.Home());
+        return true;
+    }
+    else if(ctx.Path == "/get-more-apps")
+    {
+        ctx.WithMimeType("text/html").SendText(Pages.GetMoreApps(ctx));
+        return true;
+    }
+    else if(ctx.Path == "/package-manage" && ctx.Method == "POST")
+    {
+        var data = {
+            name = ctx.QueryParams.TryGetFirst("name"),
+            version = ctx.QueryParams.TryGetFirst("version"),
+            action = ctx.QueryParams.TryGetFirst("action")
+        };
+
+        var mustConfirm = false;
+            
+
+        switch(data.action)
+        {
+            case "install":
+            {
+                var v = Version.Parse(data.version);
+                if(v != null)
+                PackageInstall(data.name,v);
+            }
+                break;
+            case "uninstall":
+            {
+                mustConfirm = true;
+            }
+                break;
+            case "confirm":
+            {
+                PackageUninstall(data.name);
+            }
+                break;
+        }
+        ctx.WithMimeType("text/html").SendText(Components.InstallButton(GetPackages(), data.name, data.version, mustConfirm));
+        return true;
+    }   
+    else if(ctx.Path == "/settings")
+    {
+        ctx.WithMimeType("text/html").SendText(Pages.Settings(ctx));
+        return true;
+    }
+    else if(ctx.Path == "/launch")
+    {
+        var app = ctx.QueryParams.TryGetFirst("app");
+        if(app != null)
+        {
+            var path = GetWebAppsDir() / app / $"{app}.crvm";
+            if(FS.Local.FileExists(path))
+            {
+                var env = VM.CreateEnvironment({});
+                env.RegisterEverything();
+                env.LockRegister();
+
+                env.LoadFileWithDependencies(FS.Local,path);
+                var myArgs = [path.ToString()];
+               
+
+                SERVER = env.GetDictionary().WebAppMain(myArgs);
+            }
+        }
+        ctx.StatusCode=302;
+        ctx.WithLocationHeader("/");
+        ctx.WithMimeType("text/html").SendText(<a href="./">Go Home</a>);
+        return true;
+    }
+    else {
+        each(var file : AppResources)
+        {
+            if(ctx.Path == file.path)
+            {
+                ctx.WithMimeType(Net.Http.MimeType(file.path)).SendBytes(file.value);
+                return true;
+            }
+        }
+    }
+        return false;
+ 
+};
+
+func WebAppMain(args)
+{
+    return {Handle = (ctx)=>{
+        if(TypeIsCallable(SERVER)) return SERVER(ctx);
+        else return SERVER.Handle(ctx);
+    }, Close = ()=>{
+        if(TypeIsCallable(SERVER)) return;
+        SERVER.Close();
+    }};
+}
+func main(args)
+{
+    Console.WriteLine("use crosslang webapp-test to test");
+}
+

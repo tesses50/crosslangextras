@@ -45,10 +45,27 @@ func create_archive()
     copyFile("Tesses.CrossLang.Shell/bin/Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm", shell / "Tesses.CrossLang.BuildEssentials-1.0.0.0-prod.crvm");
     copyFile("Tesses.CrossLang.Shell/bin/Tesses.CrossLang.Shell-1.0.0.0-prod.crvm", shell / "Shell.crvm");
     copyFile("Tesses.CrossLang.Reference/bin/Tesses.CrossLang.Reference-1.0.0.0-dev.crvm", "Reference.crvm");
+    var devStudio = r / "DevStudio";
+    tmpFS.CreateDirectory(devStudio);
+    copyFile("vscode-extension/syntaxes/crosslang.tmLanguage.json", devStudio / "grammar.json");
+    copyFile("vscode-extension/crosslang-1.0.0.vsix", r / "crosslang-vscode-1.0.0.vsix");
+    var webAppsCrossLang = r / "WebApps" / "crosslang";
+    tmpFS.CreateDirectory(webAppsCrossLang);
+    var pm = new Tesses.CrossLang.PackageManager();
+    pm.Offline = false;
+    var bt = new Tesses.CrossLang.BuildTool(pm);
 
-
+    var publisher= new Tesses.CrossLang.Publisher(bt, FS.MakeFull("Tesses.CrossLang.App"));
+    publisher.OutputDirectory =  FS.MakeFull("crosslang_shell_archive_maker/tmp/WebApps/crosslang");
+    publisher.RuntimeIdentifier = "copy";
+    publisher.Publish();
+    
     var templates = r / "Templates";
     tmpFS.CreateDirectory(templates);
+
+
+    
+
     copyFile("Templates/compiletool/bin/Tesses.CrossLang.Template.CompileTool-1.0.0.0-prod.crvm", templates / "compiletool.crvm");
     copyFile("Templates/console/bin/Tesses.CrossLang.Template.Console-1.0.0.0-prod.crvm", templates / "console.crvm");
     copyFile("Templates/lib/bin/Tesses.CrossLang.Template.Library-1.0.0.0-prod.crvm", templates / "lib.crvm");
