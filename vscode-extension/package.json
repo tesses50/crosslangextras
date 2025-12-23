@@ -4,7 +4,7 @@
   "description": "CrossLang Language Support",
   "version": "1.0.0",
   "engines": {
-    "vscode": "^1.0.0"
+    "vscode": "^1.107.0"
   },
   "publisher": "tesses50",
   "repository": "https://onedev.site.tesses.net/crosslang/crosslangextras",
