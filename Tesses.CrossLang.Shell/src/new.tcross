@@ -68,7 +68,7 @@ func Tesses.CrossLang.Shell.New(dd)
 
             var jsonText = FS.ReadAllText(projectDir, "/cross.json");
             var proj = Json.Decode(jsonText);
-
+            proj.["$schema"] = "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json";
             proj.name = projectPath.GetFileName();
             proj.version = "1.0.0.0-prod";
             var old_info = proj.info;

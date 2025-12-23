@@ -14,5 +14,6 @@
         "short_name_pretty": "Compile Tool",
         "template_ignored_files": ["bin","obj"],
         "description": "A tool that can be a dependency to a project (including libraries) that runs at compile time"
-    }
+    },
+    "$schema": "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json"
 }

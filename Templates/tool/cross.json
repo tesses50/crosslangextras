@@ -23,5 +23,6 @@
         "short_name_pretty": "Tool"
     },
     "version": "1.0.0.0-prod",
-    "name": "Tesses.CrossLang.Template.Tool"
+    "name": "Tesses.CrossLang.Template.Tool",
+    "$schema": "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json"
 }

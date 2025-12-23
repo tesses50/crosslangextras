@@ -14,5 +14,6 @@
         },
         "template_ignored_files": ["bin","obj"],
         "short_name_pretty": "WebSite"
-    }
+    },
+    "$schema": "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json"
 }

@@ -15,5 +15,6 @@
         "short_name_pretty": "Empty Website",
         "template_extra_text_ftles": [],
         "template_ignored_files": ["bin","obj"]
-    }
+    },
+    "$schema": "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json"
 }

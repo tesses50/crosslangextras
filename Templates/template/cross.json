@@ -24,5 +24,6 @@
         "template_extra_text_ftles": [],
         "template_ignored_files": ["bin","obj"],
         "short_name_pretty": "Template"
-    }
+    },
+    "$schema": "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json"
 }

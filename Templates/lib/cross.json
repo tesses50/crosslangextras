@@ -14,5 +14,6 @@
         "template_ignored_files": ["bin","obj"],
         "description": "A crosslang library",
         "short_name_pretty": "Library"
-    }
+    },
+    "$schema": "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json"
 }

@@ -17,5 +17,6 @@
         "short_name_pretty": "Console Application",
         "template_ignored_files": ["bin","obj"],
         "description": "A console application"
-    }
+    },
+    "$schema": "https://crosslang.tesseslanguage.com//schema/cross-json-schema.json"
 }
