@@ -18,8 +18,7 @@ jobs:
       type: DefaultInterpreter
       commands: |
         cd vscode-extension
-        npm install -g typescript
-        npm install -g @@vscode/vsce
+        npm install
         vsce package
     useTTY: true
     condition: SUCCESSFUL

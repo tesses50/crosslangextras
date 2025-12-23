@@ -5,3 +5,6 @@ shell_archive
 tmp
 *.crvm
 *.vsix
+vscode-extension/out
+vscode-extension/package-lock.json
+vscode-extension/node-modules
