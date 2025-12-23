@@ -19,12 +19,12 @@ int main(int argc, char** argv)
     
     TStd::RegisterStd(&gc,env);
     {
-        auto ms = std::shared_ptr<Tesses::Framework::Streams::MemoryStream>(false);
+        auto ms = std::make_shared<Tesses::Framework::Streams::MemoryStream>(false);
         auto& buff = ms->GetBuffer();
         buff.resize(@<<CAPS_VERSION>>@_length);
         memcpy(buff.data(),@<<CAPS_VERSION>>@_data,@<<CAPS_VERSION>>@_length);
         auto file = TFile::Create(ls);
-        file->Load(&gc, &ms);
+        file->Load(&gc, ms);
         env->LoadFile(&gc,file);
     }
     
@@ -41,6 +41,7 @@ int main(int argc, char** argv)
                 port = std::stoi(item.second);
             }
         }
+        env->EnsureDictionary(&gc,"Net")->SetValue("WebServerPort", (int64_t)port);
         TList* args2 = TList::Create(ls);
         args2->Add(exePath.ToString());
         for(auto& item : args.positional)
@@ -48,9 +49,9 @@ int main(int argc, char** argv)
             args2->Add(item);
         }
 
-        auto res = env->CallFunction(ls, "WebAppMain", {args2});
-        TObjectHttpServer http(&gc, res);
-        Tesses::Framework::Http::HttpServer svr(port,http,false);
+        auto res = env->CallFunctionWithFatalError(ls, "WebAppMain", {args2});
+        auto http=std::make_shared<TObjectHttpServer>(&gc, res);
+        Tesses::Framework::Http::HttpServer svr((uint16_t)port,http);
        
         svr.StartAccepting();
         TF_RunEventLoop();
@@ -71,7 +72,7 @@ int main(int argc, char** argv)
          args->Add(exePath.ToString());
         for(int arg=1;arg<argc;arg++)
             args->Add(argv[arg]);
-        auto res = env->CallFunction(ls,"main",{args});
+        auto res = env->CallFunctionWithFatalError(ls,"main",{args});
         int64_t iresult;
         if(GetObject(res,iresult))
             return (int)iresult;

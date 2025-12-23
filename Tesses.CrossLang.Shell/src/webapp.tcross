@@ -27,12 +27,17 @@ func Tesses.CrossLang.Shell.WebApp(dd)
             }
         }
 
+
 		if(FS.Local.FileExists(webapppath))
 		{
-		
-    		var env = VM.CreateEnvironment({});
+			const _dict = {};
+    		const env = VM.CreateEnvironment(_dict);
 		    env.RegisterEverything();
     		env.LockRegister();
+
+			_dict.Net ?? = {};
+			_dict.Net.WebServerPort = port;
+			
 
 	    	env.LoadFileWithDependencies(FS.Local,webapppath);
 	    	var myArgs = [webapppath.ToString()];

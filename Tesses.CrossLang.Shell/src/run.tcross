@@ -5,9 +5,14 @@ func Tesses.CrossLang.Shell.Run(dd)
     var nobuild=false;
     var allowFullCompTime=false;
     var output="";   
+    var debug = false;
     each(var flag : dd.Flags)
     {
-        if(flag == "offline")
+        if(flag == "debug")
+        {
+            debug = true;
+        }
+        else if(flag == "offline")
         {
             offline = true;
         }
@@ -23,6 +28,7 @@ func Tesses.CrossLang.Shell.Run(dd)
             Console.WriteLine("offline:                 build with no internet (don't fetch files)");
             Console.WriteLine("allow-insecure-comptime: Allow full comptime");
             Console.WriteLine("nobuild:                 don't build, just run");
+            Console.WriteLine("debug:                   emit line info into executable");
             Console.WriteLine("help:                    this help");
             Console.WriteLine();
             Console.WriteLine("OPTIONS:");
@@ -68,6 +74,7 @@ func Tesses.CrossLang.Shell.Run(dd)
         pm.Offline = offline;
         var bt = new Tesses.CrossLang.BuildTool(pm);
         bt.Config = conf;
+        bt.Debug = debug;
         bt.AllowFullCompTime = allowFullCompTime;
         output =  bt.BuildProject(buildPath).Output;
     }

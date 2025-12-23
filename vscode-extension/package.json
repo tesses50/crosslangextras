@@ -17,11 +17,87 @@
       "aliases": ["CrossLang", "crosslang"],
       "extensions": [".tcross"],
       "configuration": "./language-configuration.json"
+    },{
+      "id": "crossasm",
+      "aliases": ["CrossAsm", "crossasm"],
+      "extensions": [".tcasm"],
+      "configuration": "./language-configuration.json"
     }],
     "grammars": [{
       "language": "crosslang",
       "scopeName": "source.crosslang",
       "path": "./syntaxes/crosslang.tmLanguage.json"
-    }]
-  }
+    },{
+      "language": "crossasm",
+      "scopeName": "source.crossasm",
+      "path": "./syntaxes/crossasm.tmLanguage.json"
+    }],
+     "commands": [
+      {
+        "command": "crosslang.createProject",
+        "title": "Create Project",
+        "category": "CrossLang"
+      },
+      {
+        "command": "crosslang.createProjectWorkspace",
+        "title": "Create Project in workspace",
+        "category": "CrossLang"
+      },
+      {
+        "command": "crosslang.uploadPackage",
+        "title": "Upload package to CPKG",
+        "category": "CrossLang"
+      },
+      {
+        "command": "crosslang.addPackage",
+        "title": "Add Package",
+        "category": "CrossLang"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "crosslang",
+        "languages": [
+          "crosslang"
+        ],
+        "configurationSnippets": [
+          {
+            "label": "CrossLang: Launch",
+            "description": "A new configuration for CrossLang",
+            "body": {
+                "name": "Run crosslang program",
+                "type": "node-terminal",
+                "request": "launch",
+                "command": "crosslang run",
+                "cwd": "^\"\\${workspaceFolder}/\""
+            } 
+          }
+        ]
+      }
+    ]
+  },
+  "activationEvents": [],
+  "main": "./out/extension.js",
+   "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.107.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
+  },
+  "dependencies": {
+    "platform-folders": "^0.6.1"
+  },
+  "icon": "logo.png"
 }

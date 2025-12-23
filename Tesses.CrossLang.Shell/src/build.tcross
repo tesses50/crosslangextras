@@ -3,27 +3,33 @@ func Tesses.CrossLang.Shell.Build(dd)
     var offline=false;
     var allowFullCompTime=false;
     var buildPath = ".";
+    var debug=false;
     if(dd.Arguments.Count > 1)
     {
         buildPath = dd.Arguments[1];
     }
     each(var flag : dd.Flags)
     {
-        if(flag == "offline")
+        if(flag == "debug")
+        {
+            debug = true;
+        }
+        else if(flag == "offline")
         {
             offline = true;
         }
-        if(flag == "allow-insecure-comptime")
+        else if(flag == "allow-insecure-comptime")
         {
             allowFullCompTime=true;
         }
-        if(flag == "help")
+        else if(flag == "help")
         {
             Console.WriteLine("USAGE: crosslang build [build-flags-and-options]");
             Console.WriteLine("FLAGS:");
             Console.WriteLine("offline:                 build with no internet (don't fetch files)");
             Console.WriteLine("help:                    this help");
             Console.WriteLine("allow-insecure-comptime: Allow full comptime");
+            Console.WriteLine("debug:                   emit line info into executable");
             Console.WriteLine();
             Console.WriteLine("OPTIONS:");
             Console.WriteLine("conf=CONFIGSTRING:  specify a conf string for compile_tool(s), is the property Config");
@@ -42,6 +48,7 @@ func Tesses.CrossLang.Shell.Build(dd)
     pm.Offline = offline;
     var bt = new Tesses.CrossLang.BuildTool(pm);
     bt.Config = conf;
+    bt.Debug = debug;
     bt.AllowFullCompTime = allowFullCompTime;
     bt.BuildProject(buildPath);
         

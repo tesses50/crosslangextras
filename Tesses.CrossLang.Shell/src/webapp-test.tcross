@@ -20,10 +20,13 @@ func Tesses.CrossLang.Shell.WebAppTest(dd)
     var proj=bt.BuildProject(".");
 
     var output = proj.Output;
-
-    var env = VM.CreateEnvironment({});
+    const _dict = {};
+    var env = VM.CreateEnvironment(_dict);
     env.RegisterEverything();
     env.LockRegister();
+
+	_dict.Net ?? = {};
+	_dict.Net.WebServerPort = port;
 
     env.LoadFileWithDependencies(FS.Local,output);
     var myArgs = [output.ToString()];

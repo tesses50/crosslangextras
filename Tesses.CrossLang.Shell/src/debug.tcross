@@ -61,6 +61,7 @@ func Tesses.CrossLang.Shell.Debug(dd)
         var pm = new Tesses.CrossLang.PackageManager();
         pm.Offline = offline;
         var bt = new Tesses.CrossLang.BuildTool(pm);
+        bt.Debug = true;
         bt.Config = conf;
         output =  bt.BuildProject(buildPath).Output;
     }
