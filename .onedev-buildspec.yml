@@ -1,73 +1,88 @@
-version: 39
+version: 43
 jobs:
 - name: Build for x86_64
   steps:
-  - !CheckoutStep
+  - type: CheckoutStep
     name: Checkout
-    cloneCredential: !DefaultCredential {}
+    cloneCredential:
+      type: DefaultCredential
     withLfs: true
     withSubmodules: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: Build VSCode Extension
     runInContainer: true
     image: node:latest
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         cd vscode-extension
+        npm install -g typescript
         npm install -g @@vscode/vsce
         vsce package
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: Build everything
     runInContainer: true
     image: onedev.site.tesses.net/crosslang/crosslang:latest
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         crossint ./build.tcross pack
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !PublishArtifactStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: PublishArtifactStep
     name: Publish shell package
     artifacts: Tesses.CrossLang.ShellPackage-*.crvm
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !PublishArtifactStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: PublishArtifactStep
     name: Publish Package Server
     sourcePath: Tesses.CrossLang.PackageServer/bin/
     artifacts: Tesses.CrossLang.PackageServer-*.crvm
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
     name: Build container
     dockerfile: Dockerfile
-    output: !RegistryOutput
+    output:
+      type: RegistryOutput
       tags: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
     registryLogins:
     - registryUrl: '@server_url@'
       userName: '@job_token@'
       passwordSecret: dockersecret
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !SCPCommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: SCPCommandStep
     name: Copy Shell Package
     privateKeySecret: tesses_www_private_key
     source: Tesses.CrossLang.ShellPackage-*.crvm
     target: mike@@10.137.42.28:/var/www/downloads/ShellPackage.crvm
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !BuildImageStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
     name: Build container (package server)
     dockerfile: Dockerfile.packageserver
-    output: !RegistryOutput
+    output:
+      type: RegistryOutput
       tags: onedev.site.tesses.net/crosslang/crosslangextras/packageserver:latest
     registryLogins:
     - registryUrl: '@server_url@'
       userName: '@job_token@'
       passwordSecret: dockersecret
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: Push packages to CPKG
     runInContainer: true
     image: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         cd Tesses.CrossLang.PackageServer
         crosslang upload-package --token="$CPKG_KEY" --host="https://cpkg.tesseslanguage.com/"
@@ -99,12 +114,14 @@ jobs:
     - name: CPKG_KEY
       value: '@secret:CPKG_KEY@'
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
-  - !CommandStep
+    condition: SUCCESSFUL
+    optional: false
+  - type: CommandStep
     name: push to coolify
     runInContainer: true
     image: curlimages/curl:latest
-    interpreter: !DefaultInterpreter
+    interpreter:
+      type: DefaultInterpreter
       commands: |
         curl "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"
     envVars:
@@ -113,16 +130,19 @@ jobs:
     - name: COOLIFY_TOKEN
       value: '@secret:COOLIFY_TOKEN@'
     useTTY: true
-    condition: ALL_PREVIOUS_STEPS_WERE_SUCCESSFUL
+    condition: SUCCESSFUL
+    optional: false
   triggers:
-  - !DependencyFinishedTrigger
+  - type: DependencyFinishedTrigger
     projects: crosslang
-  - !BranchUpdateTrigger
+  - type: BranchUpdateTrigger
     branches: master
+    userMatch: anyone
     projects: crosslang/crosslangextras
   projectDependencies:
   - projectPath: crosslang
-    buildProvider: !LastFinishedBuild
+    buildProvider:
+      type: LastFinishedBuild
       jobName: Build for x86_64
     artifacts: -**
   retryCondition: never
