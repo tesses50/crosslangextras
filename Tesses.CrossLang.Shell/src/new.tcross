@@ -73,6 +73,7 @@ func Tesses.CrossLang.Shell.New(dd)
             proj.version = "1.0.0.0-prod";
             var old_info = proj.info;
             proj.info = old_info.template_info;
+            proj.icon = old_info.template_icon;
             proj.dependencies = old_info.template_project_dependencies;
             var srcDir = proj.source_directory;
             if(TypeOf(srcDir) == "Undefined") srcDir = "/src";
