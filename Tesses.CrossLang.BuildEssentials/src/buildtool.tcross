@@ -113,15 +113,15 @@ class Tesses.CrossLang.BuildTool
                 if(TypeOf(configData.info) != "Undefined")
                     info = configData.info;
                 if(TypeOf(configData.icon) != "Undefined")
-                    icon = configData.icon;
+                    icon = (resDir/configData.icon).ToString();
 
 
 
                 FS.Local.CreateDirectory(dir / outputDir);
 
-                if(TypeOf(info.type) == "String" && info.type == "template")
+                if(TypeOf(info.type) == "String" && (info.type == "template" || info.type == "archive"))
                 {
-                    //vfs, strm, name, version, info
+                    //vfs, strm, name, version, info, icon
                     var subdir = new SubdirFilesystem(FS.Local,dir);
                     var output = $"{name}-{version}.crvm";
                     var outFile = FS.Local.OpenFile(dir / outputDir / output,"wb");
