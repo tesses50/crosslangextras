@@ -113,15 +113,16 @@ class Tesses.CrossLang.BuildTool
                 if(TypeOf(configData.info) != "Undefined")
                     info = configData.info;
                 if(TypeOf(configData.icon) != "Undefined")
-                    icon = (resDir/configData.icon).ToString();
+                    icon = configData.icon;
 
 
 
                 FS.Local.CreateDirectory(dir / outputDir);
 
-                if(TypeOf(info.type) == "String" && (info.type == "template" || info.type == "archive"))
+                if(TypeOf(info.type) == "String" && info.type == "template" || info.type == "archive")
                 {
-                    //vfs, strm, name, version, info, icon
+                
+                    //vfs, strm, name, version, info
                     var subdir = new SubdirFilesystem(FS.Local,dir);
                     var output = $"{name}-{version}.crvm";
                     var outFile = FS.Local.OpenFile(dir / outputDir / output,"wb");
@@ -135,7 +136,7 @@ class Tesses.CrossLang.BuildTool
                         }
                         FS.WriteAllText(FS.Local, dir / ".crossarchiveignore", ignored);
                     }
-                    FS.CreateArchive(subdir, outFile, name, version, Json.Encode(info),icon);
+                    FS.CreateArchive(subdir, outFile, name, version, Json.Encode(info),icon == "" ? "" : (/resDir/icon).ToString());
                     outFile.Close();
                     subdir.Close();
                     return {
