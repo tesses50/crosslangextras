@@ -208,7 +208,7 @@ class Tesses.CrossLang.PackageManager
         {
             each(var dep : _vm.Dependencies)
             {
-                var path = /short_name/$"{dep.Name}-{dep.Version.ToString()}";
+                var path = /short_name/$"{dep.Name}-{dep.Version.ToString()}.crvm";
                 if(!dirFs.RegularFileExists(path))
                 {
                     var pkg2 = this.GetPackage(dep.Name,dep.Version.ToString());
