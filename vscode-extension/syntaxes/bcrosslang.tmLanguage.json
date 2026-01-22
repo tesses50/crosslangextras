@@ -1,6 +1,6 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "CrossLang",
+	"name": "Better CrossLang",
 	"patterns": [
 		{
 			"include": "#comment" 
@@ -36,34 +36,34 @@
 	"repository": {
 		"comment": {
 			"patterns": [{
-				"name": "comment.line.double-slash.crosslang",
+				"name": "comment.line.double-slash.bcrosslang",
 				"begin": "//",
 				"end": "\\n"
 			},
 			{
-				"name": "comment.block.crosslang",
+				"name": "comment.block.bcrosslang",
 				"begin": "\\/\\*",
 				"end": "\\*\\/"
 			},
 			{
-				"name": "comment.line.crosslang",
+				"name": "comment.line.bcrosslang",
 				"begin": "#",
 				"end": "\\n"
 			},
 			{
-				"name":"comment.block.documentation.crosslang",
+				"name":"comment.block.documentation.bcrosslang",
 				"begin": "\\/\\^",
 				"end": "\\^\\/"
 			}
 			]
 		},
 		"strings": {
-			"name": "string.quoted.double.crosslang",
+			"name": "string.quoted.double.bcrosslang",
 			"begin": "\\\"",
 			"end": "\\\"",
 			"patterns": [
 				{
-					"name": "constant.character.escape.crosslang",
+					"name": "constant.character.escape.bcrosslang",
 					"match": "\\\\."
 				}
 			]
@@ -76,25 +76,25 @@
 		},
 		"function": {
 			"patterns": [{
-				"name": "entity.name.function.crosslang",
+				"name": "entity.name.function.bcrosslang",
 				"match": "\\b[_a-zA-Z\\x80-\\xFF\\$][_a-zA-Z0-9\\x80-\\xFF\\$]*\\("
 			}]
 		},
 		"identifier": {
 			"patterns": [{
-				"name": "entity.name.crosslang",
+				"name": "entity.name.bcrosslang",
 				"match": "\\b[_a-zA-Z\\x80-\\xFF\\$][_a-zA-Z0-9\\x80-\\xFF\\$]*"
 			}]
 		},
 		"double": {
-			"name": "constant.numeric.crosslang",
+			"name": "constant.numeric.bcrosslang",
 			"match": "\\b[0-9][0-9]*\\.[0-9]*\\b"
 		},
 		
 		"long": {
 			"patterns": [
 				{
-					"name": "constant.numeric.crosslang",
+					"name": "constant.numeric.bcrosslang",
 					"match": "\\b[0-9][0-9]*\\b"
 				}
 			]
@@ -103,35 +103,35 @@
 			"patterns": [
 				{
 					
-					"name": "constant.language.crosslang",
+					"name": "constant.language.bcrosslang",
 					"match": "\\b(true|false|null|undefined|this)\\b"
 				},
 				{
-					"name": "keyword.operator.new.crosslang",
+					"name": "keyword.operator.new.bcrosslang",
 					"match": "\\bnew\\b"
 				},
 				{
-					"name": "keyword.control.crosslang",
-					"match": "\\b(if|else|while|for|do|return|each|in|break|try|catch|finally|defer|enumerable|yield|switch|case|default|await|breakpoint|throw)\\b"
+					"name": "keyword.control.bcrosslang",
+					"match": "\\b(if|else|while|for|do|return|each|break|try|catch|finally|defer|enumerable|yield|switch|case|default|await|breakpoint|throw)\\b"
 				},
 				{
-					"name": "keyword.crosslang",
-					"match": "\\b(var|const|func|class|public|private|protected|static|operator|embed|embeddir|embedstrm|comptime|async)\\b"
+					"name": "keyword.bcrosslang",
+					"match": "\\b(Double|Long|ByteArray|List|Dictionary|Object|String|Char|Callable|Path|Filesystem|Regex|Variant|Boolean|as|var|of|in|interface|delegate|extern|namespace|use|const|func|class|public|private|protected|static|operator|embed|embeddir|embedstrm|comptime|async)\\b"
 				}
 			]
 		},
 		"chars": {
-			"name": "constant.character.crosslang",
+			"name": "constant.character.bcrosslang",
 			"begin": "'",
 			"end": "'",
 			"patterns": [
 				{
-					"name": "constant.character.escape.crosslang",
+					"name": "constant.character.escape.bcrosslang",
 					"match": "\\\\."
 				}
 			]
 		}
 	},
-	"scopeName": "source.crosslang"
+	"scopeName": "source.bcrosslang"
 }
 
