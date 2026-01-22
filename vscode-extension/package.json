@@ -20,7 +20,7 @@
     },
     {
       "id": "bcrosslang",
-      "aliases": ["CrossLang", "better-crosslang"],
+      "aliases": ["Better CrossLang", "better-crosslang"],
       "extensions": [".btcross"],
       "configuration": "./language-configuration.json"
     }
