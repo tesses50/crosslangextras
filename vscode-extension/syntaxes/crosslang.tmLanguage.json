@@ -116,7 +116,7 @@
 				},
 				{
 					"name": "keyword.crosslang",
-					"match": "\\b(var|const|func|class|public|private|protected|static|operator|embed|embeddir|embedstrm|comptime|async)\\b"
+					"match": "\\b(meta|var|const|func|class|public|private|protected|static|operator|embed|embeddir|embedstrm|comptime|async)\\b"
 				}
 			]
 		},

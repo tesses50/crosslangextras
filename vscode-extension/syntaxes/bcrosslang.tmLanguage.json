@@ -116,7 +116,7 @@
 				},
 				{
 					"name": "keyword.bcrosslang",
-					"match": "\\b(Double|Long|ByteArray|List|Dictionary|Object|String|Char|Callable|Path|Filesystem|Regex|Variant|Boolean|as|var|of|in|interface|delegate|extern|namespace|use|const|func|class|public|private|protected|static|operator|embed|embeddir|embedstrm|comptime|async)\\b"
+					"match": "\\b(Double|Long|ByteArray|List|Dictionary|Object|String|Char|Callable|Path|Filesystem|Regex|Variant|Boolean|as|var|meta|of|in|interface|delegate|extern|namespace|use|const|func|class|public|private|protected|static|operator|embed|embeddir|embedstrm|comptime|async)\\b"
 				}
 			]
 		},
