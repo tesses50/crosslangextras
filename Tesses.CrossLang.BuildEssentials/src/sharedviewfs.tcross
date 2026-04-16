@@ -1,0 +1,65 @@
+func New.Tesses.CrossLang.SharedViewFilesystem()
+{
+    const fileSystems = [];
+    func enumeratePaths (path) {
+        var found = [];
+
+        each(var fs : fileSystems)
+        {
+            if(fs.DirectoryExists(path))
+            {
+                each(var ent : fs.EnumeratePaths(path))
+                {
+                    const name = ent.GetFileName();
+                    if(found.Contains(name)) continue;
+                    found.Add(name);
+
+                }
+            }
+        }
+
+        return found;
+    }
+
+    const fs_dict = {
+        OpenFile = (path, mode) => {
+            if(mode == "r" || mode == "rb")
+            {
+                each(var fs : fileSystems)
+                {
+                    if(fs.FileExists(path))
+                        return fs.OpenFile(path,mode);
+                }
+            }
+            return null;
+        },
+        EnumeratePaths = enumeratePaths,
+        RegularFileExists = (path) => {
+            each(var fs : fileSystems)
+            {
+                if(fs.RegularFileExists(path)) return true;
+            }
+            return false;
+        },
+        FileExists = (path) => {
+            each(var fs : fileSystems)
+            {
+                if(fs.FileExists(path)) return true;
+            }
+            return false;
+        },
+        DirectoryExists = (path) => {
+            each(var fs : fileSystems)
+            {
+                if(fs.DirectoryExists(path)) return true;
+            }
+            return false;
+        },
+        AddFS = (fs)=>{
+            fileSystems.Add(fs);
+        }
+    };
+
+
+    return new Filesystem(fs_dict);
+}

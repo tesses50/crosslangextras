@@ -5,6 +5,7 @@ func Tesses.CrossLang.Shell.Default(dd)
         if(flag == "version")
         {
             Console.WriteLine($"VM version: {VM.RuntimeVersion}");
+            Console.WriteLine($"Bytecode version: {VM.BytecodeVersion}");
             Console.WriteLine($"Shell version: {main.File.Version}");
             Console.WriteLine($"Args version: {Tesses.CrossLang.Args.File.Version}");
             Console.WriteLine($"BuildTool version: {Tesses.CrossLang.BuildTool.File.Version}");
@@ -15,6 +16,7 @@ func Tesses.CrossLang.Shell.Default(dd)
     Console.WriteLine("COMMANDS:");
     Console.WriteLine("new: create new project");
     Console.WriteLine("build: build a project");
+    Console.WriteLine("test: test a project");
     Console.WriteLine("run: run a project");
 	Console.WriteLine("debug: debug a project");
 	Console.WriteLine("install-console: install a console application");

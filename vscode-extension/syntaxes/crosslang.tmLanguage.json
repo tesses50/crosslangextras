@@ -112,7 +112,7 @@
 				},
 				{
 					"name": "keyword.control.crosslang",
-					"match": "\\b(if|else|while|for|do|return|each|in|break|try|catch|finally|defer|enumerable|yield|switch|case|default|await|breakpoint|throw)\\b"
+					"match": "\\b(if|else|while|for|do|return|each|in|break|continue|try|catch|finally|defer|enumerable|yield|switch|case|default|await|breakpoint|throw)\\b"
 				},
 				{
 					"name": "keyword.crosslang",

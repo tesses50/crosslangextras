@@ -1,0 +1,386 @@
+class ExpectObj {
+    private inverted=false;
+    private currentSpec;
+    private currentTest;
+    private left;
+    public getNot() {
+        this.inverted = !this.inverted;
+
+        return this;
+    }
+
+    public ExpectObj(currentTest,currentSpec,left)
+    {
+        this.currentTest = currentTest;
+        this.currentSpec = currentSpec;
+        this.left = left;
+    }
+    public ToBe(right)
+    {
+        if(this.inverted)
+        {
+            this.SetRes(this.left != right, $"{this.left} is equal to {this.right}");
+        }   
+        else
+        {
+
+            this.SetRes(this.left == right, $"{this.left} is not equal to {right}");
+        }
+    }
+    public LessThan(right)
+    {
+        if(this.inverted)
+        {
+            this.SetRes(!(this.left < right), $"{this.left} is less than {this.right}");
+        }   
+        else
+        {
+
+            this.SetRes(this.left < right, $"{this.left} is not less than {right}");
+        }
+    }
+    public GreaterThan(right)
+    {
+        if(this.inverted)
+        {
+            this.SetRes(!(this.left > right), $"{this.left} is greater than {this.right}");
+        }   
+        else
+        {
+
+            this.SetRes(this.left > right, $"{this.left} is not greater than {right}");
+        }
+    }
+
+    private SetRes(succeeded, failmsg)
+    {
+        if(!succeeded)
+        {   
+            this.currentTest.success = false;
+            this.currentSpec.pass=false;
+            this.currentSpec.reason = failmsg;
+        }
+    }
+}
+
+func Tesses.CrossLang.Shell.Test(dd)
+{
+    var offline=false;
+    var buildPath = ".";
+    var nobuild=false;
+    var allowFullCompTime=false;
+    var output="";   
+    var debug = false;
+    each(var flag : dd.Flags)
+    {
+        if(flag == "debug")
+        {
+            debug = true;
+        }
+        else if(flag == "offline")
+        {
+            offline = true;
+        }
+        else if(flag == "allow-insecure-comptime")
+        {
+            allowFullCompTime=true;
+        }
+        else if(flag == "help")
+        {
+            Console.WriteLine("USAGE: crosslang test [run-flags-and-options] program-arguments...");
+            Console.WriteLine("USAGE: crosslang test [run-flags-and-options] -- program-arguments-and-options...");
+            Console.WriteLine("FLAGS:");
+            Console.WriteLine("offline:                 build with no internet (don't fetch files)");
+            Console.WriteLine("allow-insecure-comptime: Allow full comptime");
+            Console.WriteLine("nobuild:                 don't build, just run");
+            Console.WriteLine("debug:                   emit line info into executable");
+            Console.WriteLine("help:                    this help");
+            Console.WriteLine();
+            Console.WriteLine("OPTIONS:");
+            Console.WriteLine("conf=CONFIGSTRING:  specify a conf string for compile_tool(s), is the property Config");
+            return 0;
+        }
+        else if(flag == "nobuild")
+        {
+            nobuild=true;
+        }
+    }
+    var conf = "";
+    each(var option : dd.Options)
+    {
+        if(option.Key == "conf")
+        {
+            conf = option.Value;
+        }
+    }
+    if(nobuild)
+    {
+        if(FS.Local.FileExists("cross.json"))
+        {
+            var proj = Json.Decode(FS.ReadAllText(FS.Local, "cross.json"));
+            var nameVer = $"{proj.name}-{proj.version}.crvm";
+            var buildDir = TypeOf(proj.bin_directory) == "String" ? proj.bin_directory : "bin";
+                    
+            output =./buildDir/nameVer;
+            if(!FS.Local.FileExists(output))
+            {
+                Console.WriteLine($"ERROR: file {output} does not exist.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("ERROR: could not find project.");
+            return 1;
+        }
+    }
+    else
+    {
+        var pm = new Tesses.CrossLang.PackageManager();
+        pm.Offline = offline;
+        var bt = new Tesses.CrossLang.BuildTool(pm);
+        bt.Config = conf;
+        bt.Debug = debug;
+        bt.AllowFullCompTime = allowFullCompTime;
+        output =  bt.BuildProject(buildPath).Output;
+        
+    }
+
+    return Tesses.CrossLang.Shell.RunTestSuite(output);
+}
+
+
+
+func Tesses.CrossLang.Shell.RunTestSuite(execFile)
+{
+    var configData = Json.Decode(FS.ReadAllText(FS.Local,"cross.json")) ?? {};
+    var testDir = configData.test_directory ?? "tests";
+    var sources = [];
+    func walk_for_source(sourceDir)
+    {
+        if(FS.Local.DirectoryExists(sourceDir))
+        each(var file : FS.Local.EnumeratePaths(sourceDir))
+        {
+            if(FS.Local.RegularFileExists(file) && file.GetExtension()==".tcross")
+            {
+                var src = {
+                    FileName = file.ToString(),
+                    Source = FS.ReadAllText(FS.Local, file)
+                };
+                sources.Add(src);
+            }
+            else if(FS.Local.DirectoryExists(file))
+            {
+                walk_for_source(file);
+            }
+        }
+    }
+    walk_for_source(testDir);
+    const strm = new MemoryStream(true);
+    var result = VM.Compile({
+        Name = "/test/",
+        Version = "1.0.0.0-prod",
+        Sources = sources,
+        Dependencies = [], //they are loaded for us
+        Output = strm,
+        CompTime = compTimeEnv,
+        Debug = this.Debug
+    });
+    if(result.Success)
+    {
+        const RED = "\e[0;91m";
+
+        const GREEN = "\e[0;92m";
+        const YELLOW = "\e[;93m";
+        const NC = "\e[0m";
+
+        strm.Seek(0,0);
+
+        var vmFile = VM.LoadExecutable(strm);
+        strm.GetBytes().Resize(0);
+
+        var env = VM.CreateEnvironment({});
+        env.RegisterEverything();
+        env.LockRegister();
+
+        env.LoadFileWithDependencies(FS.Local,execFile);
+        var failed = 0;
+        var total = 0;
+        var currentTest = null;
+        var currentSpec = null;
+        func Test(name, cb)
+        {
+            total++;
+            currentTest = {
+                success = true,
+                specs = []
+            };
+            testLists.Add(currentTest);
+            try {
+                cb();
+                if(!currentTest.success)
+                {
+                    failed++;
+
+                    Console.WriteLine($"[{RED}FAILED{NC}] {name}");
+                    each(var s : currentTest.specs)
+                    {   
+                        if(s.todo)
+                        {
+                            Console.WriteLine($"\t[{YELLOW}TODO{NC}] {s.name}");
+                        }
+                        else if(s.pass)
+                        {
+                            Console.WriteLine($"\t[{GREEN}PASS{NC}] {s.name}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"\t[{RED}FAILED{NC}] {s.name}");
+                            Console.WriteLine($"\t\tReason: {s.reason}");
+                        }
+                    }
+                }
+                else {
+                    Console.WriteLine($"[{GREEN}PASS{NC}] {name}");
+                    each(var s : currentTest.specs)
+                    {   
+                        if(s.todo)
+                        {
+                            Console.WriteLine($"\t[{YELLOW}TODO{NC}] {s.name}");
+                        }
+                        else if(s.pass)
+                        {
+                            Console.WriteLine($"\t[{GREEN}PASS{NC}] {s.name}");
+                        }
+                    }
+                }
+                
+            } catch(ex)
+            {
+                Console.WriteLine($"[{RED}EXCEPTION{NC}] {name}");
+                Console.WriteLine($"\tReason: {ex}");
+                each(var s : currentTest.specs)
+                    {   
+                        if(s.todo)
+                        {
+                            Console.WriteLine($"\t[{YELLOW}TODO{NC}] {s.name}");
+                        }
+                        else if(s.pass)
+                        {
+                            Console.WriteLine($"\t[{GREEN}PASS{NC}] {s.name}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"\t[{RED}FAILED{NC}] {s.name}");
+                            Console.WriteLine($"\t\tReason: {s.reason}");
+                        }
+                    }
+                failed++;
+            }
+
+            currentTest = null;
+        }
+        func SpecToDo(name)
+        {
+
+            if(TypeIsDictionary(currentSpec))
+            {
+                throw "Must not be in Spec";
+            }
+            if(TypeIsDictionary(currentTest))
+            {
+                currentTest.specs.Add({
+                    todo = true,
+                    name
+                });
+            }
+            else {
+                throw "Must be within Test(\"My test name\",()=>{});";
+            }
+        }
+        func Spec(name,cb)
+        {
+            if(TypeIsDictionary(currentSpec))
+            {
+                throw "Must not be in Spec";
+            }
+            if(TypeIsDictionary(currentTest))
+            {
+                currentSpec = {
+                    name
+                };
+                currentTest.specs.Add(currentSpec);
+               
+                cb();
+
+                currentSpec.pass ??= true;
+                currentSpec = null;
+            
+                
+
+            } else {
+
+                throw "Must be within Test(\"My test name\",()=>{});";
+            }
+        }
+        func Expect(val)
+        {
+            if(TypeIsDictionary(currentTest) && TypeIsDictionary(currentSpec))
+            {
+                return new ExpectObj(currentTest,currentSpec,val);
+            }
+            else {
+
+                throw "Must be within Spec(\"My spec name\",()=>{});";
+            }
+        }
+        func Assert(val, failmsg)
+        {
+            if(TypeIsDictionary(currentTest)  && TypeIsDictionary(currentSpec))
+            {
+                if(val)
+                else
+                {
+                    currentSpec.pass=false;
+                    currentSpec.reason = failmsg;
+                    currentTest.success=false;
+                }
+
+            }
+            else {
+
+                throw "Must be within Spec(\"My spec name\",()=>{});";
+            }
+        }
+        env.SetVariable("Test", Test);
+        env.SetVariable("Spec", Spec);
+        env.SetVariable("SpecToDo", SpecToDo);
+        env.SetVariable("Expect", Expect);
+        env.SetVariable("Assert",Assert);
+
+        const beginTime = DateTime.Now;
+        try {
+            env.LoadFile(vmFile);
+
+
+        } catch(ex) {
+            Console.WriteLine($"[{RED}EXCEPTION{NC}] {ex}");
+            return 1;
+        }
+
+        Console.WriteLine();
+        if(failed == 0)
+        {
+            Console.WriteLine($"Tests {GREEN}passed{NC} in {(DateTime.Now-beginTime).ToString(true)}");
+        }
+        else
+        {
+
+            Console.WriteLine($"Tests {RED}failed{NC} in {(DateTime.Now-beginTime).ToString(true)}");
+        }
+        Console.WriteLine($"Passed: {total-failed}");
+        Console.WriteLine($"Failed: {failed}");
+        Console.WriteLine($"Total: {total}");
+        return failed > 0 ? 1 : 0;
+    }
+    return 0;
+}

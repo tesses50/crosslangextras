@@ -26,7 +26,7 @@ class Tesses.CrossLang.BuildTool
     {
         var dep = this.PackageManager.GetPackage(name,version);
             if(TypeOf(dep) == "Null") throw $"Package {name} with version {version} does not exist";
-      
+
 
             var pkgPath = dir / $"{name}-{version}.crvm";
 
@@ -36,7 +36,7 @@ class Tesses.CrossLang.BuildTool
             strm.Close();
             var strm = FS.Local.OpenFile(pkgPath,"rb");
 
-            
+
             var package = VM.LoadExecutable(strm);
             strm.Close();
 
@@ -64,10 +64,10 @@ class Tesses.CrossLang.BuildTool
     {
         var dir = FS.MakeFull(projectDirectory);
             var dirStr = dir.ToString();
-            
-        
-        
-            
+      
+
+
+
             each(var item : this.DirectoriesCompiled)
             {
                 if(item.Path == dirStr) return item.Data;
@@ -88,7 +88,7 @@ class Tesses.CrossLang.BuildTool
                 var icon = "";
                 if(TypeOf(configData.compTime) != "Undefined")
                     compTime = configData.compTime;
-                
+
                 if(compTime == "full" && !this.AllowFullCompTime)
                     throw {
                         Type="CompTimeException",
@@ -98,12 +98,12 @@ class Tesses.CrossLang.BuildTool
 
                 if(TypeOf(configData.name) != "Undefined")
                     name = configData.name;
-                
+
                 if(TypeOf(configData.version) != "Undefined")
                     version = configData.version;
                 if(TypeOf(configData.bin_directory) != "Undefined")
                     outputDir = configData.bin_directory;
-                
+
                 if(TypeOf(configData.obj_directory) != "Undefined")
                     objDir = configData.obj_directory;
                 if(TypeOf(configData.source_directory) != "Undefined")
@@ -117,11 +117,12 @@ class Tesses.CrossLang.BuildTool
 
 
 
+
                 FS.Local.CreateDirectory(dir / outputDir);
 
-                if(TypeOf(info.type) == "String" && info.type == "template" || info.type == "archive")
+                if(TypeOf(info.type) == "String" && (info.type == "template" || info.type == "archive"))
                 {
-                
+
                     //vfs, strm, name, version, info
                     var subdir = new SubdirFilesystem(FS.Local,dir);
                     var output = $"{name}-{version}.crvm";
@@ -149,13 +150,18 @@ class Tesses.CrossLang.BuildTool
                 }
 
                 FS.Local.CreateDirectory(dir / objDir / "packages");
+                FS.Local.CreateDirectory(dir / objDir / "res");
 
                 FS.Local.CreateDirectory(dir/resDir);
-                
+
+                const svfs = new Tesses.CrossLang.SharedViewFilesystem();
+                svfs.AddFS(new SubdirFilesystem(FS.Local, dir / resDir));
+                svfs.AddFS(new SubdirFilesystem(FS.Local, dir / objDir / "res"));
+
                 var dependencies = [];
                 if(TypeOf(configData.project_dependencies) == "List")
                 {
-                    each(var dep : configData.project_dependencies)    
+                    each(var dep : configData.project_dependencies)
                     {
                         if(Path.FromString(dep).IsRelative())
                         {
@@ -168,18 +174,18 @@ class Tesses.CrossLang.BuildTool
                 var sources = [];
                 if(TypeOf(configData.dependencies) == "List")
                 {
-                    each(var dep : configData.dependencies)    
+                    each(var dep : configData.dependencies)
                     {
                         dependencies.Add(this.GetPackageDependencies(dep.name,dep.version,dir / objDir / "packages"));
                     }
                 }
-                
+
 
                 each(var item : this.DirectoriesCompiled)
                 {
                     if(item.Path == dirStr) return item.Data;
                 }
-                
+
 
                 func walk_for_compiling(item,dir2)
                 {
@@ -201,18 +207,20 @@ class Tesses.CrossLang.BuildTool
 
                         env.LoadFileWithDependencies(FS.Local,newFile);
                         env.GetDictionary().RunTool({
+                                ProjectDirectory = dir,
                                 Project = new SubdirFilesystem(FS.Local, dir),
+                                ProjectJson = configData,
                                 ProjectInfo = info,
                                 GeneratedSource = sources,
                                 Config = this.Config
                             });
                     }
-                    else 
+                    else
                     {
                         this.copyFile(item.Output, dir2 / $"{item.Name}-{item.Version}.crvm");
                         each(var item2 : item.Dependencies)
                         {
-                            walk_for_compiling(item2, dir2);   
+                            walk_for_compiling(item2, dir2);
                         }
                     }
                 }
@@ -220,9 +228,65 @@ class Tesses.CrossLang.BuildTool
                 var file_deps = [];
                 var file_tools = [];
 
+                if(TypeIsList(configData.prebuild))
+                {
+                    //do the prebuild things
+
+                    each(var job : configData.prebuild)
+                    {
+                        if(TypeIsDictionary(job))
+                        {
+                            if(TypeIsString(job.condition))
+                            {
+                                if(!VM.Eval($"return {job.condition};"))
+                                    continue;
+                            }
+                            var workdir = dir;
+                            if(TypeIsString(job.workdir))
+                                workdir /= job.workdir;
+                            if(TypeIsList(job.commands))
+                            each(var cmd : job.commands)
+                            {
+                                if(TypeIsList(cmd) && cmd.Length > 0)
+                                {
+                                    const name = cmd[0];
+                                    const path = Env.GetRealExecutablePath(name).ToString();
+                                    cmd.RemoveAt(0);
+                                    var p= Process.Start({
+                                        FileName = path,
+                                        Arguments = cmd,
+                                        WorkingDirectory = workdir
+                                    });
+                                    const result = p.Join();
+                                    if(result != 0)
+                                        throw $"process: {name}, did not indicate success: {result}";
+                                }
+                            }
+
+                            if(TypeIsList(job.res))
+                            {
+                                each(var reso : job.res)
+                                {
+                                    if(TypeIsString(reso))
+                                    {
+                                        svfs.AddFS(new SubdirFilesystem(FS.Local, dir / reso));
+                                    }
+                                    else if(TypeIsDictionary(reso) && TypeIsString(reso.src) && TypeOfString(reso.dest))
+                                    {
+                                        const mountable = new MountableFilesystem(new Filesystem({}));
+                                        mountable.Mount(reso.dest,new SubdirFilesystem(FS.Local, dir / reso.src));
+                                        svfs.AddFS(mountable);
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 each(var dep : dependencies)
                 {
-                    if(dep.Info.type == "lib") 
+                    if(dep.Info.type == "lib")
                     {
                         file_deps.Add({
                             Name = dep.Name,
@@ -231,7 +295,7 @@ class Tesses.CrossLang.BuildTool
                     }
                     else if(dep.Info.type == "compile_tool")
                     {
-                        
+
                         file_tools.Add({
                             Name = dep.Name,
                             Version = dep.Version
@@ -243,6 +307,7 @@ class Tesses.CrossLang.BuildTool
 
                 func walk_for_source(sourceDir)
                 {
+                    if(FS.Local.DirectoryExists(sourceDir))
                     each(var file : FS.Local.EnumeratePaths(sourceDir))
                     {
                         if(FS.Local.RegularFileExists(file) && file.GetExtension()==".tcross")
@@ -273,7 +338,7 @@ class Tesses.CrossLang.BuildTool
                 {
                     //dir / outputDir;
 
-                    
+
 
                     var exec = Env.GetRealExecutablePath("git");
                     var git_hash = "";
@@ -321,9 +386,9 @@ class Tesses.CrossLang.BuildTool
                             compTimeEnv.RegisterJson();
                             compTimeEnv.RegisterRoot();
                             compTimeEnv.RegisterIO(false);
-                            
+
                             dict.FS.Local = new SubdirFilesystem(FS.Local,dir);
-                            
+
                             break;
                         case "full":
                             compTimeEnv.RegisterEverything();
@@ -337,7 +402,7 @@ class Tesses.CrossLang.BuildTool
                             compTimeEnv.RegisterJson();
                             compTimeEnv.RegisterRoot();
                             compTimeEnv.RegisterIO(false);
-                            
+
                             break;
                     }
                     compTimeEnv.LockRegister();
@@ -347,7 +412,7 @@ class Tesses.CrossLang.BuildTool
                     }
                 }
 
-                
+
                 var result = VM.Compile({
                     Name = name,
                     Version = version,
@@ -355,7 +420,7 @@ class Tesses.CrossLang.BuildTool
                     Info = Json.Encode(info),
                     Icon = icon,
                     Tools = file_tools,
-                    ResourceFileSystem = new SubdirFilesystem(FS.Local, dir / resDir),
+                    ResourceFileSystem = svfs,
                     Dependencies = file_deps,
                     Output = outFile,
                     CompTime = compTimeEnv,
@@ -379,11 +444,10 @@ class Tesses.CrossLang.BuildTool
                     Path = dirStr,
                     Data = myData
                 });
-
                 return myData;
             }
             return null;
 
     }
-    
+
 }

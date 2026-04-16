@@ -80,6 +80,9 @@ func main(args)
             case "publish":
                 return Tesses.CrossLang.Shell.Publish(dd);
                 break;
+            case "test":
+                return Tesses.CrossLang.Shell.Test(dd);
+                break;
             default:
                 return Tesses.CrossLang.Shell.Default(dd);
         }
