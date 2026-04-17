@@ -47,35 +47,11 @@ jobs:
     artifacts: Tesses.CrossLang.PackageServer-*.crvm
     condition: SUCCESSFUL
     optional: false
-  - type: BuildImageStep
-    name: Build container
-    dockerfile: Dockerfile
-    output:
-      type: RegistryOutput
-      tags: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
-    registryLogins:
-    - registryUrl: '@server_url@'
-      userName: '@job_token@'
-      passwordSecret: dockersecret
-    condition: SUCCESSFUL
-    optional: false
   - type: SCPCommandStep
     name: Copy Shell Package
     privateKeySecret: tesses_www_private_key
     source: Tesses.CrossLang.ShellPackage-*.crvm
     target: mike@@10.137.42.28:/var/www/downloads/ShellPackage.crvm
-    condition: SUCCESSFUL
-    optional: false
-  - type: BuildImageStep
-    name: Build container (package server)
-    dockerfile: Dockerfile.packageserver
-    output:
-      type: RegistryOutput
-      tags: onedev.site.tesses.net/crosslang/crosslangextras/packageserver:latest
-    registryLogins:
-    - registryUrl: '@server_url@'
-      userName: '@job_token@'
-      passwordSecret: dockersecret
     condition: SUCCESSFUL
     optional: false
   - type: CommandStep
@@ -115,6 +91,30 @@ jobs:
     - name: CPKG_KEY
       value: '@secret:CPKG_KEY@'
     useTTY: true
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
+    name: Build container
+    dockerfile: Dockerfile
+    output:
+      type: RegistryOutput
+      tags: onedev.site.tesses.net/crosslang/crosslangextras/crosslangextras:latest
+    registryLogins:
+    - registryUrl: '@server_url@'
+      userName: '@job_token@'
+      passwordSecret: dockersecret
+    condition: SUCCESSFUL
+    optional: false
+  - type: BuildImageStep
+    name: Build container (package server)
+    dockerfile: Dockerfile.packageserver
+    output:
+      type: RegistryOutput
+      tags: onedev.site.tesses.net/crosslang/crosslangextras/packageserver:latest
+    registryLogins:
+    - registryUrl: '@server_url@'
+      userName: '@job_token@'
+      passwordSecret: dockersecret
     condition: SUCCESSFUL
     optional: false
   - type: CommandStep
