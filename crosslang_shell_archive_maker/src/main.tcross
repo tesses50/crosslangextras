@@ -23,7 +23,9 @@ func install()
 func create_archive()
 {
     
-    var tmpFS = new SubdirFilesystem(FS.Local,"crosslang_shell_archive_maker/tmp");
+    var tmpFS = new SubdirFilesystem(FS.Local,FS.MakeFull("crosslang_shell_archive_maker/tmp"));
+
+
     func copyFile(src,dest)
     {
         if(!FS.Local.FileExists(src)) return;
