@@ -124,7 +124,7 @@ jobs:
     interpreter:
       type: DefaultInterpreter
       commands: |
-        curl "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN"
+        curl "$COOLIFY_WEBHOOK" -H "Authorization: Bearer $COOLIFY_TOKEN" > /dev/null
     envVars:
     - name: COOLIFY_WEBHOOK
       value: '@secret:COOLIFY_WEBHOOK@'

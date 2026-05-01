@@ -34,26 +34,13 @@ func New.Tesses.CrossLang.SharedViewFilesystem()
             return null;
         },
         EnumeratePaths = enumeratePaths,
-        RegularFileExists = (path) => {
+        Stat = (path) => {
             each(var fs : fileSystems)
             {
-                if(fs.RegularFileExists(path)) return true;
+                const st = fs.Stat(path);
+                if(TypeIsDictionary(st)) return st;
             }
-            return false;
-        },
-        FileExists = (path) => {
-            each(var fs : fileSystems)
-            {
-                if(fs.FileExists(path)) return true;
-            }
-            return false;
-        },
-        DirectoryExists = (path) => {
-            each(var fs : fileSystems)
-            {
-                if(fs.DirectoryExists(path)) return true;
-            }
-            return false;
+            return null;
         },
         AddFS = (fs)=>{
             fileSystems.Add(fs);

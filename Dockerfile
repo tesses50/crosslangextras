@@ -1,3 +1,3 @@
-FROM onedev.site.tesses.net/crosslang/crosslang:latest
+FROM git.tesses.org/tesses50/crosslang:latest
 
 RUN crosslang update-shell

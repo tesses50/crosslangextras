@@ -1,6 +1,6 @@
 services:
   pkg:
-    image: onedev.site.tesses.net/crosslang/crosslangextras/packageserver:latest
+    image: git.tesses.org/tesses50/cpkg:latest
     ports:
       - "4206:4206"
     volumes:
