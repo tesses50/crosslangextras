@@ -31,7 +31,7 @@ func Pages.AdminRegister(ctx)
             var displayName = ctx.QueryParams.TryGetFirst("displayName");
             var password = ctx.QueryParams.TryGetFirst("password");
             var confirm = ctx.QueryParams.TryGetFirst("confirm");
-            var flags = ctx.QueryParams.GetFirstBoolean("verified") ? DB.FLAG_VERIFIED : DB.FLAG_FLAG_VERIFY;
+            var flags = ctx.QueryParams.GetFirstBoolean("verified") ? DB.FLAG_VERIFIED : DB.FLAG_VERIFY;
             flags |= (ctx.QueryParams.GetFirstBoolean("admin") ? DB.FLAG_ADMIN : 0);
             
             if(TypeOf(email) != "String" || TypeOf(displayName) != "String" || TypeOf(password) != "String" || TypeOf(confirm) != "String")

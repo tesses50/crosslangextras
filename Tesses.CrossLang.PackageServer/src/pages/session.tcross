@@ -1,0 +1,74 @@
+func Pages.Session(ctx)
+{
+    var active = DB.LoginButton(ctx,false,"");
+
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+    
+    const account = DB.GetUserIdFromSession(active.session);
+    const id = ctx.QueryParams.TryGetFirstInt("id");
+    if(TypeIsDictionary(account) && TypeIsLong(id))
+    {
+        if(ctx.Method == "GET")
+        {
+            DB.Lock();
+            const dbCon = DB.Open();
+            const results = Sqlite.Exec(dbCon, $"SELECT * FROM sessions WHERE accountId = {Sqlite.Escape(account.accountId)} AND id = {Sqlite.Escape(id)};");
+            Sqlite.Close(dbCon);
+            DB.Unlock();
+
+            return Shell("Delete session?", pages, <if(TypeIsList(results) && results.Count == 1)>
+                <true>
+                    <div class="container">
+                        <h1>Do you want to delete session: {results[0].name}?</h1>
+                        <p>Created: {new DateTime(ParseLong(results[0].created) ?? 0).ToString("%Y/%m/%d %H:%M:%S UTC")}</p>
+                        <p>Expires: {results[0].expires == "0" ? "Won't" : new DateTime(ParseLong(results[0].expires) ?? 0).ToString("%Y/%m/%d %H:%M:%S UTC")}</p>
+                        <p>Type: {results[0].key == active.session ? "This Session" : results[0].expires == "0" ? "API Key" : "Browser"}</p>
+                        <form method="POST" action="./session">
+                            <input type="hidden" name="csrf" value={DB.CreateCSRF(ctx)}>
+                            <input type="hidden" name="id" value={id}>
+                            <input type="submit" class="btn btn-danger" name="confirm" value="Yes"> 
+                            <input type="submit" class="btn btn-primary" name="confirm" value="No">
+                        </form>
+                    </div>
+                </true>
+            </if>);
+        }
+        else if(ctx.Method == "POST")
+        {
+            var confirm = ctx.QueryParams.TryGetFirst("confirm") ?? "No";
+            
+            if(confirm == "Yes")
+            {
+                var csrf = ctx.QueryParams.TryGetFirst("csrf");
+            
+                if(!DB.VerifyCSRF(active.session,csrf))
+                    return Shell("Invalid CSRF", pages, "<h1>Invalid CSRF</h1>");
+                
+                DB.Lock();
+                const dbCon = DB.Open();
+                Sqlite.Exec(dbCon, $"DELETE FROM sessions WHERE accountId = {Sqlite.Escape(account.accountId)} AND id = {Sqlite.Escape(id)};");
+                Sqlite.Close(dbCon);
+                DB.Unlock();
+            }
+            ctx.StatusCode = 303;
+            ctx.ResponseHeaders.SetValue("Location", "./sessions");
+            return Shell("Redirecting", pages,<null>
+                    <h1>Redirecting</h1>
+                    Click <a href="./sessions">here</a> if it does not redirect
+                </null>);
+        }
+    }
+    return Shell("Error", pages, "<h1>Not logged in</h1>");
+}

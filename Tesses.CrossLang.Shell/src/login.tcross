@@ -33,6 +33,9 @@ func Tesses.CrossLang.Shell.Login(dd)
         var name = dd.Arguments[1];
 
         var host = dd.Arguments[2];
+        Console.Write("Name (empty for CrossLang Shell): ");
+        var name = Console.ReadLine() ?? "";
+        if(name == "") name = "CrossLang Shell";
 
         Console.Write("Email: ");
         var email = Console.ReadLine();
@@ -45,6 +48,7 @@ func Tesses.CrossLang.Shell.Login(dd)
         Console.WriteLine();
 
         var accountRequest = {
+            name,
             email,
             password
         };

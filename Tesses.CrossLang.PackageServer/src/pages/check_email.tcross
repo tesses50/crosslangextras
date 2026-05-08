@@ -14,10 +14,20 @@ func Pages.CheckEmail(ctx)
             DB.LoginButton(ctx,false)
         ];
     var html = <div class={"container"}>
-                <h1>Please check your email.</h1>
-                <p>
-                    The email may or may not be in your spam.
-                </p>
+                <if(DB.Config.MailConfig)>
+                    <true>
+                        <h1>Please check your email.</h1>
+                        <p>
+                            The email may or may not be in your spam.
+                        </p>
+                    </true>
+                    <false>
+                        <h1>The admin will need to verify your account</h1>
+                        <p>
+                            Mail is disabled
+                        </p>
+                    </false>
+                </if>
             </div>;
-    return Shell("Check your email",pages,html);
+    return Shell(DB.Config.MailConfig ? "Check your email" : "Admin will need to verify",pages,html);
 }

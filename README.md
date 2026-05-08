@@ -2,7 +2,7 @@
 
 > :warning: **NOT READY FOR PRODUCTION, BECAUSE IT MAY (WILL) HAVE BREAKING CHANGES** 
 
-[CrossLang](https://gitea.site.tesses.net/tesses50/crosslang) is required to build this
+[CrossLang](https://git.tesses.org/tesses50/crosslang) is required to build this
 
 # To Build
 ```bash

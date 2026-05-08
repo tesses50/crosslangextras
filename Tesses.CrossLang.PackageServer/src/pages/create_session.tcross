@@ -1,0 +1,66 @@
+func Pages.CreateSession(ctx)
+{
+    var active = DB.LoginButton(ctx,false,"");
+
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+    
+    const account = DB.GetUserIdFromSession(active.session);
+    
+    if(TypeIsDictionary(account))
+    {
+        if(ctx.Method == "GET")
+        {
+            
+
+            return Shell("Create API Key", pages,
+                <div class="container">
+                    <h1>Create session</h1>
+                    <form method="POST" action="./create_session">
+                        <input type="hidden" name="csrf" value={DB.CreateCSRF(ctx)}>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Session Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Session Name">
+                        </div>
+                        <input type="submit" class="btn btn-primary" value="Create">
+                    </form>
+                </div>
+            );
+        }
+        else if(ctx.Method == "POST")
+        {
+            var name = ctx.QueryParams.TryGetFirst("name") ?? "CrossLang Shell";
+            var csrf = ctx.QueryParams.TryGetFirst("csrf");
+            
+            if(!DB.VerifyCSRF(active.session,csrf))
+                return Shell("Invalid CSRF", pages, "<h1>Invalid CSRF</h1>");
+                
+            
+            return Shell("Your API key", pages,
+                <div class="container">
+                    <h1>Your API key</h1>
+                    <p>{"It won't be shown again"}</p>
+                    <div class="mb-3 row">
+                        <label for="apiKey" class="col-sm-2 col-form-label">API Key</label>
+                        <div class="col-sm-10">
+                            <input type="text" readonly="ON" class="form-control-plaintext" id="apiKey" value={DB.CreateSession(account.accountId,false,name)}>
+                        </div>
+                    </div>
+                </div>
+            );
+            
+        }
+    }
+    return Shell("Error", pages, "<h1>Not logged in</h1>");
+}

@@ -8,3 +8,7 @@ tmp
 vscode-extension/out
 vscode-extension/package-lock.json
 vscode-extension/node-modules
+Packages
+Tesses.CrossLang.PackageServer/conf.json
+Tesses.CrossLang.PackageServer/data.db
+Temp

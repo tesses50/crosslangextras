@@ -1,0 +1,168 @@
+func Tesses.CrossLang.Shell.Logout(dd)
+{
+    var accounts = [];
+
+    func help()
+    {
+        Console.WriteLine("USAGE: crosslang logout [name]");
+        Console.WriteLine();
+        Console.WriteLine("ARGUMENTS:");
+        Console.WriteLine("name: the session name");
+    }
+   
+    
+    if(FS.Local.FileExists(Env.CrossLangConfig / "auth.json"))
+    {
+        accounts = Json.Decode(FS.ReadAllText(FS.Local,Env.CrossLangConfig / "auth.json"));
+        if(TypeOf(accounts) != "List") accounts = [];
+    }
+
+    if(dd.Flags.Contains("help"))
+    {
+        help();
+    }
+    else {
+        if(FS.Local.FileExists(Env.CrossLangConfig / "auth.json"))
+        {
+            const json = Json.Decode(FS.ReadAllText(FS.Local,Env.CrossLangConfig / "auth.json"));
+            if(json.Length == 0)
+            {
+                Console.WriteLine("You were not logged in");
+                return 0;
+            }
+            else if(json.Length == 1)
+            {
+                const host = json[0].host;
+                const token = json[0].token;
+
+                if(!TypeIsString(host))
+                {
+                    Console.WriteLine("Host is not a string");
+                    FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", "[]");
+                    return 1;
+                }
+
+                if(!TypeIsString(token))
+                {
+                    Console.WriteLine("Token is not a string");
+                    FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", "[]");
+                    return 1;
+                }
+
+                const resp = Net.Http.MakeRequest($"{host.TrimEnd('/')}/api/v1/logout",{
+                    RequestHeaders = [
+                        {Key= "Authorization",Value=$"Bearer {token}"}
+                    ],
+                    Method = "GET"
+                });
+
+                if(resp.StatusCode == 200)
+                {
+                    const json = resp.ReadAsJson();
+                    if(json.Success)
+                    {
+
+                        FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", "[]");
+                        resp.Close();
+                        return 0;
+                    }
+                    else {
+                        FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", "[]");
+                        resp.Close();
+                        Console.WriteLine($"Failed to logout, go to {host.TrimEnd('/')}/sessions to logout");
+                        return 1;
+                    }
+                }
+
+                resp.Close();
+                return 1;
+            }
+            else {
+                if(dd.Arguments.Length < 2)
+                {
+                    Console.WriteLine("Multiple entries in auth.json file, session is ambiguous.");
+                    Console.WriteLine("Sessions:");
+                    each(var item : json)
+                    {
+                        Console.WriteLine($"{item.name}: {item.host}");
+                    }
+                }
+                else {
+                    var host = "";
+                    var token = "";
+                    var found = false;
+                    var cur = null;
+                    each(var item : json)
+                    {
+                        
+                        if(item.name == dd.Arguments[1])
+                        {
+                            cur = item;
+                            found=true;
+                            host = item.host;
+                            token = item.token;
+                            break;
+                        }
+                    }
+
+                    if(!found) { 
+                        Console.WriteLine($"Could not find session with name: {dd.Arguments[1]}");
+                        return 1;
+                    }
+
+
+                    if(!TypeIsString(host))
+                    {
+                        Console.WriteLine("Host is not a string");
+                        json.Remove(cur);
+                        FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", json.ToString());
+                           
+                        return 1;
+                    }
+
+                    if(!TypeIsString(token))
+                    {
+                        Console.WriteLine("Token is not a string");
+                        json.Remove(cur);
+                        FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", json.ToString());
+                           
+                        return 1;
+                    }
+
+                    const resp = Net.Http.MakeRequest($"{host.TrimEnd('/')}/api/v1/logout",{
+                        RequestHeaders = [
+                            {Key= "Authorization",Value=$"Bearer {token}"}
+                        ],
+                        Method = "GET"
+                    });
+
+                    if(resp.StatusCode == 200)
+                    {
+                        const json2 = resp.ReadAsJson();
+                        if(json2.Success)
+                        {
+                            json.Remove(cur);
+                            FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", json.ToString());
+                            resp.Close();
+                            return 0;
+                        }
+                        else {
+                            
+                            json.Remove(cur);
+                            FS.WriteAllText(FS.Local, Env.CrossLangConfig / "auth.json", json.ToString());
+                            resp.Close();
+                            Console.WriteLine($"Failed to logout, go to {host.TrimEnd('/')}/sessions to logout");
+                            return 1;
+                        }
+                    }
+
+                    resp.Close();
+                    return 1;
+                }
+            }
+        } else {
+             Console.WriteLine("You were not logged in");
+            return 0;
+        }
+    }
+}

@@ -33,6 +33,95 @@ func Pages.Admin(ctx)
             //we have authorization
             switch(action2)
             {
+            case "cache_package":
+            {
+                const userInfo = DB.GetUserIdFromSession(active.session);
+                const url = ctx.QueryParams.TryGetFirst("url");
+                
+                if(!TypeIsString(url) || url.Length == 0 || !url.Contains("/package?name=") || !TypeIsDictionary(userInfo))
+                {
+                    ctx.StatusCode = 400;
+                    return Shell("Invalid input", pages,<h1>Invalid Input</h1>);
+                }
+
+                const components=url.Split("/package?name=");
+                if(components.Length < 2)
+                {
+                    ctx.StatusCode = 400;
+                    return Shell("Invalid input", pages,<h1>Invalid Input</h1>);
+                }
+                
+
+                const strm = ctx.WithMimeType("text/html").OpenResponseStream();
+                const textWriter = new StreamWriter(strm);
+                textWriter.Write("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"color-scheme\" content=\"dark light\"></head><body>");
+                
+                var finished = false;
+                var errors = "";
+
+                const thread = new Thread(()=>{
+
+                    func log(err)
+                    {
+                        errors += "{err}\n";
+                    }
+                    const server = components[0];
+                    const name = Net.Http.UrlDecode(components[1]);
+                    
+                    try {
+                        const resp=Net.Http.MakeRequest($"{server.TrimEnd('/')}/api/v1/versions?name={Net.Http.UrlEncode(name)}",{FollowRedirects=true});
+                        
+                        if(resp.StatusCode >= 200 && resp.StatusCode <= 299)
+                        {
+                            const respJson = resp.ReadAsJson();
+                            resp.Close();
+                            if(respJson.success)
+                            {
+                                if(TypeIsList(respJson.versions))
+                                {
+                                    each(var item in respJson.versions)
+                                    {
+                                        if(TypeIsString(item.version))
+                                        {
+                                            DB.DownloadPackage(log,userInfo.accountId,server, name, item.version);
+                                        }
+                                    }
+                                }
+                                else {
+                                    log("versions is not list");
+                                }
+                            }
+                            else 
+                            {
+                                log("versions json does not indicate success");
+                            }
+                        }
+                        else {
+                            log($"Status code does not indicate success {resp.StatusCode} {Net.Http.StatusCodeString(resp.StatusCode)}");
+                        }
+                    } catch(ex) {
+                        log(ex.ToString());
+                    }
+
+
+                    finished=true;
+                });
+
+
+                while(!finished)
+                {
+                    textWriter.Write(".");
+                    DateTime.Sleep(1000);
+                }
+                errors = Net.Http.HtmlEncode(errors).Replace("\n","<br>");
+                textWriter.Write($"{}<br>Done <a href=\"./admin\">Go Back</a></body></html>");
+
+                thread.Join();
+                
+                return null;
+            }
+
+                break;
             case "server_config":
                 {
                     var prefix = ctx.QueryParams.TryGetFirst("prefix");
@@ -129,7 +218,7 @@ func Pages.Admin(ctx)
             </fieldset>
             <fieldset class="border p-2">
             <legend  class="float-none w-auto">Accounts</legend>
-                <form action="./admin_account" method="get">
+                <form action="./admin_accounts" method="get">
                     <div class="mb-3">
                         <label for="account" class="form-label">Account Name</label>
                         <input class="form-control" name="account" id="account" type="text" placeholder="Account Name" aria-label="Account Name">

@@ -1,0 +1,305 @@
+func Pages.AdminAccount(ctx)
+{
+    var active = DB.LoginButton(ctx,false,"");
+    var csrf="";
+
+    
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+    if(!active.admin) ctx.StatusCode = 401;
+    
+
+    if(ctx.Method == "POST")
+    {
+        var csrf2 = ctx.QueryParams.TryGetFirst("csrf");
+        if(!active.admin) {ctx.StatusCode = 401; return Shell("Not an admin", pages,<h1>Not an admin</h1>);}
+        if(TypeOf(csrf2) != "String") {ctx.StatusCode = 401; return Shell("Invalid CSRF", pages,<h1>Invalid CSRF</h1>);}
+        if(DB.VerifyCSRF(active.session, csrf2))
+        {
+
+            const oldname = ctx.QueryParams.TryGetFirst("oldname");
+            const newname = ctx.QueryParams.TryGetFirst("newname");
+            const motto = ctx.QueryParams.TryGetFirst("motto") ?? ""; 
+            const admin = ctx.QueryParams.GetFirstBoolean("admin");
+            const verified = ctx.QueryParams.GetFirstBoolean("verified");
+            if(TypeIsString(oldname) && TypeIsString(newname))
+            {
+
+                const userInfo = DB.GetAccountInfo(oldname);
+
+                if(TypeIsDictionary(userInfo))
+                {
+                    var flags = ParseLong(userInfo.flags);
+                    //CREATE TABLE IF NOT EXISTS accounts 
+                    //(id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, accountName TEXT UNIQUE,
+                    //password_hash TEXT, password_salt TEXT, motto TEXT, verifyKey TEXT UNIQUE,
+                    //verifyExpire INTEGER, flags INTEGER, created INTEGER, verified INTEGER);
+
+                    const wasVerified = (flags & DB.FLAG_VERIFIED) != 0;
+                    
+                    if(userInfo.accountName != active.text)
+                    {
+                        if(!admin)
+                        {
+                            flags &= ~DB.FLAG_ADMIN;
+                        }
+                        if(!verified)
+                        {
+                            flags |= DB.FLAG_VERIFY;
+                            flags &= ~DB.FLAG_VERIFIED;
+                        }
+                        
+                    }
+                    
+                    if(admin)
+                    {
+                        flags |= DB.FLAG_ADMIN;
+                    }
+
+                    if(verified)
+                    {
+
+                        flags |= DB.FLAG_VERIFIED;
+                        flags &= ~DB.FLAG_VERIFY;
+                    }
+
+                    DB.Lock();
+                    const dbCon = DB.Open();
+                    if(!wasVerified && verified)
+                    {
+                        Sqlite.Exec(dbCon, $"UPDATE accounts SET accountName = {Sqlite.Escape(newname)}, motto = {Sqlite.Escape(motto)}, flags = {Sqlite.Escape(flags)}, verified = {Sqlite.Escape(DateTime.NowEpoch ?? 0)} WHERE id = {Sqlite.Escape(userInfo.id)};");
+                    
+                    }
+                    else {
+                        Sqlite.Exec(dbCon, $"UPDATE accounts SET accountName = {Sqlite.Escape(newname)}, motto = {Sqlite.Escape(motto)}, flags = {Sqlite.Escape(flags)} WHERE id = {Sqlite.Escape(userInfo.id)};");
+                    
+                    }
+                    
+                    Sqlite.Close(dbCon);
+                    DB.Unlock();
+
+
+                    ctx.StatusCode=303;
+                    ctx.ResponseHeaders.SetValue("Location", "/admin_accounts");
+                    return Shell("Redirect",pages, 
+                        <null>
+                            <h1>Redirecting</h1>
+                            Click <a href="/admin_accounts">here</a> if it does not redirect
+                        </null>
+                    );
+                }
+            }
+           
+            ctx.StatusCode=400;
+            return Shell("Must need a user",pages, 
+                <null>
+                    <h1>Must need a user</h1>
+                    Click <a href="/admin_accounts">here</a> to go back to admin list
+                </null>
+            );
+            
+
+            
+        }
+        else 
+        {
+            ctx.StatusCode = 401; return Shell("Invalid CSRF", pages,<h1>Invalid CSRF</h1>);
+        }
+    }
+    const name = ctx.QueryParams.TryGetFirst("account");
+    const page = ctx.QueryParams.TryGetFirstInt("page") ?? 1;
+    var cur = (page - 1) % 3;
+    var firstPage = (page-1) - cur;
+    var userInfo = null;
+    var motto_ta = "";
+    const list = [];
+
+    if(active.admin && TypeIsString(name))
+    {
+        userInfo = DB.GetAccountInfo(name);
+        if(!TypeIsDictionary(userInfo))
+        {
+            if(TypeIsString(userInfo) && userInfo == "No such user exists")
+                ctx.StatusCode = 404;
+            else
+                ctx.StatusCode = 500;
+        }
+        else {
+            csrf = DB.CreateCSRF(ctx);
+            motto_ta = TypeOf(userInfo.motto) == "String" ? userInfo.motto : "";
+            userInfo.flags = ParseLong(userInfo.flags);
+        }
+    }
+    
+    if(active.admin && !TypeIsString(name))
+    {
+        const limit = 20;
+        DB.Lock();
+        const db = DB.Open();
+        const res = Sqlite.Exec(db, $"SELECT * FROM accounts LIMIT {Sqlite.Escape(limit)} OFFSET {Sqlite.Escape((page-1)*limit)};");
+        Sqlite.Close(db);
+        DB.Unlock();
+
+        if(TypeIsList(res))
+        {
+            each(var item in res)
+            {
+                const flags = ParseLong(item.flags);
+                
+
+                list.Add({
+                    name = item.accountName,
+                    created = new DateTime(ParseLong(item.created)).ToString("%Y/%m/%d %H:%M:%S UTC"),
+                    verified = (flags & DB.FLAG_VERIFIED) ? (new DateTime(ParseLong(item.verified)).ToString("%Y/%m/%d %H:%M:%S UTC")) : "N/A",
+                    admin = (flags & DB.FLAG_ADMIN) ? "Yes" : "No"
+                });
+            }
+        }
+        else {
+            ctx.StatusCode = 500;
+            return Shell("Error", pages,
+            <h1>Error {res}</h1>);
+            
+        }
+    }
+
+    var html = <div class="container">
+    
+        <if(active.admin)>
+            <true>
+                <if(TypeIsString(name))>
+                    <true>
+                        <if(TypeIsDictionary(userInfo))>
+                            <true>
+                                <form method="POST" action="./admin_accounts">
+                                    <input type="hidden" name="csrf" value={csrf}>
+                                    <input type="hidden" name="oldname" value={name}>
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">Name</label>
+                                        <input type="text" class="form-control" id="name" name="newname" value={name}>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="motto" class="form-label">Motto</label>
+                                        <if(motto_ta.Length == 0)>
+                                            <true><textarea class="form-control" id="motto" name="motto" placeholder="Type your motto and/or links here" id="floatingTextarea2" style="height: 100px"></textarea></true>
+                                            <false><textarea class="form-control" id="motto" name="motto" placeholder="Type your motto and/or links here" id="floatingTextarea2" style="height: 100px">{motto_ta}</textarea></false>
+                                        </if>
+                                    </div>
+                                    <div class="form-check">
+                                        <if(userInfo.flags & DB.FLAG_VERIFIED)>
+                                            <true>
+                                                <if(userInfo.accountName == active.text)>
+                                                    <true>
+                                                        <input class="form-check-input" type="checkbox" name="verified" id="verified" checked="ON" disabled="ON">
+                                                    </true>
+                                                    <false>
+                                                        <input class="form-check-input" type="checkbox" name="verified" id="verified" checked="ON">
+                                                    </false>
+                                                </if>
+                                            </true>
+                                            <false>
+                                                <input class="form-check-input" type="checkbox" name="verified" id="verified">
+                                            </false>
+                                        </if>
+                                        <label class="form-check-label" for="verified">
+                                            Is Verified
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <if(userInfo.flags & DB.FLAG_ADMIN)>
+                                            <true>
+                                                <if(userInfo.accountName == active.text)>
+                                                    <true>
+                                                        <input class="form-check-input" type="checkbox" name="admin" id="admin" checked="ON" disabled="ON">
+                                                    </true>
+                                                    <false>
+                                                        <input class="form-check-input" type="checkbox" name="admin" id="admin" checked="ON">
+                                                    </false>
+                                                </if>
+                                            </true>
+                                            <false>
+                                                <input class="form-check-input" type="checkbox" name="admin" id="admin">
+                                            </false>
+                                        </if>
+                                        <label class="form-check-label" for="admin">
+                                            Is Admin
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" name="action">Save</button>
+                                    <a href="./admin_accounts" class="btn btn-secondary">Back</a>
+                                </form>
+                            </true>
+                            <false>
+                                <h1>Error {userInfo}</h1>
+                            </false>
+                        </if>
+                    </true>
+                    <false>
+
+                        <a href="./admin" class="btn btn-primary">Back To Admin</a>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Verified</th>
+                                    <th scope="col">Admin</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <each(var item : list)>
+                                    <tr>
+                                        <th scope="row"><a href={$"./admin_accounts?account={Net.Http.UrlEncode(item.name)}"}>{item.name}</a></th>
+                                        <td>{item.created}</td>
+                                        <td>{item.verified}</td>
+                                        <td>{item.admin}</td>
+                                    </tr>
+                                </each>
+                            </tbody>
+                        </table>
+
+                          <nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <if(page == 1)>
+            <true>
+    <li class="page-item disabled">
+      <a class="page-link">Previous</a>
+    </li>
+    </true>
+    <false>
+    <li class="page-item">
+    <a class="page-link" href={$"./admin_accounts?page={page-1}"}>Previous</a>
+  </li>
+    </false>
+    </if>
+    <for(var i = 1; i <= 3; i++)>
+
+        <li class={i == cur + 1 ? "page-item active" : "page-item"}><a class="page-link" href={$"./admin_accounts?page={i+firstPage}"}>{i+firstPage}</a></li>
+    </for>
+    <li class="page-item">
+      <a class="page-link" href={$"./admin_accounts?page={page+1}"}>Next</a>
+    </li>
+  </ul>
+</nav>
+                    </false>
+                </if>
+            </true>
+            <false>
+                <h1>You are not authorized in the admin panel</h1>
+            </false>
+        </if>
+    </div>;
+
+    return Shell("Admin Register", pages,html);
+}

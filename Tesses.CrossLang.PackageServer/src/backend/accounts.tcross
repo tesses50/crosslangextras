@@ -66,7 +66,8 @@ func DB.CreateUserFromAdmin(email, name, password, flags)
     var res = {Success=true};
     DB.Lock();
     var dbCon = DB.Open();
-    exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE accountName = {Sqlite.Escape(name)};");
+    var exec = Sqlite.Exec(dbCon,$"SELECT * FROM accounts WHERE accountName = {Sqlite.Escape(name)};");
+    
     if(TypeOf(exec) == "List" && exec.Length > 0)
     {
         res = {Success=false, Reason = "Name already exists"};
@@ -75,8 +76,8 @@ func DB.CreateUserFromAdmin(email, name, password, flags)
     {
         var salt = Crypto.RandomBytes(32, "CPKG");
         var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
-
-        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyExpire, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{0},{flags});");
+        const now = DateTime.NowEpoch ?? 0;
+        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyExpire, flags, created, verified) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{0},{flags},{now},{now});");
         if(TypeOf(r) == "String") res = {Success = false, Reason = r};
         res = {Success=true};
     }
@@ -87,8 +88,12 @@ func DB.CreateUserFromAdmin(email, name, password, flags)
 
         var verify_hash = Crypto.RandomBytes(32, "CPKG");  
         var verify_hash_str = Crypto.Base64Encode(verify_hash);
-        
-        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyKey, verifyExpire, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{Sqlite.Escape(verify_hash_str)},{DateTime.NowEpoch+600},{flags});");
+        const now = DateTime.NowEpoch ?? 0;
+      
+        const resp = $"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyKey, verifyExpire, flags, created, verified) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{Sqlite.Escape(verify_hash_str)},{now+600},{flags},{now},0);";
+        Console.WriteLine(resp);
+        var r = Sqlite.Exec(dbCon, resp);
+        Console.WriteLine(r);
         if(TypeOf(r) == "String") res = {Success = false, Reason = r};
                 
         if(DB.Config.MailConfig)
@@ -111,8 +116,8 @@ func DB.CreateUser(email, name, password)
 
         var salt = Crypto.RandomBytes(32, "CPKG");
         var hash = Crypto.PBKDF2(password, salt, DB.ITTR,64,384);
-        
-        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{DB.FLAG_ADMIN|DB.FLAG_VERIFIED});");
+        const now = DateTime.NowEpoch ?? 0;
+        var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, flags, created, verified) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{DB.FLAG_ADMIN|DB.FLAG_VERIFIED},{now},{now});");
         if(TypeOf(r) == "String") res = {Success = false, Reason = r};
         
    }
@@ -146,8 +151,8 @@ func DB.CreateUser(email, name, password)
 
                 var verify_hash = Crypto.RandomBytes(32, "CPKG");  
                 var verify_hash_str = Crypto.Base64Encode(verify_hash);
-        
-                var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyKey, verifyExpire, flags) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{Sqlite.Escape(verify_hash_str)},{DateTime.NowEpoch+600},{DB.FLAG_VERIFY});");
+                const now = DateTime.NowEpoch ?? 0;
+                var r = Sqlite.Exec(dbCon,$"INSERT INTO accounts (email, accountName, password_hash, password_salt, verifyKey, verifyExpire, flags, created, verified) values ({Sqlite.Escape(email)},{Sqlite.Escape(name)},{Sqlite.Escape(Crypto.Base64Encode(hash))},{Sqlite.Escape(Crypto.Base64Encode(salt))},{Sqlite.Escape(verify_hash_str)},{now+600},{DB.FLAG_VERIFY},{now},0);");
                 if(TypeOf(r) == "String") {res = {Success = false, Reason = r};}
                 else {
                     if(DB.Config.MailConfig)

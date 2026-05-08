@@ -81,8 +81,18 @@ func Pages.Account(ctx)
     <if(TypeOf(user) == "Dictionary")>
         <true>
         <h1>{user.accountName}</h1>
-        <a href={$"./packages?account={Net.Http.UrlEncode(name)}"}>Packages</a>|<a href={$"./reserved_prefixes?name={Net.Http.UrlEncode(name)}"}>Reserved Prefixes</a>
-        
+        <h6>Created: {new DateTime(ParseLong(user.created)).ToString("%Y/%m/%d %H:%M:%S UTC")}</h6>
+        <if(user.verified != "0")>
+            <true>
+                <h6>Verified: {new DateTime(ParseLong(user.verified)).ToString("%Y/%m/%d %H:%M:%S UTC")}</h6>
+            </true>
+            <false>
+                <h6>Not verified</h6>
+            </false>
+        </if>
+        <div>
+        <a href={$"./packages?account={Net.Http.UrlEncode(name)}"}>Packages</a> | <a href={$"./reserved_prefixes?name={Net.Http.UrlEncode(name)}"}>Reserved Prefixes</a>
+        </div>
           <if(active.active)>
             <true>
                 
@@ -100,6 +110,7 @@ func Pages.Account(ctx)
                     <a class="btn btn-secondary" href="./admin">Admin</a>
                         </true>
                     </if>
+                    <a class="btn btn-info" href="./sessions">Sessions</a>
                     <a class="btn btn-danger" href="./delete_packages">Delete Packages</a>
                     <a class="btn btn-danger" href="./logout">Logout</a>
                 </form>

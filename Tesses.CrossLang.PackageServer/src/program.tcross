@@ -1,5 +1,7 @@
 func main(args)
 {
+
+
     var dir = ".";
     if(args.Length > 1)
     {
@@ -7,6 +9,14 @@ func main(args)
     }
     DB.Init(dir);
 
+    const timer = new Timer(()=>{
+        const time = DateTime.NowEpoch ?? 0;
+        DB.Lock();
+        const db = DB.Open();
+        Sqlite.Exec(db, "DELETE FROM sessions WHERE expires < {time} AND expires > 0;");
+        Sqlite.Close(db);
+        DB.Unlock();
+    },900000);
 
    
     
@@ -39,6 +49,11 @@ func main(args)
         if(ctx.Path == "/admin_register")
         {
             ctx.WithMimeType("text/html").SendText(Pages.AdminRegister(ctx));
+            return true;
+        }
+        if(ctx.Path == "/admin_accounts")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.AdminAccount(ctx));
             return true;
         }
         if(ctx.Path == "/package")
@@ -137,9 +152,9 @@ func main(args)
 
                 if(DB.VerifyCSRF(session,csrf))
                 {
-                    var userId = DB.GetUserIdFromSession(session);
+                    var userId = DB.GetUserIdFromSession(session).accountId;
                     var url = DB.ChangeMotto(userId,motto);
-                    ctx.StatusCode = 302;
+                    ctx.StatusCode = 303;
                     ctx.ResponseHeaders.SetValue("Location", url);
                     ctx.WithMimeType("text/html").SendText(<null>
                         <h1>Redirecting</h1>
@@ -194,7 +209,7 @@ func main(args)
 
                     if(!DB.VerifyCSRF(session,csrf))
                     {
-                        var userId = DB.GetUserIdFromSession(session);
+                        var userId = DB.GetUserIdFromSession(session).accountId;
                         result = DB.UploadPackage(userId, filePath);
                     }
 
@@ -203,7 +218,7 @@ func main(args)
 
                     if(result.Success)
                     {
-                        ctx.StatusCode = 302;
+                        ctx.StatusCode = 303;
                         ctx.ResponseHeaders.SetValue("Location", "/");
                         ctx.WithMimeType("text/html").SendText(<null>
                         <h1>Redirecting</h1>
@@ -279,7 +294,7 @@ func main(args)
                     });
                     return true;
                 }
-                var userId = DB.GetUserIdFromSession(session);
+                var userId = DB.GetUserIdFromSession(session).accountId;
                 var filePath = DB.working / "Temp" / $"{DB.GetUniqueNumber()}.crvm";
                 
                 var strm = FS.Local.OpenFile(filePath,"wb");
@@ -335,7 +350,7 @@ func main(args)
 
 
                 ctx.SendJson({
-                    token = DB.CreateSession(accountId)
+                    token = DB.CreateSession(accountId,false, TypeIsString(json.name) ? json.name : "CrossLang Shell")
                 });
                 return true;
    
@@ -432,13 +447,16 @@ func main(args)
                 if(accountId == -1)
                 {
                     ctx.StatusCode = 400;
-                    ctx.SendText("<h1>Invalid credentials</h1>");
+                    ctx.SendText(Shell("Invalid credentials",[],"<h1>Invalid credentials</h1>"));
                     return true;
                 }
 
-                ctx.StatusCode = 302;
+                ctx.StatusCode = 303;
                 ctx.ResponseHeaders.SetValue("Location", "/");
-                ctx.ResponseHeaders.SetValue("Set-Cookie", $"Session={DB.CreateSession(accountId)}; SameSite=Strict");
+                const browser="Browser";
+                const now = DateTime.NowEpoch??0;
+                
+                ctx.ResponseHeaders.SetValue("Set-Cookie", $"Session={DB.CreateSession(accountId,true, browser)}; SameSite=Strict; Expires={new DateTime(now+DB.Expires).ToHttpDate()}");
                 ctx.WithMimeType("text/html").SendText(<null>
                         <h1>Redirecting</h1>
                         Click <a href="./">here</a> if it does not redirect
@@ -492,7 +510,7 @@ func main(args)
                     var res = DB.UnforgetPassword(code,password,confirm);
                     if(res.Success)
                     {
-                        ctx.StatusCode = 302;
+                        ctx.StatusCode = 303;
                         ctx.ResponseHeaders.SetValue("Location", "/");
                         ctx.WithMimeType("text/html").SendText(<null>
                         <h1>Redirecting</h1>
@@ -538,7 +556,7 @@ func main(args)
                 }
 
 
-                ctx.StatusCode = 302;
+                ctx.StatusCode = 303;
                 ctx.ResponseHeaders.SetValue("Location", res.Redirect);
                 ctx.WithMimeType("text/html").SendText(<null>
                         <h1>Redirecting</h1>
@@ -596,12 +614,12 @@ func main(args)
                 if(!res.Success)
                 {
                     ctx.StatusCode = 400;
-                    ctx.SendText($"<h1>Error: {Net.Http.HtmlEncode(res.Reason)}</h1>");
+                    ctx.SendText(Shell("Error",[],$"<h1>Error: {Net.Http.HtmlEncode(res.Reason)}</h1>"));
                     return true;
                 }
 
 
-                ctx.StatusCode = 302;
+                ctx.StatusCode = 303;
                 ctx.ResponseHeaders.SetValue("Location", res.Redirect);
                 ctx.WithMimeType("text/html").SendText(<null>
                         <h1>Redirecting</h1>
@@ -613,6 +631,22 @@ func main(args)
         if(ctx.Path == "/account")
         {
             ctx.WithMimeType("text/html").SendText(Pages.Account(ctx));
+            return true;
+        }
+        if(ctx.Path == "/sessions")
+        {
+
+            ctx.WithMimeType("text/html").SendText(Pages.Sessions(ctx));
+            return true;
+        }
+        if(ctx.Path == "/create_session")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.CreateSession(ctx));
+            return true;
+        }
+        if(ctx.Path == "/session")
+        {
+            ctx.WithMimeType("text/html").SendText(Pages.Session(ctx));
             return true;
         }
         if(ctx.Path == "/css/bootstrap.min.css")
@@ -650,4 +684,6 @@ func main(args)
         
         return false;
     },DB.Port);
+
+    timer.Callback = null;
 }

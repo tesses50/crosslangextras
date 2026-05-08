@@ -1,5 +1,8 @@
 func Tesses.CrossLang.Shell.Token(dd)
 {
+    Console.Write("Name (empty for CrossLang Shell): ");
+    var name = Console.ReadLine() ?? "";
+    if(name == "") name = "CrossLang Shell";
     Console.Write("Host: ");
     var host = Console.ReadLine();
     Console.Write("Email: ");
@@ -15,6 +18,7 @@ func Tesses.CrossLang.Shell.Token(dd)
 
 
         var accountRequest = {
+            name,
             email,
             password
         };

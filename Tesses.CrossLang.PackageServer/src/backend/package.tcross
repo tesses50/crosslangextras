@@ -458,3 +458,43 @@ func DB.QueryReservedPrefixes(name)
         Items = items
     };
 }
+
+func DB.DownloadPackage(log,userId,server, name, version)
+{
+    Console.WriteLine("INDLPKG");
+    if(!DB.CanUploadPackagePrefix(userId,name)) return;
+
+    var res = DB.PackageExists(userId, {Name = name, Version = Version.Parse(version)});
+    if(res == 2 || res == 4) return;
+
+    const resp=Net.Http.MakeRequest($"{server.TrimEnd('/')}/api/v1/download?name={Net.Http.UrlEncode(name)}&version={Net.Http.UrlEncode(version)}",{FollowRedirects=true});
+    if(resp.StatusCode >= 200 && resp.StatusCode <= 299)
+    {
+        var filePath = DB.working / "Temp" / $"{DB.GetUniqueNumber()}.crvm";
+                
+        var strm = FS.Local.OpenFile(filePath,"wb");
+        resp.CopyToStream(strm);
+        strm.Close();
+        resp.Close();
+
+        //we need to load the exec, because the main thing erases it
+        strm = FS.Local.OpenFile(filePath,"rb");
+        const exec = VM.LoadExecutable(strm);
+        strm.Close();
+        const status = DB.UploadPackage(userId, filePath);
+        if(status.Success)
+        {
+            each(var item in exec.Dependencies)
+            {
+                DB.DownloadPackage(log, userId, server, item.Name, item.Version.ToString());
+            }
+            each(var item in exec.Tools)
+            {
+                DB.DownloadPackage(log, userId, server, item.Name, item.Version.ToString());
+            }
+        }
+        else {
+            log($"Failed to add package: {name} with {version}");
+        }
+    }
+}

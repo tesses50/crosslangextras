@@ -1,0 +1,62 @@
+func Pages.Sessions(ctx)
+{
+    var active = DB.LoginButton(ctx,false,"");
+
+    var pages = [
+            {
+                active = false,
+                route = "/packages",
+                text = "Packages"
+            },
+            {
+                active =  false,
+                route = "/upload",
+                text = "Upload"
+            },
+            active
+        ];
+    
+    const account = DB.GetUserIdFromSession(active.session);
+
+    if(TypeIsDictionary(account))
+    {
+        DB.Lock();
+        const dbCon = DB.Open();
+        const results = Sqlite.Exec(dbCon, $"SELECT * FROM sessions WHERE accountId = {Sqlite.Escape(account.accountId)};");
+        Sqlite.Close(dbCon);
+        DB.Unlock();
+
+        return Shell("Sessions",
+        pages,
+            <div class="container">
+                  <a href="./create_session" class="btn btn-primary">Create API Key</a>
+                  <if(TypeIsList(results))>
+                  <true>
+                  <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Created</th>
+                                    <th scope="col">Expires</th>
+                                    <th scope="col">Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <each(var item : results)>
+                                    <tr>
+                                        <th scope="row"><a href={$"./session?id={Net.Http.UrlEncode(item.id)}"}>{item.name}</a></th>
+                                        <td>{new DateTime(ParseLong(item.created) ?? 0).ToString("%Y/%m/%d %H:%M:%S UTC")}</td>
+                                        <td>{item.expires == "0" ? "Won't" : new DateTime(ParseLong(item.expires) ?? 0).ToString("%Y/%m/%d %H:%M:%S UTC")}</td>
+                                        <td>{item.key == active.session ? "This Session" : item.expires == "0" ? "API Key" : "Browser"}</td>
+                                    </tr>
+                                </each>
+                            </tbody>
+                        </table>
+                        </true>
+                    </if>
+            </div>
+        );
+    }
+
+    return Shell("You are not logged in",pages,<h1>You are not logged in</h1>);
+}

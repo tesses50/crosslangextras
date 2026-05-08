@@ -151,7 +151,8 @@ func DB.VerifyEmail(verifyKey)
         {
             flags &= ~DB.FLAG_VERIFY;
             flags |= DB.FLAG_VERIFIED;
-            Sqlite.Exec(dbCon,$"UPDATE accounts SET flags = {flags} WHERE id = {exec[0].id};");  
+            const now = DateTime.NowEpoch;
+            Sqlite.Exec(dbCon,$"UPDATE accounts SET flags = {flags} WHERE id = {exec[0].id}, verified = {now};");  
             Sqlite.Close(dbCon);
             DB.Unlock();
             return { Success=true };

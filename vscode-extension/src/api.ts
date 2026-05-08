@@ -202,6 +202,7 @@ export async function createTemplate()
     if(project_name)
     {
         const dir = join(getDocumentsFolder(),"CrossLangProjects",project_name);
+        mkdirSync(getDocumentsFolder());
         mkdirSync(join(getDocumentsFolder(),"CrossLangProjects"));
         mkdirSync(dir);
         
