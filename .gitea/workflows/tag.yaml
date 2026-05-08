@@ -12,7 +12,7 @@ env:
   GITEA_REGISTRY_USER: tesses50
 
 jobs:
-  update-tap:
+  build-crosslang-shell-and-cpkg:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,6 +32,32 @@ jobs:
           mkdir -p artifacts
           cp Tesses.CrossLang.ShellPackage-*.crvm artifacts/ShellPackage.crvm
           cp Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-*.crvm artifacts/CPKG.crvm
+          cd Tesses.CrossLang.PackageServer
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../Tesses.CrossLang.Args
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../Tesses.CrossLang.BuildEssentials
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../Tesses.CrossLang.Std
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../Tesses.CrossLang.Reference
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../Templates/compiletool
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../console
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../emptyweb
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../lib
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../template
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../tool
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../web
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../webapp
+          crosslang upload-package --token="{{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
       - name: "Publish artifacts"
         uses: akkuman/gitea-release-action@v1
         env:

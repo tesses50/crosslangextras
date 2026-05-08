@@ -1,6 +1,6 @@
 func Pages.Index(ctx)
 {
-    var repo = TypeOf(DB.Config.RepoCommitPrefix) == "String" ? DB.Config.RepoCommitPrefix : "https://onedev.site.tesses.net/crosslang/crosslangextras/~files/";
+    var repo = TypeOf(DB.Config.RepoCommitPrefix) == "String" ? DB.Config.RepoCommitPrefix : "https://git.tesses.org/tesses50/crosslangextras/src/commit/";
     
     var pages = [
             {
