@@ -6,5 +6,5 @@
 	"project_dependencies": [
 		"..\/Tesses.CrossLang.BuildEssentials"
 	],
-	"version": "1.0.0.0-prod"
+	"version": "1.0.0.0-dev"
 }

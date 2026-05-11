@@ -3,9 +3,13 @@
     "info": {
         "type": "console",
         "short_name": "packageserver",
-        "short_name_pretty": "Package Server"
+        "short_name_pretty": "Package Server",
+        "description": "This webapp allows you to serve packages",
+        "repo": "https://git.tesses.org/tesses50/crosslangextras",
+        "homepage": "https://cpkg.tesseslanguage.com/",
+        "license": "AGPLv3"
     },
-    "version": "1.0.0.0-prod",
+    "version": "1.0.0.0-dev",
     "name": "Tesses.CrossLang.PackageServer",
     "compTime": "secure"
 }

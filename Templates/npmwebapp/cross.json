@@ -1,0 +1,43 @@
+{
+	"$schema": "https:\/\/crosslang.tesseslanguage.com\/\/schema\/cross-json-schema.json",
+	"info": {
+		"template_ignored_files": [
+			".DS_Store",
+			"bin",
+			"obj",
+			"publish",
+			"npm/node_modules",
+			"npm/package-lock.json",
+			"npm/dist",
+			"thumbs.db"
+		],
+        "short_name_pretty": "NPM WebApp",
+		"maintainer": "Mike Nolan",
+        "type": "template",
+        "repo": "https://git.tesses.org/tesses50/crosslangextras",
+        "homepage": "https://crosslang.tesseslanguage.com/",
+        "license": "MIT",
+        "short_name": "npmwebapp",
+        "description": "A NPM WebApp Template with BeerCSS and HTMX",
+        "template_info": {
+            "type": "webapp",
+			"short_name": "changeme",
+			"short_name_pretty": "Change Me"
+        },
+		"template_prebuild": [
+			{
+				"workdir": "npm",
+				"commands": [
+					["npm","install"],
+					["npm","run","publish"]
+				],
+				"res": [
+					"npm/dist"
+				]
+			}
+		]
+	},
+	"name": "Tesses.CrossLang.Template.NPMWebApp",
+	"version": "1.0.0.0-dev"
+	
+}

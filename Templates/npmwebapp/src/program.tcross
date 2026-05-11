@@ -1,0 +1,37 @@
+class MyWebApp {
+    private fileServer;
+    private mountable;
+    private pages;
+
+    public MyWebApp()
+    {
+        this.fileServer = new FileServer(embeddir("/"), true, false);
+        
+        this.mountable = new MountableServer((ctx)=>{
+            const page = this.pages.[ctx.Path];
+            if(TypeIsDefined(page)) return page(ctx);
+            return false;
+        });
+        this.mountable.Mount("/dist/",this.fileServer);
+        this.pages = {
+            .["/"] = Pages.Index,
+            .["/counter"] = Pages.Counter,
+            .["/about"] = Pages.About,
+            .["/echo"] = Pages.Echo
+        };
+    }
+
+    public Handle(ctx)
+    {
+        return this.mountable.Handle(ctx);
+    }
+    public Close()
+    {
+        this.mountable = null;
+    }
+}
+
+func WebAppMain(args)
+{
+    return new MyWebApp();
+}

@@ -86,7 +86,7 @@ func VM.RunEventLoop()
 /^
     Merge all crvm files into one and returns path inside destVFS of output
     You should have srcFS a SubdirFilesystem to directory with executable
-    so if the source executable was /app/bin/app-1.0.0.0-prod.crvm you should pass a SubdirFilesystem pointing to the directory /app/bin and sourcePath set to /app-1.0.0.0-prod.crvm and destVFS to a empty SubdirFilesystem
+    so if the source executable was /app/bin/app-1.0.0.0-dev.crvm you should pass a SubdirFilesystem pointing to the directory /app/bin and sourcePath set to /app-1.0.0.0-dev.crvm and destVFS to a empty SubdirFilesystem
 ^/
 func VM.Merge(srcVFS,sourcePath,destVFS)
 {

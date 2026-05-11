@@ -1,0 +1,8 @@
+.DS_Store
+bin
+obj
+publish
+npm/node_modules
+npm/package-lock.json
+npm/dist
+thumbs.db

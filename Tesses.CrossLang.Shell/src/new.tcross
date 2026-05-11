@@ -74,6 +74,7 @@ func Tesses.CrossLang.Shell.New(dd)
             var old_info = proj.info;
             proj.info = old_info.template_info;
             proj.icon = old_info.template_icon;
+            proj.prebuild = old_info.template_prebuild;
             proj.dependencies = old_info.template_project_dependencies;
             var srcDir = proj.source_directory;
             if(TypeOf(srcDir) == "Undefined") srcDir = "/src";
@@ -105,7 +106,7 @@ func Tesses.CrossLang.Shell.New(dd)
                     var src = FS.ReadAllText(projectDir, ent);
 
                     src = src.Replace("%PROJECT_NAME%",projectPath.GetFileName());
-                    src = src.Replace("%TEMPLATE_PROJECT_NAME%","%PROJECT_NAME");
+                    src = src.Replace("%TEMPLATE_PROJECT_NAME%","%PROJECT_NAME%");
 
                     FS.WriteAllText(projectDir, ent, src);
                 }

@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "beercss": "^4.0.21",
+    "htmx.org": "^2.0.10"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  },
+  "scripts": {
+      "publish": "esbuild --minify --sourcemap --define:'process.env.NODE_ENV=\"production\"' --bundle --outdir=dist web.mjs --loader:.svg=file --loader:.woff2=file"
+  }
+}

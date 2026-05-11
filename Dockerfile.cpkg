@@ -1,6 +1,6 @@
 FROM git.tesses.org/tesses50/crosslang:latest
 WORKDIR /app
-COPY ./Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm /app/Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm
+COPY ./Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-1.0.0.0-dev.crvm /app/Tesses.CrossLang.PackageServer-1.0.0.0-dev.crvm
 
 EXPOSE 4206
-ENTRYPOINT ["crossvm","Tesses.CrossLang.PackageServer-1.0.0.0-prod.crvm","/data"]
+ENTRYPOINT ["crossvm","Tesses.CrossLang.PackageServer-1.0.0.0-dev.crvm","/data"]

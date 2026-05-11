@@ -1,0 +1,42 @@
+func Pages.Index(ctx)
+{
+   var pages = [
+            {
+                active = true,
+                route = "/",
+                text = "Home",
+                icon = "home"
+            },
+            {
+                active = false,
+                route = "/counter",
+                text = "Counter",
+                icon = "exposure_plus_1"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About",
+                icon = "info"
+            }
+        ];
+   ctx.WithMimeType("text/html").SendText(Components.Shell("Main Page",pages,<section>
+   <form hx-get="./echo" hx-target="body" hx-push-url="true" action="./echo" method="GET">
+        <div class="row">
+            <div class="max">
+                <div class="field label border">
+                    <input type="text" name="text">
+                    <label>Text to echo</label>
+                </div>
+            </div>
+            <div class="min">
+                <button type="submit">
+                    Echo
+                </button>
+            </div>
+        </div>
+   </form>
+   <p>1 John 4:4: You, dear children, are from God and have overcome them, because the one who is in you is greater than the one who is in the world.</p>
+   </section>));
+   return true;
+}

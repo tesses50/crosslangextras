@@ -1,0 +1,35 @@
+func Pages.Echo(ctx)
+{
+    const text = ctx.QueryParams.TryGetFirst("text");
+   var pages = [
+            {
+                active = true,
+                route = "/",
+                text = "Home",
+                icon = "home"
+            },
+            {
+                active = false,
+                route = "/counter",
+                text = "Counter",
+                icon = "exposure_plus_1"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About",
+                icon = "info"
+            }
+        ];
+   ctx.WithMimeType("text/html").SendText(Components.Shell("Echo",pages,<section>
+    <if(text != null)>
+            <true>
+                <plink(text)>
+            </true>
+            <false>
+                <p>No text available</p>
+            </false>
+        </if>
+   </section>));
+   return true;
+}

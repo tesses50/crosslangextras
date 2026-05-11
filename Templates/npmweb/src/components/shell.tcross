@@ -1,0 +1,78 @@
+func Components.Shell(title,pages,body)
+{
+    <return>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/dist/web.css">
+    <title>%PROJECT_NAME% - {title}</title>
+    <script src="/dist/web.js" defer></script>
+</head>
+<body>
+    <dialog class="left" id="leftpane">
+        <header>
+          <nav>
+            <img class="circle large" src="/tytd-128.png">
+            <h6 class="max">%PROJECT_NAME%</h6>
+            <button hx-on:click="ui('#leftpane')" class="transparent circle large">
+              <i>close</i>
+            </button>
+          </nav>
+        </header>
+        <div class="space"></div>
+        <ul class="list">
+            <each(var item : pages)>
+                <if(item.active)>
+                    <true>
+                        <li class="wave round primary"  hx-target="body" hx-push-url="true" hx-get={item.link}>
+                            <i>{item.icon}</i>
+                            <span class="max">{item.text}</span>
+                            <b></b>
+                      
+                        </li>
+                    </true>
+                    <false>
+                        <li class="wave round"  hx-target="body" hx-push-url="true" hx-get={item.route}>
+                            <i>{item.icon}</i>
+                            <span class="max">{item.text}</span>
+                            <b></b>
+                      
+                        </li>
+                    </false>
+                </if>
+            </each>
+                    
+                   
+        </ul>
+      </dialog>
+    <header class="fixed primary-container">
+        <nav>
+          <button hx-on:click="ui('#leftpane')" class="circle transparent">
+            <i>menu</i>
+          </button>
+          <button hx-target="body" hx-push-url="true" hx-get="/" class="circle transparent">
+            <i>home</i>
+          </button>
+          <div class="max"></div>
+          <div>
+            <button class="circle transparent">
+              <i>more_vert</i>
+            </button>
+            <menu class="left no-wrap">
+              <li><a href="https://beercss.com/">BeerCSS</a></li>
+            </menu>
+          </div>
+        </nav>
+        <div class="small-padding">
+            <h5>%PROJECT_NAME%</h5>
+        </div>
+      </header>
+      <main class="responsive">
+            <raw(body)>
+      </main>
+</body>
+</html>
+    </return>
+}

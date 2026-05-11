@@ -24,7 +24,7 @@ func main(args)
         PUT /api/v1/upload Authorization Bearer
         POST /api/v1/login Json object with email and password returns json object with either 200 for success {"token": "TOKEN_VAL"} or non 2XX if fails {"reason": "SOME ERROR"}
         POST /api/v1/logout use Authorization Bearer
-        GET /api/v1/latest?name=PackageName returns 200 OK with json  {"version": "1.0.0.0-prod"} if it succeeds if it fails returns a failing status code with {"reason": "SOME ERROR"}
+        GET /api/v1/latest?name=PackageName returns 200 OK with json  {"version":"1.0.0.0-dev"} if it succeeds if it fails returns a failing status code with {"reason": "SOME ERROR"}
         GET /api/v1/download?name=PackageName&version=1.0.0.0-prod returns 200 OK with package bytes or 404 if doesn't exist
         GET /api/v1/search?q=SomeQuery&offset=&limit= returns 200 OK with json of packages {"packages": [{"name": "pkgName","version": "latestVersion", ...}]} or non success status code
         

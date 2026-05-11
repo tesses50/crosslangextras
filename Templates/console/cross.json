@@ -1,10 +1,10 @@
 {
     "name": "Tesses.CrossLang.Template.Console",
-    "version": "1.0.0.0-prod",
+    "version": "1.0.0.0-dev",
     "info": {
         "maintainer": "Mike Nolan",
         "type": "template",
-        "repo": "https://onedev.site.tesses.net/CrossLang/CrossLangExtras",
+        "repo": "https://git.tesses.org/tesses50/crosslangextras",
         "homepage": "https://crosslang.tesseslanguage.com/",
         "license": "MIT",
         "short_name": "console",

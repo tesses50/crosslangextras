@@ -59,6 +59,10 @@ jobs:
           crosslang upload-package --token="${{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
           cd ../webapp
           crosslang upload-package --token="${{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../npmweb
+          crosslang upload-package --token="${{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
+          cd ../npmwebapp
+          crosslang upload-package --token="${{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
       - name: "Publish artifacts"
         uses: akkuman/gitea-release-action@v1
         env:

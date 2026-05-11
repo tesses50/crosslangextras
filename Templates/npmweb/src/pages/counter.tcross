@@ -1,0 +1,30 @@
+var counter = 0;
+
+func Pages.Counter(ctx)
+{
+   var pages = [
+            {
+                active = false,
+                route = "/",
+                text = "Home",
+                icon = "home"
+            },
+            {
+                active = true,
+                route = "/counter",
+                text = "Counter",
+                icon = "exposure_plus_1"
+            },
+            {
+                active =  false,
+                route = "/about",
+                text = "About",
+                icon = "info"
+            }
+        ];
+   ctx.WithMimeType("text/html").SendText(Components.Shell("Counter",pages,<section>
+        <button hx-get="./counter" hx-target="body" hx-push-url="true">Counter is {++counter}</button>
+   </section>
+   ));
+   return true;
+}

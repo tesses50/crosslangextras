@@ -4,5 +4,5 @@
 		"description": "The standard library of crosslang"
 	},
 	"name": "Tesses.CrossLang.Std",
-	"version": "1.0.0.0-prod"
+	"version": "1.0.0.0-dev"
 }
