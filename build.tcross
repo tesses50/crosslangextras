@@ -51,11 +51,11 @@ func main(args)
     {
         if(args[1] == "install")
         {
-            cmd("crossvm",["crosslang_shell_archive_maker/bin/crosslang_shell_archive_maker-1.0.0.0-dev.crvm", "install"]);
+            cmd("crosslang",["vm","crosslang_shell_archive_maker/bin/crosslang_shell_archive_maker-1.0.0.0-dev.crvm", "install"]);
         }
         else if(args[1] == "pack")
         {
-            cmd("crossvm",["crosslang_shell_archive_maker/bin/crosslang_shell_archive_maker-1.0.0.0-dev.crvm"]);
+            cmd("crosslang",["vm","crosslang_shell_archive_maker/bin/crosslang_shell_archive_maker-1.0.0.0-dev.crvm"]);
         }
     }
 }
