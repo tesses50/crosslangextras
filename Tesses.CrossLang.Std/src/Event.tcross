@@ -1,0 +1,48 @@
+class Event {
+    private mtx = new Mutex();
+    private cb = [];
+    public Event()
+    {
+
+    }
+
+    public Invoke(sender,e)
+    {
+        mtx.Lock();
+        each(var item : cb)
+        {
+            item(sender,e);
+        }
+        mtx.Unlock();
+    }
+
+    public Subscribe(val)
+    {
+        mtx.Lock();
+        cb.Add(val);
+        mtx.Unlock();
+    }
+
+    public Unsubscribe(val)
+    {
+        mtx.Lock();
+        cb.Remove(val);
+        mtx.Unlock();
+    }
+
+    public operator+(val)
+    {
+        mtx.Lock();
+        cb.Add(val);
+        mtx.Unlock();
+        return this;
+    }
+
+    public operator-(val)
+    {
+        mtx.Lock();
+        cb.Remove(val);
+        mtx.Unlock();
+        return this;
+    }
+}

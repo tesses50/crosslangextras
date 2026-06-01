@@ -27,6 +27,7 @@ class ExpectObj {
             this.SetRes(this.left == right, $"{this.left} is not equal to {right}");
         }
     }
+
     public LessThan(right)
     {
         if(this.inverted)

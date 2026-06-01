@@ -1,0 +1,19 @@
+class MutexLock
+{
+    private mtx;
+    public MutexLock(mtx)
+    {
+        this.mtx = mtx;
+        mtx.Lock();
+    }
+
+    public Dispose()
+    {
+        mtx.Unlock();
+    }
+}
+
+func Lock(mtx)
+{
+    return new MutexLock(mtx);
+}

@@ -1,0 +1,48 @@
+
+
+Test("Collections",()=>{
+    Spec("SequenceEquals",()=>{
+        enumerable func myenum()
+        {
+            yield 42;
+            yield 69;
+            yield 128;
+            yield "Hello";
+        }
+        Assert(SequenceEquals("MyString",['M','y','S','t','r','i','n','g']), "SequenceEquals is not functioning correctly, String MyString and array with same chars should return true");
+        Assert(SequenceEquals(myenum(), [42,69,128,"Hello"]), "SequenceEquals is not functioning correctly, enumerable and list should return same result");
+    });
+    Spec("Queue", ()=>{
+        const queue = new Queue();
+        queue.Enqueue("Apple");
+        queue.Enqueue(37);
+        Assert(!TypeIsDefined(queue.Enqueue("My String")), "Queue.Enqueue should not return value, but it does");
+        Expect(queue.Dequeue()).ToBe("Apple");
+        
+        Expect(queue.Peek()).LessThan(42);
+
+        Expect(queue.Count).ToBe(2);
+        queue.Dequeue();
+        Expect(queue.Count).ToBe(1);
+
+        queue.Enqueue(4);
+        queue.Enqueue(5);
+        queue.Enqueue(true);
+
+        Assert(SequenceEquals(queue,["My String",4,5,true]), "Queue isn't working correctly");
+        
+    });
+
+    Spec("Stack", ()=>{
+        const stack = new Stack();
+        Assert(!TypeIsDefined(stack.Push(42)),"Stack.Push should not return a value, but it does");
+        stack.Push(59);
+        Expect(stack.Count).ToBe(2);
+        Expect(stack.Pop()).ToBe(59);
+        Expect(stack.Top()).ToBe(42);
+        Expect(stack.Pop()).ToBe(42);
+    });
+    
+    
+
+});

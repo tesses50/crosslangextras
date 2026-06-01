@@ -1,0 +1,39 @@
+class Result {
+    private isError=false;
+    private value=null;
+
+    public Result(value, isError)
+    {
+        this.value = value;
+        this.isError = isError;
+    }
+
+    static Error(value)
+    {
+        return new Result(value,true);
+    }
+
+    static OK(value)
+    {
+        return new Result(value,false);
+    }
+
+    
+
+    public getIsError()
+    {
+        return this.isError;
+    }
+
+    public getValue()
+    {
+        return this.value;
+    }
+
+
+    public Unwrap()
+    {
+        if(isError) throw value;
+        return value;
+    }
+}

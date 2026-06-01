@@ -1,0 +1,65 @@
+class ConcurrentQueue
+{
+    private mtx = new Mutex();
+
+    private queue = new Queue();
+
+    public Enqueue(val)
+    {
+        mtx.Lock();
+        queue.Enqueue(val);
+        mtx.Unlock();
+
+    }
+
+    public Dequeue()
+    {
+        mtx.Lock();
+        const val = queue.Dequeue();
+        mtx.Unlock();
+
+        return val;
+    }
+    public Peek()
+    {
+        mtx.Lock();
+        const val = queue.Peek();
+        mtx.Unlock();
+
+        return val;
+    }
+
+    public getCount()
+    {
+        mtx.Lock();
+        const val = queue.Count;
+        mtx.Unlock();
+
+        return val;
+    }
+    public getLength()
+    {
+        mtx.Lock();
+        const val = queue.Length;
+        mtx.Unlock();
+
+        return val;
+    }
+
+    public ToList()
+    {
+
+        mtx.Lock();
+
+        const ittr = new Queryable(queue);
+        const ls = ittr.ToList();
+
+        mtx.Unlock();
+        return ls;
+    }
+
+    public GetEnumerator()
+    {
+        return ToList().GetEnumerator();
+    }
+}

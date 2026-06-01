@@ -13,23 +13,22 @@ env:
 
 jobs:
   build-crosslang-shell-and-cpkg:
-    runs-on: ubuntu-latest
+    runs-on: arch-builder
     steps:
       - uses: actions/checkout@v4
       - run: |
+          wget -O /root/repository.key https://git.tesses.org/api/packages/tesses50/arch/repository.key
+          pacman-key --add /root/repository.key
+          printf "[tesses50.git.tesses.org]\nSigLevel = Optional TrustAll\nServer = https://git.tesses.org/api/packages/tesses50/arch/core/\$arch\n" >> /etc/pacman.conf
+          pacman --noconfirm -Sy crosslang
           cd vscode-extension
           npm install
           npm install -g typescript
           npm install -g @vscode/vsce
           vsce package
           cd ..
-          wget -O /usr/local/bin/crosslang https://redirect.tesses.net/cl-slim-x86_64-linux-musl
-          chmod 755 /usr/local/bin/crosslang
-          ln -s /usr/local/bin/crosslang /usr/local/bin/crossc
-          ln -s /usr/local/bin/crosslang /usr/local/bin/crossint
-          ln -s /usr/local/bin/crosslang /usr/local/bin/crossvm
-          crossint ./build.tcross pack
-          crossint ./build.tcross install
+          crosslang int ./build.tcross pack
+          crosslang int ./build.tcross install
           mkdir -p artifacts
           cp Tesses.CrossLang.ShellPackage-*.crvm artifacts/ShellPackage.crvm
           cp Tesses.CrossLang.PackageServer/bin/Tesses.CrossLang.PackageServer-*.crvm artifacts/CPKG.crvm

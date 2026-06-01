@@ -10,20 +10,12 @@ class Exception
 
     public ToString()
     {
-        var messagePart = $"{Class.Name(this)}: {Message}";
+        var messagePart = $"{Class.Name(this)}: {this.Message}";
         if(InnerException != undefined && InnerException != null)
         {
             var innerEx = InnerException.ToString().Replace("\n","\n\t");
             return $"{messagePart}\nInner exception:\n{innerEx}";
         }
         return messagePart;
-    }
-}
-
-class OutOfRangeException : Exception 
-{
-    public OutOfRangeException(varName,$inner)
-    {
-        Exception($"{varName} is out of range.",inner);
     }
 }

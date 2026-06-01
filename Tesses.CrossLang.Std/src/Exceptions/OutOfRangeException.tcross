@@ -1,0 +1,7 @@
+class OutOfRangeException : Exception 
+{
+    public OutOfRangeException(varName,$inner)
+    {
+        Exception($"{varName} is out of range.",inner);
+    }
+}

@@ -1,0 +1,33 @@
+class Stack 
+{
+    private items = [];
+
+    public Push(val)
+    {
+        items.Insert(0, val);
+    }
+
+    public Pop()
+    {
+        if(items.Count == 0) return null;
+        const val = items[0];
+        items.RemoveAt(0);
+        return val;
+    }
+
+    public Top()
+    {
+        if(items.Count == 0) return null;
+        return items[0];
+    }
+
+    public getCount() items.Count;
+
+
+    public getLength() items.Length;
+
+    public GetEnumerator()
+    {
+        return items.GetEnumerator();
+    }
+}

@@ -1,0 +1,12 @@
+func FuncWithThis(
+    function,
+    thisVal
+)
+{
+    return ($$args)=>{
+        const newArgs = [thisVal];
+        each(var item : args) newArgs.Add(item);
+
+        return function.Call(newArgs);
+    };
+}

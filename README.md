@@ -6,15 +6,15 @@
 
 # To Build
 ```bash
-crossint ./build.tcross
+crosslang int ./build.tcross
 ```
 
 # To Install
 ```bash
-crossint ./build.tcross install
+crosslang int ./build.tcross install
 ```
 
 # To Pack
 ```bash
-crossint ./build.tcross pack
+crosslang int ./build.tcross pack
 ```

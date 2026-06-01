@@ -1,0 +1,65 @@
+class ConcurrentStack
+{
+    private mtx = new Mutex();
+
+    private stack = new Stack();
+
+    public Push(val)
+    {
+        mtx.Lock();
+        stack.Push(val);
+        mtx.Unlock();
+
+    }
+
+    public Pop()
+    {
+        mtx.Lock();
+        const val = stack.Pop();
+        mtx.Unlock();
+
+        return val;
+    }
+    public Top()
+    {
+        mtx.Lock();
+        const val = stack.Top();
+        mtx.Unlock();
+
+        return val;
+    }
+
+    public getCount()
+    {
+        mtx.Lock();
+        const val = stack.Count;
+        mtx.Unlock();
+
+        return val;
+    }
+    public getLength()
+    {
+        mtx.Lock();
+        const val = stack.Length;
+        mtx.Unlock();
+
+        return val;
+    }
+
+    public ToList()
+    {
+
+        mtx.Lock();
+
+        const ittr = new Queryable(stack);
+        const ls = ittr.ToList();
+
+        mtx.Unlock();
+        return ls;
+    }
+
+    public GetEnumerator()
+    {
+        return ToList().GetEnumerator();
+    }
+}

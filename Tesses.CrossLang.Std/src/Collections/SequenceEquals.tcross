@@ -1,0 +1,24 @@
+func SequenceEquals(a,b)
+{
+    const ittra = a.GetEnumerator();
+    const ittrb = b.GetEnumerator();
+
+    defer {
+        ittra.Dispose();
+        ittrb.Dispose();
+    }
+
+    while(true) {
+        const hasa = ittra.MoveNext();
+        const hasb = ittrb.MoveNext();
+
+        if(hasa != hasb) return false;
+        if(hasa)
+        {
+            if(!(hasa.Current == hasb.Current)) return false;
+        }
+        else break;
+    }
+
+    return true;
+}

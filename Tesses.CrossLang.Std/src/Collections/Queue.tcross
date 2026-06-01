@@ -1,0 +1,32 @@
+class Queue
+{
+    private items = [];
+
+    public Enqueue(val)
+    {
+        items.Add(val);
+    }
+
+    public Dequeue()
+    {
+        if(items.Count == 0) return null;
+        const val = items[0];
+        items.RemoveAt(0);
+
+        return val;
+    }
+
+    public Peek()
+    {
+        if(items.Count == 0) return null;
+        return items[0];
+    }
+
+    public GetEnumerator()
+    {
+        return items.GetEnumerator();
+    }
+
+    public getCount() items.Count;
+    public getLength() items.Length;
+}

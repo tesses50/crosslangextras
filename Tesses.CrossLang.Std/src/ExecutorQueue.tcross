@@ -1,0 +1,42 @@
+class ExecutorQueue {
+    private mtx = new Mutex();
+    private items = [];
+    private thread;
+    private running=true;
+
+    public ExecutorQueue()
+    {
+        thread = new Thread(()=>{
+            while(running)
+            {
+                mtx.Lock();
+                if(items.Count == 0)
+                {
+                    mtx.Unlock();
+                    continue;
+                }
+                const item = items[0];
+                items.RemoveAt(0);
+                mtx.Unlock();
+                if(TypeIsCallable(item))
+                    item();
+            }
+        });
+    }
+
+
+    public EnqueueJob(cb)
+    {
+        mtx.Lock();
+        items.Add(cb);
+        mtx.Unlock();
+    }
+
+    public Dispose()
+    {
+        mtx.Lock();
+        running=false;
+        mtx.Unlock();
+        thread.Join();
+    }
+}
