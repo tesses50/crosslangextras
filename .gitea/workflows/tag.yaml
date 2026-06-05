@@ -63,6 +63,7 @@ jobs:
           cd ../npmwebapp
           crosslang upload-package --token="${{ secrets.CPKG_KEY }}" --host="https://cpkg.tesseslanguage.com/"
           wget -O /usr/local/bin/docker https://downloads.tesses.net/cache/other/docker/docker
+          chmod 755 /usr/local/bin/docker
       - name: "Publish artifacts"
         uses: akkuman/gitea-release-action@v1
         env:
